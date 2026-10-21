@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DWCode Logo Round 2</title>
+<meta name="description" content="Five original DWCode marks with custom letterforms, animated with anime.js.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{--bg:#06080d;--panel:#0c1118;--panel2:#101722;--line:#1d2836;--fg:#dbe4ec;--muted:#7f8c9b;--cyan:#2ee6f6;--pink:#ff2e97;--steel:#dfe7ee;color-scheme:dark}
+*{box-sizing:border-box}
+html{scrollbar-color:#2a3a4d var(--bg);scrollbar-width:thin}
+::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:linear-gradient(var(--cyan),var(--pink));border-radius:10px;border:3px solid var(--bg)}
+body{margin:0;background:var(--bg);color:var(--fg);font:13px/1.6 "JetBrains Mono",ui-monospace,monospace}
+header{max-width:1180px;margin:0 auto;padding:40px 16px 8px}
+h1{font-size:20px;font-weight:600;margin:0 0 6px;color:#fff}
+header p{margin:0;color:var(--muted);max-width:80ch}
+header code{color:var(--cyan)}
+main{max-width:1180px;margin:0 auto;padding:16px;display:grid;gap:22px}
+.card{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+.stage{position:relative;height:300px;display:grid;place-items:center;background:
+ radial-gradient(500px 200px at 50% 50%,rgba(46,230,246,.06),transparent),
+ linear-gradient(rgba(46,230,246,.04) 1px,transparent 1px) 0 0/24px 24px,
+ linear-gradient(90deg,rgba(46,230,246,.04) 1px,transparent 1px) 0 0/24px 24px,#070a10;border-bottom:1px solid var(--line)}
+.stage svg.lockup{width:min(86%,620px);height:auto;overflow:visible}
+.num{position:absolute;left:14px;top:12px;color:var(--muted);font-size:12px}
+.replay{position:absolute;right:12px;top:10px;font:12px "JetBrains Mono",monospace;color:var(--fg);background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:6px 10px;cursor:pointer}
+.replay:hover{border-color:var(--cyan);color:#fff}
+.info{display:grid;grid-template-columns:1.2fr 1fr;gap:18px;padding:16px 18px}
+@media(max-width:820px){.info{grid-template-columns:1fr}}
+.info h2{margin:0 0 4px;font-size:16px;color:#fff}
+.info h2 small{color:var(--muted);font-weight:400;font-size:12px;margin-left:8px}
+.info ul{margin:8px 0 0;padding-left:18px;color:#b4c0cc}
+.previews{display:grid;gap:12px;align-content:start}
+.nav{height:52px;display:flex;align-items:center;gap:14px;padding:0 14px;border:1px solid var(--line);border-radius:10px;background:rgba(6,8,13,.9)}
+.nav svg{height:28px;width:auto}
+.nav span{margin-left:auto;color:var(--muted);font-size:11px;display:flex;gap:6px;flex-direction:column}
+.nav i{display:block;width:18px;height:2px;background:var(--fg);border-radius:2px}
+.icons{display:flex;align-items:end;gap:16px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel2)}
+.icons figure{margin:0;display:grid;justify-items:center;gap:4px;color:var(--muted);font-size:10px}
+.tab{display:flex;align-items:center;gap:7px;padding:6px 10px;border-radius:7px 7px 0 0;background:#1a2230;color:#c9d3dd;font-size:11px}
+footer{max-width:1180px;margin:0 auto;padding:10px 16px 40px;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.replay{display:none}}
+</style>
+</head>
+<body>
+<header>
+ <h1>// DWCode logo round 2: five originals</h1>
+ <p>Every letter here is drawn for DWCode, not taken from a font: <code>D</code> <code>W</code> <code>C</code> <code>O</code> <code>E</code> exist only as the SVG paths on this page. The colours stay Cybercore: cyan D, magenta W, steel for CODE. Motion is <code>anime.js 4.5.0</code> and plays once, with a short ambient loop where it helps. Press Replay to watch it again.</p>
+</header>
+<main id="cards"></main>
+<footer>Each concept shows the full lockup, the site nav at its real size, and the icon at 64, 32 and 16 px.</footer>
+
+<script type="module">
+import { animate, createTimeline, stagger, svg, utils } from 'https://cdn.jsdelivr.net/npm/animejs@4.5.0/dist/bundles/anime.esm.min.js';
+
+const C = { cyan:'#2ee6f6', pink:'#ff2e97', steel:'#dfe7ee', bg:'#0b1018' };
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let uid = 0;
+const colorOf = ch => ch === 'D0' ? C.cyan : ch === 'W' ? C.pink : C.steel;
+
+// ---------- Glyph sets: each concept's own letterforms on a 100-unit cap height ----------
+const CONCEPTS = [
+ {
+  id:'bracket', name:'Bracket', tag:'open code-bracket letterforms',
+  notes:['D is a bracket stem and a chamfered bowl: <code>[ )</code> reads as D.','W splits at the middle peak into two chevrons, C and E echo <code>{ }</code> corners.','A block cursor sits after the wordmark and blinks, like an editor waiting for you.','Motion: halves slide together, strokes draw, then the cursor wakes.'],
+  w:64, adv:82, sw:9,
+  glyphs:{
+   D:['M18 0H0V100H18','M30 0H44L64 20V80L44 100H30'],
+   W:['M0 0L14 100L29 46','M35 46L50 100L64 0'],
+   C:['M64 0H20L0 20V80L20 100H64'],
+   O:['M28 0H44L64 20V80L44 100H20L0 80V20L20 0'],
+   E:['M64 0H0V100H64','M16 50H50'],
+  },
+  stroke:{cap:'square', join:'miter'},
+  cursor:true,
+ },
+ {
+  id:'trace', name:'Trace', tag:'circuit-trace letterforms',
+  notes:['Letters are PCB traces: 45° bends, no curves, via pads at the ends.','The icon is a chip package with pins, carrying the DW traces.','Motion: traces draw in on a stagger, vias pop, then signal pulses run the D and W paths on a loop.'],
+  w:64, adv:82, sw:6,
+  glyphs:{
+   D:['M6 100V0H40L64 24V76L40 100H24'],
+   W:['M0 0V76L12 100L32 60L52 100L64 76V0'],
+   C:['M64 16L48 0H22L0 22V78L22 100H48L64 84'],
+   O:['M22 0H42L64 22V78L42 100H22L0 78V22Z'],
+   E:['M64 0H0V100H64','M0 50H44'],
+  },
+  vias:{ D:[[6,100],[24,100]], W:[[0,0],[64,0],[32,60]], C:[[64,16],[64,84]], O:[[64,50]], E:[[64,0],[64,100],[44,50]] },
+  stroke:{cap:'round', join:'round'},
+  pulse:true, chip:true,
+ },
+ {
+  id:'matrix', name:'Matrix', tag:'refined dot-matrix letterforms',
+  notes:['A 5×7 terminal matrix, refined: corner cells are angled half-pixels so curves read smooth.','It stays crisp at 16 px because every shape sits on the pixel grid.','Motion: pixels power on from the centre out, then a scanline sweeps across.'],
+  matrix:{
+   D:['1111L','10001','10001','10001','10001','10001','1111U'],
+   W:['10001','10001','10101','10101','10101','10101','01010'],
+   C:['R1111','10000','10000','10000','10000','10000','u1111'],
+   O:['R111L','10001','10001','10001','10001','10001','u111U'],
+   E:['11111','10000','10000','1111.','10000','10000','11111'],
+  },
+  w:72, adv:88,
+ },
+ {
+  id:'splitframe', name:'Splitframe', tag:'split-pane stencil letterforms',
+  notes:['Heavy squared letters cut by one horizontal gap: the editor split, the scanline.','Upper halves are polished steel; lower halves carry one cyan→magenta signal across the word.','The icon divides D | W with a live cursor bar.','Motion: upper halves slide in from the left, lower from the right, and lock together.'],
+  w:64, adv:80, sw:16,
+  glyphs:{
+   D:['M8 8V92H40L60 72V28L40 8Z'],
+   W:['M4 8L18 92L34 44L50 92L64 8'],
+   C:['M60 8H24L8 24V76L24 92H60'],
+   O:['M24 8H44L60 24V76L44 92H24L8 76V24Z'],
+   E:['M60 8H8V92H60','M8 50H46'],
+  },
+  stroke:{cap:'butt', join:'bevel'},
+  split:true,
+ },
+ {
+  id:'signal', name:'Signal', tag:'waveform monoline letterforms',
+  notes:['Smooth monoline curves; the W is a waveform, the D a single carrier arc.','One gradient runs through the whole word, cyan → violet → magenta.','Motion: the word is drawn like an oscilloscope trace, then a bright pulse rides the W forever.'],
+  w:64, adv:80, sw:8,
+  glyphs:{
+   D:['M8 4V96','M8 4C78 4 78 96 8 96'],
+   W:['M2 4C6 60 10 96 17 96C26 96 26 46 32 46C38 46 38 96 47 96C54 96 58 60 62 4'],
+   C:['M62 24C54 2 8 0 8 50C8 100 54 98 62 76'],
+   O:['M35 4C66 4 66 96 35 96C4 96 4 4 35 4Z'],
+   E:['M62 4H26C14 4 8 10 8 22V78C8 90 14 96 26 96H62','M8 50H48'],
+  },
+  stroke:{cap:'round', join:'round'},
+  gradient:true, pulse:true,
+ },
+];
+
+// ---------- Rendering ----------
+const NS='http://www.w3.org/2000/svg';
+function el(name, attrs={}, parent){ const n=document.createElementNS(NS,name); for(const [k,v] of Object.entries(attrs)) n.setAttribute(k,v); parent?.append(n); return n; }
+
+function defs(svgEl, c, id, span){
+ const d=el('defs',{},svgEl);
+ // One gradient per letter slot, offset so the colour runs continuously across the word.
+ for(let i=0;i<6;i++){
+  const g=el('linearGradient',{id:`sig-${id}-${i}`,gradientUnits:'userSpaceOnUse',x1:-i*c.adv,y1:0,x2:span-i*c.adv,y2:0},d);
+  el('stop',{offset:'0',['stop-color']:C.cyan},g); el('stop',{offset:'.5',['stop-color']:'#9b6bff'},g); el('stop',{offset:'1',['stop-color']:C.pink},g);
+ }
+ const s=el('linearGradient',{id:`steel-${id}`,x1:0,y1:0,x2:0,y2:1},d);
+ [['0','#f6fafc'],['.55','#b9c5cf'],['1','#7d8a96']].forEach(([o,c])=>el('stop',{offset:o,['stop-color']:c},s));
+ const f=el('filter',{id:`glow-${id}`,filterUnits:'userSpaceOnUse',x:-40,y:-40,width:160,height:190},d);
+ el('feGaussianBlur',{stdDeviation:'2.2',result:'b'},f);
+ const m=el('feMerge',{},f); el('feMergeNode',{in:'b'},m); el('feMergeNode',{in:'SourceGraphic'},m);
+const sc=el('linearGradient',{id:`scan-${id}`,x1:0,y1:0,x2:1,y2:0},d);
+ [['0','rgba(255,255,255,0)'],['.5','rgba(190,250,255,.55)'],['1','rgba(255,255,255,0)']].forEach(([o,c])=>el('stop',{offset:o,['stop-color']:c},sc));
+ if(c.split){
+  const top=el('clipPath',{id:`top-${id}`},d); el('rect',{x:-50,y:-50,width:5000,height:96},top);
+  const bot=el('clipPath',{id:`bot-${id}`},d); el('rect',{x:-50,y:54,width:5000,height:120},bot);
+ }
+ return d;
+}
+
+// Draw one glyph into group g (glyph units). role: 'D0' first D, 'W', or other letters.
+function glyph(c, ch, role, g, id, slot=0){
+ const accent = colorOf(role);
+ if(c.matrix){
+  const cell=100/7, size=cell*.8, pad=(cell-size)/2;
+  c.matrix[ch].forEach((row,y)=>[...row].forEach((k,x)=>{
+   if(k==='0'||k==='.') return;
+   const x0=x*cell+pad,y0=y*cell+pad,x1=x0+size,y1=y0+size;
+   const fill = role==='D0'||role==='W' ? accent : C.steel;
+   let p;
+   if(k==='1') p=el('rect',{x:x0,y:y0,width:size,height:size,rx:size*.22,fill},g);
+   else { const pts={L:[[x0,y0],[x0,y1],[x1,y1]],U:[[x0,y0],[x1,y0],[x0,y1]],R:[[x1,y0],[x1,y1],[x0,y1]],u:[[x0,y0],[x1,y0],[x1,y1]]}[k];
+    p=el('polygon',{points:pts.map(q=>q.join(',')).join(' '),fill},g); }
+   p.classList.add('px'); p.dataset.cx=x0+size/2; p.dataset.cy=y0+size/2;
+  }));
+  return;
+ }
+ const paint = c.gradient ? `url(#sig-${id}-${slot})` : accent;
+ const layers = c.split ? [['top',`url(#steel-${id})`],['bot', role==='D0'?C.cyan: role==='W'?C.pink:`url(#sig-${id}-${slot})`]] : [[null,paint]];
+ for(const [clip,stroke] of layers){
+  const lg=el('g',clip?{['clip-path']:`url(#${clip}-${id})`,class:`half-${clip}`}:{},g);
+  for(const d of c.glyphs[ch]){
+   el('path',{d,fill:'none',stroke,['stroke-width']:c.sw,['stroke-linecap']:c.stroke.cap,['stroke-linejoin']:c.stroke.join,['stroke-miterlimit']:4,class:'stroke',filter:c.gradient||role==='D0'||role==='W'?`url(#glow-${id})`:''},lg);
+  }
+ }
+ if(c.vias?.[ch]) for(const [x,y] of c.vias[ch]) el('circle',{cx:x,cy:y,r:5.5,fill:C.bg,stroke:accent,['stroke-width']:3,class:'via'},g);
+}
+
+// Lockup: icon + DWCODE wordmark. Returns the svg element.
+function lockup(c, {icon=true, word=true}={}){
+ const id=`${c.id}-${++uid}`, s=.6, wx=icon?156:0, wy=40;
+ const letters=['D','W','C','O','D','E'], roles=['D0','W','C','O','D','E'];
+ const wordW=(letters.length-1)*c.adv*s+c.w*s;
+ const width=(word?wx+wordW+(c.cursor?34:6):128), height=140;
+ const svgEl=el('svg',{viewBox:`-6 -6 ${width+12} ${height+12}`,class:'lockup',role:'img','aria-label':`DWCode ${c.name} logo`});
+ defs(svgEl,c,id,(letters.length-1)*c.adv+c.w);
+ if(icon) iconInto(c, el('g',{class:'icon'},svgEl), id);
+ if(word){
+  const wg=el('g',{class:'word',transform:`translate(${wx} ${wy}) scale(${s})`},svgEl);
+  letters.forEach((ch,i)=>{ const pos=el('g',{transform:`translate(${i*c.adv} 0)`},wg); const g=el('g',{class:`ch ch-${i}`},pos); glyph(c,ch,roles[i],g,id,i); });
+  if(c.cursor) el('rect',{class:'cursor',x:letters.length*c.adv-8,y:6,width:20,height:94,fill:C.cyan,opacity:.9},wg);
+  if(c.matrix) el('rect',{class:'scan',x:-30,y:-8,width:46,height:116,fill:`url(#scan-${id})`,opacity:0},wg);
+ }
+ return svgEl;
+}
+
+function iconInto(c, g, id){
+ el('rect',{x:4,y:10,width:120,height:120,rx:26,fill:'#0b1018',stroke:'#223044',['stroke-width']:2},g);
+ if(c.chip){
+  for(let i=0;i<5;i++){ const x=24+i*20; el('rect',{x:x-3,y:2,width:6,height:10,rx:1.5,fill:'#3a4a5e'},g); el('rect',{x:x-3,y:128,width:6,height:10,rx:1.5,fill:'#3a4a5e'},g); }
+  el('rect',{x:14,y:20,width:100,height:100,rx:14,fill:'none',stroke:'#1c2938',['stroke-width']:2,['stroke-dasharray']:'3 5'},g);
+ }
+ const s=c.matrix?.44:.5, y=c.matrix?48:45, dx=c.matrix?16:18, gap=c.matrix?50:46;
+ const d=el('g',{transform:`translate(${dx+ (c.matrix?0:2)} ${y}) scale(${s})`},g); glyph(c,'D','D0',d,id,0);
+ const w=el('g',{transform:`translate(${dx+gap} ${y}) scale(${s})`},g); glyph(c,'W','W',w,id,1);
+ if(c.split) el('rect',{class:'icon-cursor',x:57,y:38,width:5,height:64,rx:2,fill:'#fff'},g);
+ if(c.cursor) el('rect',{class:'cursor',x:92,y:104,width:16,height:5,fill:C.cyan},g);
+}
+
+// ---------- Motion (anime.js) ----------
+function play(c, svgEl){
+ utils.remove(svgEl.querySelectorAll('*'));
+ svgEl.querySelectorAll('.pulse').forEach(n=>n.remove());
+ const strokes=svgEl.querySelectorAll('.word .stroke, .icon .stroke');
+ const tl=createTimeline({defaults:{ease:'outExpo'}});
+ if(c.id==='bracket'){
+  tl.add(svgEl.querySelectorAll('.ch'),{opacity:[0,1],translateX:(_,i)=>[i%2? 40:-40, 0],duration:900,delay:stagger(70)},0)
+    .add(svg.createDrawable(strokes),{draw:['0 0','0 1'],duration:1100,delay:stagger(35),ease:'inOutQuad'},100)
+    .add(svgEl.querySelectorAll('.cursor'),{opacity:[0,1,0,1,0,.9],duration:1200,ease:'steps(6)'},'-=300');
+  animate(svgEl.querySelectorAll('.cursor'),{opacity:[.9,0],duration:530,loop:true,alternate:true,ease:'steps(1)',delay:2600});
+ }
+ if(c.id==='trace'){
+  tl.add(svg.createDrawable(strokes),{draw:['0 0','0 1'],duration:1400,delay:stagger(90),ease:'inOutSine'},0)
+    .add(svgEl.querySelectorAll('.via'),{scale:[0,1],opacity:[0,1],duration:500,delay:stagger(40),ease:'outBack(3)'},'-=500');
+  pulses(svgEl, ['.ch-0 .stroke','.icon .stroke'], C.cyan, 1700);
+  pulses(svgEl, ['.ch-1 .stroke'], C.pink, 1900);
+ }
+ if(c.id==='matrix'){
+  const px=[...svgEl.querySelectorAll('.px')];
+  px.forEach(p=>{ const b=p.getBBox(); p.style.transformOrigin=`${b.x+b.width/2}px ${b.y+b.height/2}px`; p.style.transformBox='view-box'; });
+  tl.add(px,{scale:[0,1],opacity:[0,1],duration:420,delay:stagger(6,{from:'center'}),ease:'outBack(2)'},0)
+    .add(svgEl.querySelectorAll('.scan'),{opacity:[0,1,1,0],translateX:[0,(c.adv*6)+60],duration:1300,ease:'inOutSine'},'+=100');
+  animate(svgEl.querySelectorAll('.scan'),{opacity:[0,.8,.8,0],translateX:[0,(c.adv*6)+60],duration:1500,ease:'inOutSine',loop:true,loopDelay:3200,delay:4200});
+ }
+ if(c.id==='splitframe'){
+  tl.add(svgEl.querySelectorAll('.half-top'),{translateX:[-46,0],opacity:[0,1],duration:900,delay:stagger(60)},0)
+    .add(svgEl.querySelectorAll('.half-bot'),{translateX:[46,0],opacity:[0,1],duration:900,delay:stagger(60)},120)
+    .add(svgEl.querySelectorAll('.icon-cursor'),{scaleY:[0,1],duration:500},700);
+  animate(svgEl.querySelectorAll('.icon-cursor'),{opacity:[1,.15],duration:600,loop:true,alternate:true,ease:'steps(1)',delay:1800});
+ }
+ if(c.id==='signal'){
+  tl.add(svg.createDrawable(strokes),{draw:['0 0','0 1'],duration:1600,delay:stagger(110),ease:'inOutCubic'},0);
+  pulses(svgEl, ['.ch-1 .stroke','.icon g:nth-of-type(2) .stroke'], '#c48bff', 1900);
+ }
+ return tl;
+}
+
+// A glowing dot that rides along each matching path, looping.
+function pulses(svgEl, selectors, color, delay){
+ for(const sel of selectors) for(const path of svgEl.querySelectorAll(sel)){
+  const dot=el('circle',{r:3.6,fill:'#fff',class:'pulse',opacity:0},path.parentNode);
+  dot.style.filter=`drop-shadow(0 0 3px ${color}) drop-shadow(0 0 7px ${color})`;
+  const { translateX, translateY } = svg.createMotionPath(path);
+  animate(dot,{translateX,translateY,opacity:[0,1,1,0],duration:1600+Math.random()*700,delay:delay+Math.random()*600,loop:true,loopDelay:600,ease:'inOutSine'});
+ }
+}
+
+// ---------- Page ----------
+const host=document.getElementById('cards');
+CONCEPTS.forEach((c,i)=>{
+ const card=document.createElement('section'); card.className='card'; card.id=c.id;
+ card.innerHTML=`<div class="stage"><span class="num">${String(i+1).padStart(2,'0')} / ${c.id}</span><button class="replay" type="button">↻ Replay</button></div>
+  <div class="info"><div><h2>${c.name}<small>${c.tag}</small></h2><ul>${c.notes.map(n=>`<li>${n}</li>`).join('')}</ul></div>
+  <div class="previews"><div class="nav"></div><div class="icons"></div></div></div>`;
+ host.append(card);
+ const big=lockup(c); card.querySelector('.stage').append(big);
+ const nav=card.querySelector('.nav'); nav.append(lockup(c)); nav.insertAdjacentHTML('beforeend','<span aria-hidden="true"><i></i><i></i><i></i></span>');
+ const icons=card.querySelector('.icons');
+ for(const px of [64,32,16]){ const f=document.createElement('figure'); const ic=lockup(c,{word:false}); ic.style.width=px+'px'; ic.style.height=px+'px'; f.append(ic); f.insertAdjacentHTML('beforeend',`<figcaption>${px}px</figcaption>`); icons.append(f); }
+ const tab=document.createElement('figure'); const t=document.createElement('div'); t.className='tab'; const ti=lockup(c,{word:false}); ti.style.width='16px'; ti.style.height='16px'; t.append(ti,'DWCode'); tab.append(t); tab.insertAdjacentHTML('beforeend','<figcaption>browser tab</figcaption>'); icons.append(tab);
+ const run=()=>{ if(!reduce){ play(c,big); play(c,nav.querySelector('svg')); } };
+ card.querySelector('.replay').addEventListener('click',run);
+ new IntersectionObserver((e,o)=>{ if(e[0].isIntersecting){ run(); o.disconnect(); } },{threshold:.4}).observe(card);
+});
+</script>
+</body>
+</html>
