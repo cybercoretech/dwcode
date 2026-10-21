@@ -47,6 +47,17 @@ Validate the first data-only theme/icon/snippet pack with:
 npm run validate:packs
 ```
 
+## 🌐 Website
+
+The project site, **[dwcode.pages.dev](https://dwcode.pages.dev)**, lives in [`site/`](site/): features, real window captures, all 84 themes, the Railshift downloads, and a live panel running the app's Monaco bundle in the browser (sample files only; saving, the terminal and language servers need the desktop app).
+
+```sh
+./tools/build-site.sh --shots   # recapture screenshots offscreen, build the demo, assemble site/
+./tools/deploy-site.sh          # build and upload to Cloudflare Pages (needs wrangler login)
+```
+
+Screenshots come from `tests/shots.cpp`, which drives the real window through the same harness as the UI tests and saves 2x captures to `build/site-shots/`.
+
 ## 🛰️ Brand: Railshift
 
 **Railshift** is the approved DWCode mark. The asset pack in [`brand/railshift/`](brand/railshift/) has transparent PNGs and dark avatars from 64 to 1024 px, a multi-resolution ICO, favicons, Apple/Android icons, a social card, and simplified true-vector SVGs (`railshift-vector.svg`, `railshift-mono.svg`, `railshift-favicon.svg`). `railshift-artwork.svg` wraps the detailed raster and is not a true vector. Rebuild the pack and its zip with `python3 tools/build-brand-assets.py`.

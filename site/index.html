@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DWCode — Code after dark</title>
+  <meta name="description" content="DWCode is Cybercore's keyboard-first desktop code editor: a Qt Quick shell around Monaco with real file saving, language servers, a workspace terminal and 84 Cybercore themes.">
+  <meta name="theme-color" content="#06080d">
+  <meta name="color-scheme" content="dark">
+  <link rel="canonical" href="https://dwcode.pages.dev/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="DWCode — Code after dark">
+  <meta property="og:description" content="A keyboard-first desktop editor from Cybercore Tech: Qt Quick + Monaco, language servers, 84 themes.">
+  <meta property="og:url" content="https://dwcode.pages.dev/">
+  <meta property="og:image" content="https://dwcode.pages.dev/assets/social.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="nav">
+    <a class="brand" href="#top" aria-label="DWCode home">
+      <img src="assets/railshift-mark.webp" alt="" width="40" height="39">
+      <span>DWCODE</span>
+    </a>
+    <nav aria-label="Sections">
+      <a href="#features">Features</a>
+      <a href="#tour">Tour</a>
+      <a href="#themes">Themes</a>
+      <a href="#demo">Live demo</a>
+      <a href="#brand">Brand</a>
+    </nav>
+    <a class="btn btn-ghost nav-gh" href="https://github.com/cybercoretech/dwcode">GitHub ↗</a>
+  </header>
+
+  <main id="main">
+    <!-- Hero -->
+    <section class="hero" id="top">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="dot"></span>Cybercore / DWCode · desktop prototype</p>
+        <h1>Code after <em>dark.</em></h1>
+        <p class="lede">A keyboard-first desktop editor. A native Qt Quick shell wraps the Monaco editing surface, with real file saving, language servers, a workspace terminal and every Cybercore palette.</p>
+        <div class="cta">
+          <a class="btn btn-primary" href="#demo">Try the editor in your browser</a>
+          <a class="btn btn-ghost" href="#build">Build it on Linux</a>
+        </div>
+        <ul class="facts" aria-label="At a glance">
+          <li><b>Qt 6</b> Quick shell</li>
+          <li><b>Monaco</b> editing surface</li>
+          <li><b>LSP</b> over stdio</li>
+          <li><b>84</b> themes</li>
+        </ul>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <img class="hero-mark" src="assets/railshift-hero.webp" alt="" width="720" height="702">
+      </div>
+      <figure class="hero-shot frame">
+        <div class="frame-bar"><i></i><i></i><i></i><span>signal-relay — relay.ts</span></div>
+        <img src="screenshots/hero.webp" srcset="screenshots/hero.webp 1440w, screenshots/hero@2x.webp 2880w" sizes="(max-width: 1200px) 100vw, 1180px" width="1440" height="900" alt="DWCode editing relay.ts: a language-server hover shows the route() signature, a type error is underlined, and the problems panel lists it.">
+        <figcaption>Real capture of the desktop app: language-server hover, an error underline and the problems panel.</figcaption>
+      </figure>
+    </section>
+
+    <!-- Features -->
+    <section class="section" id="features" aria-labelledby="features-h">
+      <header class="section-head">
+        <p class="kicker">// what works today</p>
+        <h2 id="features-h">An editor, not a mock-up.</h2>
+        <p>Every feature below runs in the desktop prototype and is covered by its offscreen UI test suite, which clicks and types through the real window.</p>
+      </header>
+      <div class="grid features">
+        <article class="card">
+          <span class="glyph" aria-hidden="true">⌂</span>
+          <h3>Real workspaces</h3>
+          <p>Open any folder, browse it in the explorer and edit in tabs. Paths stay inside the workspace; symlinks that escape it are refused.</p>
+        </article>
+        <article class="card">
+          <span class="glyph" aria-hidden="true">⤓</span>
+          <h3>Safe saving</h3>
+          <p>Atomic writes on <kbd>Ctrl</kbd>+<kbd>S</kbd>. If the file changed on disk behind you, the save is blocked instead of overwriting someone else's work.</p>
+        </article>
+        <article class="card">
+          <span class="glyph" aria-hidden="true">λ</span>
+          <h3>Language servers</h3>
+          <p>Diagnostics, completion, hover and go-to-definition over LSP. TypeScript ships with it; <code>clangd</code>, <code>rust-analyzer</code> and <code>pyright</code> are picked up from your <code>PATH</code>.</p>
+        </article>
+        <article class="card">
+          <span class="glyph" aria-hidden="true">›_</span>
+          <h3>Workspace terminal</h3>
+          <p>Run commands in the project, stream their output, type input to a running process, stop it. A command runner for now; full-screen TUIs come with the PTY.</p>
+        </article>
+        <article class="card">
+          <span class="glyph" aria-hidden="true">◐</span>
+          <h3>84 Cybercore themes</h3>
+          <p>The whole Cybercore palette library plus three DWCode originals. One choice recolours the shell and the editor together and is remembered.</p>
+        </article>
+        <article class="card">
+          <span class="glyph" aria-hidden="true">⫴</span>
+          <h3>Split view, keyboard first</h3>
+          <p>Both panes share one document, so edits land in each instantly. Command palette on <kbd>Ctrl</kbd>+<kbd>P</kbd>, optional Helix-style modal mode.</p>
+        </article>
+      </div>
+      <p class="honest"><b>Still to come:</b> file watching, crash recovery, a New File command, a real PTY terminal, and extension packs loaded at runtime. DWCode uses Monaco, not VS Code, so VS Code extensions do not run in it.</p>
+    </section>
+
+    <!-- Tour -->
+    <section class="section" id="tour" aria-labelledby="tour-h">
+      <header class="section-head">
+        <p class="kicker">// tour</p>
+        <h2 id="tour-h">Straight from the app.</h2>
+        <p>These are window captures of the desktop build working on a small TypeScript project, not renders.</p>
+      </header>
+      <div class="tour">
+        <div class="tabs" role="tablist" aria-label="Screenshots">
+          <button role="tab" aria-selected="true" aria-controls="tour-panel" data-shot="completion" data-cap="Member completion from the TypeScript language server after typing routes.">Completion</button>
+          <button role="tab" aria-selected="false" aria-controls="tour-panel" data-shot="terminal" data-cap="The workspace terminal running ls, grep and wc in the project, with the next command ready.">Terminal</button>
+          <button role="tab" aria-selected="false" aria-controls="tour-panel" data-shot="split" data-cap="Split view: both panes edit the same document.">Split view</button>
+          <button role="tab" aria-selected="false" aria-controls="tour-panel" data-shot="themes" data-cap="The Cybercore theme chooser, open over the editor.">Theme chooser</button>
+          <button role="tab" aria-selected="false" aria-controls="tour-panel" data-shot="hero" data-cap="Hover, an error underline and the problems panel, all from the language server.">Diagnostics</button>
+        </div>
+        <figure class="frame tour-frame" id="tour-panel" role="tabpanel">
+          <img id="tour-img" src="screenshots/completion.webp" srcset="screenshots/completion.webp 1440w, screenshots/completion@2x.webp 2880w" sizes="(max-width: 1200px) 100vw, 1180px" width="1440" height="900" alt="Member completion from the TypeScript language server after typing routes." loading="lazy">
+          <figcaption id="tour-cap">Member completion from the TypeScript language server after typing <code>routes.</code></figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- Themes -->
+    <section class="section" id="themes" aria-labelledby="themes-h">
+      <header class="section-head">
+        <p class="kicker">// palettes</p>
+        <h2 id="themes-h">Tune it to your signal.</h2>
+        <p>DWCode reads the canonical Cybercore theme files, so every palette in the family is here on day one. Pick one to see it on the same file.</p>
+      </header>
+      <div class="theme-show">
+        <div class="theme-picks" role="radiogroup" aria-label="Theme screenshots">
+          <button role="radio" aria-checked="true" data-theme="synthwave-84">Synthwave 84</button>
+          <button role="radio" aria-checked="false" data-theme="tokyo-night">Tokyo Night</button>
+          <button role="radio" aria-checked="false" data-theme="cyberdyne-t800">Cyberdyne T800</button>
+          <button role="radio" aria-checked="false" data-theme="neosynth-plasma">Neosynth Plasma</button>
+          <button role="radio" aria-checked="false" data-theme="dracula">Dracula</button>
+          <button role="radio" aria-checked="false" data-theme="cybercore.dwcode-frost">DWCode Frost</button>
+        </div>
+        <figure class="frame">
+          <img id="theme-img" src="screenshots/theme-synthwave-84.webp" width="1440" height="900" alt="DWCode in the Synthwave 84 theme." loading="lazy">
+        </figure>
+      </div>
+      <div class="swatches-head">
+        <h3>All <span id="theme-count">84</span> palettes</h3>
+        <p>Click any swatch to load it in the live demo below.</p>
+      </div>
+      <ul class="swatches" id="swatches" aria-label="All DWCode themes"></ul>
+    </section>
+
+    <!-- Demo -->
+    <section class="section" id="demo" aria-labelledby="demo-h">
+      <header class="section-head">
+        <p class="kicker">// live panel</p>
+        <h2 id="demo-h">Take the editing surface for a spin.</h2>
+        <p>This is the same Monaco bundle the desktop app loads, running in your browser on sample files.</p>
+      </header>
+      <div class="demo">
+        <div class="demo-bar">
+          <div class="demo-files" role="tablist" aria-label="Sample files">
+            <button role="tab" aria-selected="true" data-file="main.ts">main.ts</button>
+            <button role="tab" aria-selected="false" data-file="workspace.ts">workspace.ts</button>
+            <button role="tab" aria-selected="false" data-file="theme.css">theme.css</button>
+            <button role="tab" aria-selected="false" data-file="README.md">README.md</button>
+          </div>
+          <div class="demo-tools">
+            <label class="sr" for="demo-theme">Theme</label>
+            <select id="demo-theme" aria-label="Theme"></select>
+            <button class="btn btn-ghost btn-sm" id="demo-modal" aria-pressed="false" title="Helix-style modal mode: Esc for normal, h j k l to move, i to insert">Modal: off</button>
+          </div>
+        </div>
+        <div class="demo-stage" id="demo-stage">
+          <button class="demo-start" id="demo-start" type="button">
+            <span class="play" aria-hidden="true">▶</span>
+            <span>Load the live editor</span>
+            <small>About 1 MB. Nothing leaves your browser.</small>
+          </button>
+        </div>
+        <p class="demo-note"><b>Browser preview.</b> Edits stay in this tab. Opening folders, saving, the terminal and language servers need the desktop app, because a web page can't touch your files or start processes.</p>
+      </div>
+    </section>
+
+    <!-- Brand -->
+    <section class="section" id="brand" aria-labelledby="brand-h">
+      <header class="section-head">
+        <p class="kicker">// identity</p>
+        <h2 id="brand-h">Railshift.</h2>
+        <p>Polished steel rails with a cyan <b>D</b> and a magenta <b>W</b>. Use the detailed artwork big and the simplified vector small.</p>
+      </header>
+      <div class="brand-grid">
+        <figure class="brand-art"><img src="assets/railshift-hero.webp" width="720" height="702" alt="The Railshift DW mark: steel letterforms with cyan and magenta light channels." loading="lazy"></figure>
+        <div class="brand-list">
+          <a class="dl dl-main" href="downloads/dwcode-railshift-assets.zip" download>
+            <span><b>Full asset pack</b><small>PNG 64–1024, avatars, ICO, favicons, app icons, social card, SVG</small></span><em>ZIP ↓</em>
+          </a>
+          <a class="dl" href="assets/railshift.svg" download><span><b>Simplified vector</b><small>Editable SVG companion</small></span><em>SVG ↓</em></a>
+          <a class="dl" href="assets/railshift.png" download><span><b>Transparent artwork</b><small>1024 px</small></span><em>PNG ↓</em></a>
+          <a class="dl" href="assets/favicon.ico" download><span><b>Favicon</b><small>16–256 px multi-size</small></span><em>ICO ↓</em></a>
+          <a class="dl" href="assets/social.png" download><span><b>Social card</b><small>1200 × 630</small></span><em>PNG ↓</em></a>
+          <p class="fine">All rights reserved by Cybercore Tech; the pack grants no redistribution licence.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Build -->
+    <section class="section" id="build" aria-labelledby="build-h">
+      <header class="section-head">
+        <p class="kicker">// from source</p>
+        <h2 id="build-h">Build it on Linux.</h2>
+        <p>Needs Qt 6 with Quick Controls and WebEngine Quick, <code>qmake6</code>, a C++17 compiler, Node.js and npm. On Arch / Omarchy: <code>qt6-declarative qt6-webengine qt6-webchannel nodejs npm</code>.</p>
+      </header>
+      <div class="code">
+        <button class="copy btn btn-ghost btn-sm" type="button" data-copy="build-cmd">Copy</button>
+<pre id="build-cmd"><code>git clone https://github.com/cybercoretech/dwcode.git
+cd dwcode
+npm ci
+./bin/build
+./build/dwcode --workspace ~/your/project</code></pre>
+      </div>
+      <p class="honest">DWCode is a prototype: there are no packaged releases yet, and it's tested on Linux only.</p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <cybercore-contact repo="dwcode">
+      <p><a href="mailto:dev@cybercoretech.net">dev@cybercoretech.net</a> · security reports: <a href="mailto:security@cybercoretech.net">security@cybercoretech.net</a> · <a href="https://github.com/cybercoretech">GitHub</a> · <a href="https://discord.gg/vBMcK5wAx">Discord</a></p>
+    </cybercore-contact>
+    <p class="legal">Copyright (c) 2026 Cybercore Tech · DWCode uses <a href="https://microsoft.github.io/monaco-editor/">Monaco</a> and <a href="https://www.qt.io/">Qt</a>; not affiliated with Microsoft or Visual Studio Code.</p>
+  </footer>
+
+  <script type="module" src="https://cybercoretech.github.io/kit/contact.js"></script>
+  <script type="module" src="site.js"></script>
+</body>
+</html>

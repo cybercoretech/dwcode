@@ -39,6 +39,7 @@ protected:
  App app;
  Probe probe;
  int nextId=0;
+ QString workspace; // defaults to root
 
 
  static void put(const QString &path,const QByteArray &text){QFile f(path);QVERIFY(f.open(QIODevice::WriteOnly));QCOMPARE(f.write(text),text.size());}
@@ -46,7 +47,7 @@ protected:
 
  void launch(App &a){
   a.backend=std::make_unique<WorkspaceBackend>();
-  QVERIFY(a.backend->openWorkspace(root.path()));
+  QVERIFY(a.backend->openWorkspace(workspace.isEmpty()?root.path():workspace));
   a.engine=std::make_unique<QQmlApplicationEngine>();
   a.engine->rootContext()->setContextProperty("workspaceBackend",a.backend.get());
   a.engine->rootContext()->setContextProperty("webEditorUrl",server.url());
