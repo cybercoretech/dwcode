@@ -1,4 +1,4 @@
-QT += quick qml quickcontrols2 webenginequick network
+QT += quick qml quickcontrols2 webenginequick network webchannel
 CONFIG += c++17
 CONFIG += console
 CONFIG -= app_bundle
@@ -17,3 +17,7 @@ RESOURCES += src/resources.qrc
 QML_IMPORT_PATH += /usr/lib/qt6/qml
 
 INCLUDEPATH += $$PWD/src
+
+DEFINES += DWCODE_SOURCE_ROOT=\\\"$$PWD\\\"
+SOURCES += src/workspacebackend.cpp
+HEADERS += src/workspacebackend.h

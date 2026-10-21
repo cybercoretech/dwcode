@@ -71,6 +71,7 @@ void LocalWebServer::serveRequest(QTcpSocket *socket, const QByteArray &request)
     if (candidate.isEmpty() || (!candidate.startsWith(rootPrefix) && candidate != m_rootDirectory))
         resolvedPath.clear();
 
+    if (relativePath == QStringLiteral("/qwebchannel.js")) resolvedPath = QStringLiteral(":/qtwebchannel/qwebchannel.js");
     QFile file(resolvedPath);
     if (resolvedPath.isEmpty() || !file.open(QIODevice::ReadOnly) || !QFileInfo(file).isFile()) {
         socket->write("HTTP/1.1 404 Not Found\r\nConnection: close\r\nContent-Length: 0\r\n\r\n");
