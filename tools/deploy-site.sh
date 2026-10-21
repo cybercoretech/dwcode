@@ -5,4 +5,9 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 ./tools/build-site.sh "$@"
-npx -y wrangler@4 pages deploy site --project-name dwcode --branch main --commit-dirty=true
+# Run wrangler outside the repo: in the repo root its Workers autoconfig
+# detects Vite and rewrites package.json and vite.config.js.
+site="$PWD/site"
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+(cd "$tmp" && npx -y wrangler@4 pages deploy "$site" --project-name dwcode --branch main --commit-dirty=true)
