@@ -2,7 +2,8 @@
   <qresource prefix="/qml">
     <file alias="Main.qml">qml/Main.qml</file>
     <file alias="Theme.qml">qml/Theme.qml</file>
-    <file alias="dwcode-mark.svg">assets/dwcode-mark.svg</file>
+    <file alias="railshift-mark.png">assets/railshift-mark.png</file>
+    <file alias="railshift-icon.png">assets/railshift-icon.png</file>
   </qresource>
   <qresource prefix="/data"><file alias="themes.json">data/themes.json</file></qresource>
 </RCC>

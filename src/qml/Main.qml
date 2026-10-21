@@ -71,7 +71,7 @@ ApplicationWindow {
   Rectangle {
    Layout.fillWidth:true;Layout.preferredHeight:56;color:theme.shell;border.color:theme.border
    RowLayout {anchors.fill:parent;anchors.margins:10;spacing:12
-    Image {source:"qrc:/qml/dwcode-mark.svg";Layout.preferredWidth:42;Layout.preferredHeight:32;fillMode:Image.PreserveAspectFit}
+    Image {source:"qrc:/qml/railshift-mark.png";Layout.preferredWidth:36;Layout.preferredHeight:35;fillMode:Image.PreserveAspectFit;smooth:true;mipmap:true}
     Label{text:"DWCODE";font.bold:true;font.letterSpacing:2;color:theme.foreground}
     Button{text:"Open folder";onClicked:chooseFolder()}
     Button{text:workspaceBackend.dirty?"Save ●":"Save";enabled:workspaceBackend.activePath!=="";onClicked:save()}

@@ -21,7 +21,8 @@
 - [x] Create a first-party DWCode-style declarative pack prototype with original palettes, icons, snippets, and a local validator.
 - [x] Build a ten-option DWCode logo selection gallery with SVG export for review.
 - [x] Select the Railshift mark and build its icon/avatar/favicon asset pack.
-- [ ] Replace the in-app mark (`src/qml/dwcode-mark.svg`) with Railshift.
+- [x] Replace the in-app mark with Railshift (top bar and window icon).
+- [x] Publish the project site at dwcode.pages.dev with real screenshots and a browser demo.
 - [x] Document the package format, visual adaptation rules, profile-based roadmap, and license gate.
 - [ ] Define the DWCode extension API, contribution points, permission model, and package format before loading third-party code.
 - [ ] Connect the validated first-party pack to a DWCode theme/icon/snippet preview and selection UI.
