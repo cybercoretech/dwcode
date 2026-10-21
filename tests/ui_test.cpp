@@ -37,7 +37,7 @@ private slots:
   const int from=picker->property("highlightedIndex").toInt(),target=60;
   for(int i=from;i<target;++i)QTest::keyClick(app.window,Qt::Key_Down);
   QTRY_COMPARE(picker->property("highlightedIndex").toInt(),target);
-  QVERIFY(list->property("contentY").toReal()>top+500);
+  QTRY_VERIFY(list->property("contentY").toReal()>top+500); // scrolling is animated
   QTest::keyClick(app.window,Qt::Key_Return);
   QTRY_VERIFY(!popup->property("opened").toBool());
   const auto chosen=app.backend->themes().at(target).toMap();
@@ -135,6 +135,14 @@ private slots:
   // Go to definition of `shout` on line 4 jumps to line 3.
   js(editor(),"(window.dwcodeEditor.setPosition({lineNumber:4,column:2}),window.dwcodeEditor.trigger('test','editor.action.revealDefinition',{}),true)");
   QVERIFY2(waitJs(editor(),"window.dwcodeEditor.getPosition().lineNumber===3"),"definition did not move the cursor");
+  // Real keystrokes: the backend's echo of each change must not rewind the view,
+  // which would cancel the completion list opened by the '.'.
+  js(editor(),"(window.dwcodeEditor.setPosition({lineNumber:5,column:1}),true)");
+  QMetaObject::invokeMethod(editor(),"forceActiveFocus");typeText("message.");
+  QVERIFY2(waitJs(editor(),"[...document.querySelectorAll('.suggest-widget .monaco-list-row')].some(n=>n.textContent.includes('charAt'))"),"typing 'message.' did not show its members");
+  QCOMPARE(js(editor(),"window.dwcodeEditor.getModel().getLineContent(5)"),QString("\"message.\""));
+  js(editor(),"(window.dwcodeEditor.trigger('test','hideSuggestWidget',{}),window.dwcodeEditor.trigger('test','undo',{}),true)");
+  QVERIFY(waitJs(editor(),"window.dwcodeEditor.getModel().getLineContent(5)===''"));
   // Fixing the error in the editor clears the problem list.
   js(editor(),"(window.dwcodeEditor.executeEdits('test',[{range:{startLineNumber:1,startColumn:25,endLineNumber:1,endColumn:28},text:\"'ok'\"}]),true)");
   QTRY_VERIFY_WITH_TIMEOUT(app.backend->problems().isEmpty(),20000);

@@ -144,7 +144,7 @@ editor.onKeyDown((event) => {
 
 // Native capabilities exist only in the Qt WebChannel, never on the public HTTP server.
 let native = null, applyingNative = false;
-const models = new Map(), pendingLanguage = new Map();
+const models = new Map(), pendingLanguage = new Map(), inFlight = new Map();
 let selectedTheme = cybercoreThemes.find(t => t.id === 'cyberpunk-chrome') || cybercoreThemes[0];
 window.dwcodeThemes = cybercoreThemes;
 window.dwcodeSetTheme = id => {
@@ -177,9 +177,13 @@ const applyDocument = (doc, activate = true) => {
     model = monaco.editor.createModel(doc.text, doc.language.replace(/react$/, ''), monaco.Uri.parse(doc.uri));
     models.set(doc.uri, model);
     model.onDidChangeContent(() => {
-      if (!applyingNative && native) native.updateDocument(doc.path, model.getValue());
+      if (applyingNative || !native) return;
+      inFlight.set(doc.uri, (inFlight.get(doc.uri) || 0) + 1);
+      native.updateDocument(doc.path, model.getValue(), () => inFlight.set(doc.uri, inFlight.get(doc.uri) - 1));
     });
-  } else if (model.getValue() !== doc.text) {
+  } else if (model.getValue() !== doc.text && !inFlight.get(doc.uri)) {
+    // Skip while this view has edits in flight: the backend is echoing an older
+    // text, and applying it would rewind the cursor and cancel completion.
     const state = editor.saveViewState();
     model.setValue(doc.text);
     if (editor.getModel() === model && state) editor.restoreViewState(state);
