@@ -1,0 +1,62 @@
+[
+  {
+    "id": "01-cryoforge",
+    "name": "Cryoforge",
+    "tag": "Precision / Armored steel",
+    "description": "Broad armored letterforms with inset cyan-magenta channels, polished silver chamfers, and restrained mechanical seams.",
+    "colors": [
+      "#3ee7ff",
+      "#ff37b9",
+      "#e0e7ed",
+      "#292d36"
+    ]
+  },
+  {
+    "id": "02-vectorstrike",
+    "name": "Vectorstrike",
+    "tag": "Velocity / Swept facets",
+    "description": "A low, forward-swept DW with long steel facets, sharp diagonal cuts, and neon channels tucked beneath the surface.",
+    "colors": [
+      "#3ee7ff",
+      "#ff37b9",
+      "#e0e7ed",
+      "#292d36"
+    ]
+  },
+  {
+    "id": "03-nexus-lock",
+    "name": "Nexus Lock",
+    "tag": "Interlock / Shared core",
+    "description": "A compact DW interlock with a shared central spine, recessed light paths, and precise over-under steel joints.",
+    "colors": [
+      "#3ee7ff",
+      "#ff37b9",
+      "#e0e7ed",
+      "#292d36"
+    ]
+  },
+  {
+    "id": "04-railshift",
+    "name": "Railshift",
+    "tag": "Layered / Floating rails",
+    "description": "Layered steel rails form an angular DW, with luminous recessed cores visible between the outer machined surfaces.",
+    "colors": [
+      "#3ee7ff",
+      "#ff37b9",
+      "#e0e7ed",
+      "#292d36"
+    ]
+  },
+  {
+    "id": "05-spectre-alloy",
+    "name": "Spectre Alloy",
+    "tag": "Sculpted / Stealth alloy",
+    "description": "Smooth, sculpted steel surfaces flow into precise angular folds, accented by fine cyan-magenta circuitry and bright polished edges.",
+    "colors": [
+      "#3ee7ff",
+      "#ff37b9",
+      "#e0e7ed",
+      "#292d36"
+    ]
+  }
+]
