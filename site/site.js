@@ -330,20 +330,24 @@ fetch('data/themes.json').then((r) => r.json()).then((list) => {
 }).catch(() => { tree.textContent = 'Theme list unavailable right now.'; });
 
 // ---------------------------------------------------------------- logo
-// The Bracket wordmark (Monaspace Krypton, outlined) replaces the text fallback.
-fetch('assets/dwcode-wordmark.svg').then((r) => r.ok ? r.text() : Promise.reject(r.status)).then((markup) => {
-  const holder = $('.wordmark');
-  holder.querySelector('.wm-fallback').remove();
-  holder.insertAdjacentHTML('afterbegin', markup);
-  const logo = $('svg', holder);
-  logo.removeAttribute('width'); logo.removeAttribute('height');
-  logo.setAttribute('aria-hidden', 'true');
-  if (reduce) return;
-  animate(svg.createDrawable($$('.br', logo)), { draw: ['0 0', '0 1'], duration: 650, ease: 'inOutQuad' });
-  animate($$('.br-l', logo), { translateX: [14, 0], duration: 650, ease: 'outExpo' });
-  animate($$('.br-r', logo), { translateX: [-14, 0], duration: 650, ease: 'outExpo' });
-  animate($$('.ch-0, .ch-1, .ch-2, .ch-3, .ch-4, .ch-5', logo), { opacity: [0, 1], duration: 1, delay: stagger(80, { start: 350 }) });
-}).catch(() => { /* keep the text wordmark */ });
+// The Bracket mark (Monaspace Krypton, outlined): wordmark in the bar, full
+// lockup in the hero. Brackets draw in, letters type, the cursor blinks.
+function placeLogo(file, holder, before) {
+  return fetch(`assets/${file}`).then((r) => r.ok ? r.text() : Promise.reject(r.status)).then((markup) => {
+    before?.remove();
+    holder.insertAdjacentHTML('afterbegin', markup);
+    const logo = $('svg', holder);
+    logo.removeAttribute('width'); logo.removeAttribute('height');
+    logo.setAttribute('aria-hidden', 'true');
+    if (reduce) return;
+    animate(svg.createDrawable($$('.br', logo)), { draw: ['0 0', '0 1'], duration: 700, ease: 'inOutQuad' });
+    animate($$('.br-l', logo), { translateX: [14, 0], duration: 700, ease: 'outExpo' });
+    animate($$('.br-r', logo), { translateX: [-14, 0], duration: 700, ease: 'outExpo' });
+    animate($$('[class^="ch ch-"]', logo), { opacity: [0, 1], duration: 1, delay: stagger(85, { start: 380 }) });
+  }).catch(() => { /* keep the fallback */ });
+}
+placeLogo('dwcode-wordmark.svg', $('.wordmark'), $('.wordmark .wm-fallback'));
+placeLogo('dwcode-lockup.svg', $('.hero-logo'));
 
 // ---------------------------------------------------------------- copy
 $$('[data-copy]').forEach((btn) => btn.addEventListener('click', async () => {
