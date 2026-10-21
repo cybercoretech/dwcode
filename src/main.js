@@ -151,7 +151,9 @@ window.dwcodeSetTheme = id => {
   const t = cybercoreThemes.find(t => t.id === id);
   if (!t) return;
   selectedTheme = t;
-  monaco.editor.defineTheme(t.id, {
+  // Monaco rejects theme names outside [a-z0-9-], e.g. the dotted DWCode ids.
+  const name = 'dw-' + t.id.replace(/[^a-z0-9-]/gi, '-');
+  monaco.editor.defineTheme(name, {
     base: t.appearance === 'light' ? 'vs' : 'vs-dark', inherit: true,
     rules: Object.entries(t.syntax).map(([token,color]) => ({token, foreground:color.replace('#','')})),
     colors: {'editor.background':t.surfaces.editor,'editor.foreground':t.text.primary,'editorCursor.foreground':t.accents.primary,
@@ -161,7 +163,7 @@ window.dwcodeSetTheme = id => {
       'editorSuggestWidget.border':t.surfaces.border,'editorHoverWidget.background':t.surfaces.raised,
       'editorHoverWidget.border':t.surfaces.border,'editorIndentGuide.background1':t.surfaces.border}
   });
-  monaco.editor.setTheme(t.id);
+  monaco.editor.setTheme(name);
   document.body.style.background = t.surfaces.editor;
   try {localStorage.setItem('dwcode-theme', id)} catch {}
   window.dispatchEvent(new CustomEvent('dwcode-theme', {detail:t}));
