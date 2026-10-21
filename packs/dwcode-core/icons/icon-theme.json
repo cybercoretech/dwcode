@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "cybercore.dwcode-icons",
+  "name": "DWCode Signal Icons",
+  "style": {
+    "canvas": "24x24",
+    "stroke": "#77BCC5",
+    "strokeWidth": 1.65,
+    "fill": "none",
+    "colorMode": "muted-accent"
+  },
+  "icons": {
+    "file": "assets/file.svg",
+    "folder": "assets/folder.svg",
+    "javascript": "assets/javascript.svg",
+    "typescript": "assets/typescript.svg",
+    "stylesheet": "assets/stylesheet.svg",
+    "markdown": "assets/markdown.svg",
+    "data": "assets/data.svg"
+  },
+  "files": {
+    "default": "file",
+    "extensions": {
+      "js": "javascript",
+      "jsx": "javascript",
+      "mjs": "javascript",
+      "cjs": "javascript",
+      "ts": "typescript",
+      "tsx": "typescript",
+      "css": "stylesheet",
+      "scss": "stylesheet",
+      "md": "markdown",
+      "mdx": "markdown",
+      "json": "data",
+      "toml": "data",
+      "yaml": "data",
+      "yml": "data"
+    },
+    "folders": {
+      "default": "folder",
+      "src": "folder",
+      "docs": "folder",
+      "assets": "folder"
+    }
+  }
+}

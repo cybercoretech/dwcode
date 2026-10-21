@@ -1,0 +1,7 @@
+<RCC>
+  <qresource prefix="/qml">
+    <file alias="Main.qml">qml/Main.qml</file>
+    <file alias="Theme.qml">qml/Theme.qml</file>
+    <file alias="dwcode-mark.svg">assets/dwcode-mark.svg</file>
+  </qresource>
+</RCC>

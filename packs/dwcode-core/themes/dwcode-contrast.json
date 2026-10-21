@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "cybercore.dwcode-contrast",
+  "name": "DWCode Dark / Clear Signal",
+  "appearance": "dark",
+  "surfaces": {
+    "window": "#05070A",
+    "shell": "#0A0D12",
+    "sidebar": "#080B10",
+    "editor": "#05070A",
+    "raised": "#10151C",
+    "border": "#586875"
+  },
+  "text": {
+    "primary": "#FFFFFF",
+    "secondary": "#E1E8EE",
+    "muted": "#B4C0CA"
+  },
+  "accents": {
+    "primary": "#63E4F1",
+    "secondary": "#FF87BC",
+    "success": "#7EE5B1",
+    "warning": "#F0CD83",
+    "error": "#FF9CA2"
+  },
+  "syntax": {
+    "comment": "#B1BBC4",
+    "keyword": "#FF9AC7",
+    "string": "#D0EEA9",
+    "number": "#F3D28E",
+    "type": "#7CE7F1",
+    "function": "#A7D6F0",
+    "variable": "#FFFFFF",
+    "constant": "#D9B5F3"
+  }
+}

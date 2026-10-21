@@ -1,0 +1,7 @@
+node_modules/
+web/dist/
+build/
+Makefile
+.qmake.stash
+*.user
+*.autosave

@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "cybercore.dwcode-frost",
+  "name": "DWCode Frost / Signal",
+  "appearance": "light",
+  "surfaces": {
+    "window": "#E9EEF1",
+    "shell": "#F3F6F7",
+    "sidebar": "#EDF2F4",
+    "editor": "#F8FAFB",
+    "raised": "#FFFFFF",
+    "border": "#C9D5DA"
+  },
+  "text": {
+    "primary": "#17232B",
+    "secondary": "#445761",
+    "muted": "#687D88"
+  },
+  "accents": {
+    "primary": "#087F91",
+    "secondary": "#A93669",
+    "success": "#287D59",
+    "warning": "#8B641C",
+    "error": "#A5424D"
+  },
+  "syntax": {
+    "comment": "#71818A",
+    "keyword": "#A93669",
+    "string": "#50772E",
+    "number": "#8B641C",
+    "type": "#087F91",
+    "function": "#285C86",
+    "variable": "#23323A",
+    "constant": "#714A91"
+  }
+}

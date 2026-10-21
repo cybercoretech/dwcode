@@ -1,0 +1,28 @@
+{
+  "manifestVersion": 1,
+  "id": "cybercore.dwcode-core",
+  "version": "0.1.0",
+  "displayName": "DWCode Core Signal",
+  "description": "First-party DWCode themes, file icons, and starter snippets.",
+  "engines": {
+    "dwcode": ">=0.1.0 <1.0.0"
+  },
+  "dwcodeApi": "1.0",
+  "kind": "declarative",
+  "license": "UNLICENSED",
+  "publisher": "Cybercore Tech",
+  "contributes": {
+    "themes": [
+      "themes/dwcode-dark.json",
+      "themes/dwcode-frost.json",
+      "themes/dwcode-contrast.json"
+    ],
+    "iconTheme": "icons/icon-theme.json",
+    "snippets": {
+      "javascript": "snippets/javascript.json",
+      "typescript": "snippets/typescript.json",
+      "markdown": "snippets/markdown.json"
+    }
+  },
+  "capabilities": []
+}

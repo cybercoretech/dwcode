@@ -1,0 +1,16 @@
+{
+  "name": "dwcode-editor-ui",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "validate:packs": "node tools/validate-packs.mjs"
+  },
+  "dependencies": {
+    "monaco-editor": "^0.52.2"
+  },
+  "devDependencies": {
+    "vite": "^7.1.9"
+  }
+}

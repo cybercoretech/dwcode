@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "cybercore.dwcode-dark",
+  "name": "DWCode Dark / Signal",
+  "appearance": "dark",
+  "surfaces": {
+    "window": "#090C12",
+    "shell": "#10141C",
+    "sidebar": "#0E1219",
+    "editor": "#0B0E14",
+    "raised": "#141A23",
+    "border": "#26313D"
+  },
+  "text": {
+    "primary": "#E5EAF1",
+    "secondary": "#A8B3C0",
+    "muted": "#7E8A99"
+  },
+  "accents": {
+    "primary": "#43C9D7",
+    "secondary": "#D85A94",
+    "success": "#57C995",
+    "warning": "#D6AE6B",
+    "error": "#D9767D"
+  },
+  "syntax": {
+    "comment": "#778493",
+    "keyword": "#D87DA8",
+    "string": "#A9C98A",
+    "number": "#D6AE6B",
+    "type": "#63BFCB",
+    "function": "#8BB8D0",
+    "variable": "#D8DEE8",
+    "constant": "#C39BD5"
+  }
+}

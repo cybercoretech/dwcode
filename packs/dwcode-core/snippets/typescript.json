@@ -1,0 +1,22 @@
+{
+  "DWCode typed result": {
+    "prefix": "dwresult",
+    "body": [
+      "export type ${1:ResultName} = {",
+      "  ok: true;",
+      "  value: ${2:T};",
+      "} | {",
+      "  ok: false;",
+      "  error: ${3:Error};",
+      "};$0"
+    ],
+    "description": "Discriminated success/error result"
+  },
+  "DWCode signal enum": {
+    "prefix": "dwsignal",
+    "body": [
+      "export type ${1:SignalState} = \"ready\" | \"idle\" | \"offline\";"
+    ],
+    "description": "Small explicit signal-state union"
+  }
+}

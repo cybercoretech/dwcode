@@ -1,0 +1,20 @@
+{
+  "DWCode decision record": {
+    "prefix": "dwdecision",
+    "body": [
+      "## Decision / ${1:topic}",
+      "",
+      "**Status:** ${2:proposed}",
+      "",
+      "### Context",
+      "${3:What problem are we solving?}",
+      "",
+      "### Choice",
+      "${4:What did we decide and why?}",
+      "",
+      "### Follow-up",
+      "- [ ] ${0:Next action}"
+    ],
+    "description": "Structured DWCode decision note"
+  }
+}

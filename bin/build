@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+npm run build
+mkdir -p build
+cd build
+qmake6 ../dwcode.pro
+make -j"$(nproc)"

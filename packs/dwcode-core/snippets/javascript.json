@@ -1,0 +1,18 @@
+{
+  "DWCode function": {
+    "prefix": "dwfn",
+    "body": [
+      "export function ${1:functionName}(${2:args}) {",
+      "  ${0:// implementation}",
+      "}"
+    ],
+    "description": "DWCode-style exported function"
+  },
+  "DWCode diagnostic log": {
+    "prefix": "dwlog",
+    "body": [
+      "console.info(\"[DWCODE] ${1:signal}\", ${2:value});$0"
+    ],
+    "description": "Namespaced diagnostic log"
+  }
+}
