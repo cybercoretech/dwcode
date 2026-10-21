@@ -85,6 +85,11 @@ img { max-width: 100%; height: auto; display: block; }
 .wordmark { display: inline-flex; align-items: center; font: 700 15px/1 var(--mono); letter-spacing: .14em; text-decoration: none; }
 .wm-d { color: var(--cyan); } .wm-w { color: var(--pink); } .wm-rest { color: var(--white); }
 .wordmark svg { height: 24px; width: auto; display: block; overflow: visible; }
+.hero-logo { height: clamp(56px, 8vw, 84px); margin: 0 0 22px; }
+.hero-logo svg { height: 100%; width: auto; max-width: 100%; display: block; overflow: visible; }
+.hero-logo svg .ch-0 { color: var(--cyan); } .hero-logo svg .ch-1 { color: var(--pink); }
+.hero-logo svg .ch-0, .hero-logo svg .ch-1 { filter: drop-shadow(0 0 10px currentColor); }
+.hero-logo svg .cursor { animation: blink 1.06s steps(1) infinite; }
 .wordmark svg .ch-0, .wordmark svg .ch-1 { filter: drop-shadow(0 0 5px currentColor); }
 .wordmark svg .ch-0 { color: var(--cyan); } .wordmark svg .ch-1 { color: var(--pink); }
 .wordmark svg .cursor { animation: blink 1.06s steps(1) infinite; }
