@@ -11,7 +11,7 @@ DWCode is a standalone Cybercore desktop code editor. It owns its window chrome,
 
 ## Integrations and extensions
 
-Use Language Server Protocol for language intelligence and Debug Adapter Protocol for debugging. Keep language servers and debuggers as separately installed tools with explicit executable paths and workspace trust. Open VSX may supply reviewed, declarative themes, snippets, keymaps, and language metadata. It is not an executable extension host.
+Use Language Server Protocol for language intelligence and Debug Adapter Protocol for debugging. The prototype already speaks LSP over stdio for diagnostics, completion, hover, and definition. Keep language servers and debuggers as separately installed tools with explicit executable paths and workspace trust. Open VSX may supply reviewed, declarative themes, snippets, keymaps, and language metadata. It is not an executable extension host.
 
 DWCode-native executable extensions come later, behind a versioned API, separate process, scoped permissions, explicit install/trust, and reviewable updates. Start the native catalog as a checksum-pinned GitHub Releases index. See [EXTENSIONS.md](EXTENSIONS.md) for the compatibility and trust policy.
 

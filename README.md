@@ -6,19 +6,40 @@ DWCode is Cybercore's keyboard-first desktop editor project. The prototype pairs
 
 DWCode keeps a familiar project tree, tabs, splits, command palette, and lower panels, with optional modal navigation. Qt Quick owns the desktop shell; Monaco is the text editing surface. DWCode owns its workspace model, commands, settings, themes, integrations, and extension contract. Monaco does not make DWCode compatible with Visual Studio Code extensions by itself.
 
-The current prototype uses a sample project. It does not yet open arbitrary folders, save files, start language servers, run/debug project code, or load third-party VSIX files.
+## ⚡ What works today
 
-## Build and run
+- 📂 **Workspace:** open any folder (`Ctrl+O` or `--workspace <folder>`), browse it in the explorer, and edit UTF-8 text files up to 8 MiB in tabs. Paths are confined to the workspace; symlinks that escape it are refused.
+- 💾 **Saving:** `Ctrl+S` or **Save** writes atomically. If the file changed on disk since you opened it, the save is blocked so nothing is lost; use **Save As** for your copy. Unsaved changes prompt before closing or switching folders.
+- 🖥️ **Terminal:** runs commands in the workspace with `bash`, streams output, accepts input for a running command, and can stop it. It is a command runner, not a full PTY, so full-screen programs such as `vim` or `htop` do not work yet.
+- 🧠 **Language servers:** **Connect LSP** starts a server for the active file: TypeScript/JavaScript (bundled), C/C++ (`clangd`), Rust (`rust-analyzer`), Python (`pyright-langserver`). Diagnostics, completion, hover, and go-to-definition. TypeScript is covered by automated tests; the others depend on the server being on `PATH`.
+- 🎨 **Themes:** 84 palettes, the 81 canonical Cybercore themes plus 3 DWCode ones, recolour the shell and editor together and are remembered between runs.
+- 🪟 **Split view** shares the same document, so edits in one pane appear in the other.
+
+Not yet: file watching, crash recovery, a New File command, a real PTY terminal, loading extension packs at runtime.
+
+## 🛠️ Build and run
 
 Requirements: Qt 6 with Qt Quick Controls and Qt WebEngine Quick, qmake6, a C++17 compiler, Node.js, and npm.
 
 ```sh
-npm install
+npm ci
 ./bin/build
-./build/dwcode
+./build/dwcode --workspace ~/some/project
 ```
 
-The Monaco UI is built into `web/dist` and served from a loopback-only HTTP listener so its editor workers function without loading code from a third-party site. The prototype has a sample workspace and interaction scaffolding; project file operations, language-server integration, and runtime execution are not connected yet.
+The Monaco UI is built into `web/dist` and served from a loopback-only HTTP listener so its editor workers run without loading code from a third-party site. Native capabilities are exposed to the editor only through Qt WebChannel, never on that HTTP listener.
+
+## 🧪 Tests
+
+```sh
+# Backend: files, conflicts, path boundaries, terminal, themes, TypeScript LSP
+mkdir -p build/tests && cd build/tests && qmake6 ../../tests/backend.pro && make -j"$(nproc)" && ./backend-tests
+
+# UI: drives the real window offscreen (dropdown, split view, save, terminal, LSP in the editor)
+mkdir -p build/ui-tests && cd build/ui-tests && qmake6 ../../tests/ui.pro && make -j"$(nproc)" && ./ui-tests
+```
+
+The UI suite always runs offscreen so it never opens a window on your desktop; set `DWCODE_UI_PLATFORM` to watch it on a real display.
 
 Validate the first data-only theme/icon/snippet pack with:
 
@@ -26,12 +47,18 @@ Validate the first data-only theme/icon/snippet pack with:
 npm run validate:packs
 ```
 
-Open [`brand/logo-selection.html`](brand/logo-selection.html) in a browser to compare the ten original DWCode mark directions. Select symbol-only or full wordmark-lockup SVG, then copy or download it. The selected mark has not yet replaced the app's current logo.
+## 🛰️ Brand: Railshift
 
-## Prototype controls
+**Railshift** is the approved DWCode mark. The asset pack in [`brand/railshift/`](brand/railshift/) has transparent PNGs and dark avatars from 64 to 1024 px, a multi-resolution ICO, favicons, Apple/Android icons, a social card, and simplified true-vector SVGs (`railshift-vector.svg`, `railshift-mono.svg`, `railshift-favicon.svg`). `railshift-artwork.svg` wraps the detailed raster and is not a true vector. Rebuild the pack and its zip with `python3 tools/build-brand-assets.py`.
+
+The exploration that led there is kept for reference: [`brand/logo-selection.html`](brand/logo-selection.html) (the five fusion concepts, Railshift is option 04), [`brand/fusion-concepts/`](brand/fusion-concepts/), [`brand/neon-concepts/`](brand/neon-concepts/), and the earlier [concept board](brand/dwcode-logo-options.png) with its GIMP source.
+
+## ⌨️ Prototype controls
 
 | Shortcut | Action |
 | --- | --- |
+| `Ctrl+O` | Open a folder |
+| `Ctrl+S` / `Ctrl+Shift+S` | Save / Save As |
 | `Ctrl+P` | Open the command palette / quick switcher |
 | `Ctrl+Shift+P` | Open the command palette |
 | `Ctrl+B` | Toggle the explorer |
