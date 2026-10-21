@@ -1,6 +1,6 @@
 // DWCode site behaviour: drawer menu, feature sheets, screenshot tour,
 // theme explorer, the lazy browser demo and small anime.js effects.
-import { animate, stagger, scrambleText } from './vendor/anime.esm.min.js';
+import { animate, stagger, scrambleText, svg } from './vendor/anime.esm.min.js';
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
@@ -328,6 +328,22 @@ fetch('data/themes.json').then((r) => r.json()).then((list) => {
   select.value = selectedTheme;
   buildTree();
 }).catch(() => { tree.textContent = 'Theme list unavailable right now.'; });
+
+// ---------------------------------------------------------------- logo
+// The Bracket wordmark (Monaspace Krypton, outlined) replaces the text fallback.
+fetch('assets/dwcode-wordmark.svg').then((r) => r.ok ? r.text() : Promise.reject(r.status)).then((markup) => {
+  const holder = $('.wordmark');
+  holder.querySelector('.wm-fallback').remove();
+  holder.insertAdjacentHTML('afterbegin', markup);
+  const logo = $('svg', holder);
+  logo.removeAttribute('width'); logo.removeAttribute('height');
+  logo.setAttribute('aria-hidden', 'true');
+  if (reduce) return;
+  animate(svg.createDrawable($$('.br', logo)), { draw: ['0 0', '0 1'], duration: 650, ease: 'inOutQuad' });
+  animate($$('.br-l', logo), { translateX: [14, 0], duration: 650, ease: 'outExpo' });
+  animate($$('.br-r', logo), { translateX: [-14, 0], duration: 650, ease: 'outExpo' });
+  animate($$('.ch-0, .ch-1, .ch-2, .ch-3, .ch-4, .ch-5', logo), { opacity: [0, 1], duration: 1, delay: stagger(80, { start: 350 }) });
+}).catch(() => { /* keep the text wordmark */ });
 
 // ---------------------------------------------------------------- copy
 $$('[data-copy]').forEach((btn) => btn.addEventListener('click', async () => {

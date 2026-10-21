@@ -71,8 +71,7 @@ ApplicationWindow {
   Rectangle {
    Layout.fillWidth:true;Layout.preferredHeight:56;color:theme.shell;border.color:theme.border
    RowLayout {anchors.fill:parent;anchors.margins:10;spacing:12
-    Image {source:"qrc:/qml/railshift-mark.png";Layout.preferredWidth:36;Layout.preferredHeight:35;fillMode:Image.PreserveAspectFit;smooth:true;mipmap:true}
-    Label{text:"DWCODE";font.bold:true;font.letterSpacing:2;color:theme.foreground}
+    Image {source:"qrc:/qml/dwcode-wordmark.png";Layout.preferredHeight:22;Layout.preferredWidth:sourceSize.width*22/Math.max(1,sourceSize.height);fillMode:Image.PreserveAspectFit;smooth:true;mipmap:true;Accessible.name:"DWCode"}
     Button{text:"Open folder";onClicked:chooseFolder()}
     Button{text:workspaceBackend.dirty?"Save ●":"Save";enabled:workspaceBackend.activePath!=="";onClicked:save()}
     Button{text:"Commands ⌘";onClicked:win.paletteVisible=true}
