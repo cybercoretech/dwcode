@@ -27,15 +27,13 @@ for png in "$raw"/*.png; do
   magick "$png" -resize 1440x -quality 82 "site/screenshots/$name.webp"
 done
 
-# Web-sized logo renders for the page.
-magick site/assets/railshift.png -resize 720x -quality 88 site/assets/railshift-hero.webp
-magick site/assets/railshift.png -trim -resize 80x -quality 90 site/assets/railshift-mark.webp
+python3 tools/make-site-background.py
 
 mkdir -p site/data
 cp src/data/themes.json site/data/themes.json
 
-[[ -f brand/dwcode-railshift-assets.zip ]] || python3 tools/build-brand-assets.py
-mkdir -p site/downloads
-cp brand/dwcode-railshift-assets.zip site/downloads/
+# anime.js, served locally (pinned in package.json).
+mkdir -p site/vendor
+cp node_modules/animejs/dist/bundles/anime.esm.min.js site/vendor/anime.esm.min.js
 
 du -sh site
