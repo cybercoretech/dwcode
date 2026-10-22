@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-4.00 -18.00 619.59 136.00" width="620" height="136" role="img" aria-label="DWCode"><title>DWCode</title><defs><style>@font-face{font-family:"Monaspace Krypton";font-weight:800;src:url("../../font/monaspace-krypton-latin-800-normal.woff2") format("woff2")}</style></defs>
+<path d="M20.00 -8.00H9.00L0.00 12.00V88.00L9.00 108.00H20.00" fill="none" stroke="#5f6f82" stroke-width="8" class="br br-l"/>
+<text x="34.00" y="100.0" font-family="Monaspace Krypton" font-weight="800" font-size="136.99"><tspan fill="#2ee6f6">D</tspan><tspan fill="#ff2e97">W</tspan><tspan fill="#e3eaf0">C</tspan><tspan fill="#e3eaf0">O</tspan><tspan fill="#e3eaf0">D</tspan><tspan fill="#e3eaf0">E</tspan></text>
+<rect x="557.59" y="0" width="20.00" height="100.0" fill="#2ee6f6" class="cursor"/>
+<path d="M587.59 -8.00H598.59L607.59 12.00V88.00L598.59 108.00H587.59" fill="none" stroke="#5f6f82" stroke-width="8" class="br br-r"/>
+</svg>

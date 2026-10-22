@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220.00%200.00%20144.00%20144.00%22%20width%3D%22144%22%20height%3D%22144%22%20role%3D%22img%22%20aria-label%3D%22DWCode%22%3E%3Ctitle%3EDWCode%3C%2Ftitle%3E%0A%3Crect%20x%3D%221%22%20y%3D%221%22%20width%3D%22142%22%20height%3D%22142%22%20rx%3D%2230%22%20fill%3D%22%230b1018%22%2F%3E%3Cpath%20d%3D%22M30.80%2029.08H22.66L16.00%2043.88V100.12L22.66%20114.92H30.80%22%20fill%3D%22none%22%20stroke%3D%22%235f6f82%22%20stroke-width%3D%2210%22%2F%3E%3Cpath%20d%3D%22M113.20%2029.08H121.34L128.00%2043.88V100.12L121.34%20114.92H113.20%22%20fill%3D%22none%22%20stroke%3D%22%235f6f82%22%20stroke-width%3D%2210%22%2F%3E%3Cpath%20d%3D%22M31.5013698630137%20100.0H58.0054794520548L71.23835616438356%2079.32602739726028V63.83013698630137L58.0054794520548%2044.0H31.5013698630137ZM44.12054794520549%2088.45479452054795V55.54520547945205H51.48493150684932L58.77260273972603%2068.2027397260274V74.95342465753424L51.48493150684932%2088.45479452054795Z%22%20fill%3D%22%232ee6f6%22%2F%3E%3Cpath%20d%3D%22M80.3945205479452%20100.0H89.13972602739726L93.78082191780823%2082.16438356164383L98.11506849315069%20100.0H107.16712328767125L114.03287671232877%2073.64931506849315V44.0H103.67671232876712V72.72876712328767L101.26027397260275%2086.53698630136986L97.96164383561644%2070.42739726027398V60.416438356164385H89.63835616438357V70.42739726027398L86.33972602739726%2086.53698630136986L83.92328767123288%2072.72876712328767V44.0H73.52876712328766V73.64931506849315Z%22%20fill%3D%22%23ff2e97%22%2F%3E%0A%3C%2Fsvg%3E%0A">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DWCode Bracket Fonts</title>
+<meta name="description" content="The Bracket DWCode mark set in six FOSS coding fonts, animated with anime.js.">
+<style>
+@font-face{font-family:"JetBrains Mono";font-weight:800;src:url(https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.3.0/files/jetbrains-mono-latin-800-normal.woff2) format("woff2")}
+@font-face{font-family:"JetBrains Mono";font-weight:400;src:url(https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.3.0/files/jetbrains-mono-latin-400-normal.woff2) format("woff2")}
+@font-face{font-family:"Iosevka";font-weight:800;src:url(https://cdn.jsdelivr.net/npm/@fontsource/iosevka@5.3.0/files/iosevka-latin-800-normal.woff2) format("woff2")}
+@font-face{font-family:"Monaspace Krypton";font-weight:800;src:url(https://cdn.jsdelivr.net/npm/@fontsource/monaspace-krypton@5.3.0/files/monaspace-krypton-latin-800-normal.woff2) format("woff2")}
+@font-face{font-family:"Martian Mono";font-weight:800;src:url(https://cdn.jsdelivr.net/npm/@fontsource/martian-mono@5.3.0/files/martian-mono-latin-800-normal.woff2) format("woff2")}
+@font-face{font-family:"Space Mono";font-weight:700;src:url(https://cdn.jsdelivr.net/npm/@fontsource/space-mono@5.3.0/files/space-mono-latin-700-normal.woff2) format("woff2")}
+@font-face{font-family:"Geist Mono";font-weight:800;src:url(https://cdn.jsdelivr.net/npm/@fontsource/geist-mono@5.3.0/files/geist-mono-latin-800-normal.woff2) format("woff2")}
+:root{--bg:#06080d;--panel:#0c1118;--panel2:#101722;--line:#1d2836;--fg:#dbe4ec;--muted:#7f8c9b;--cyan:#2ee6f6;--pink:#ff2e97;color-scheme:dark}
+*{box-sizing:border-box}
+html{scrollbar-color:#2a3a4d var(--bg);scrollbar-width:thin}
+::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:linear-gradient(var(--cyan),var(--pink));border-radius:10px;border:3px solid var(--bg)}
+body{margin:0;background:var(--bg);color:var(--fg);font:13px/1.6 "JetBrains Mono",ui-monospace,monospace}
+header{max-width:1180px;margin:0 auto;padding:36px 16px 6px}
+h1{font-size:18px;font-weight:800;margin:0 0 6px;color:#fff}
+header p{margin:0;color:var(--muted);max-width:88ch}
+header code{color:var(--cyan)}
+.controls{max-width:1180px;margin:12px auto 0;padding:0 16px;display:flex;gap:8px;flex-wrap:wrap}
+.controls button{font:12px "JetBrains Mono",monospace;color:var(--fg);background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:7px 11px;cursor:pointer}
+.controls button[aria-pressed="true"]{border-color:var(--cyan);color:#fff}
+main{max-width:1180px;margin:0 auto;padding:16px;display:grid;gap:18px}
+.card{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+.stage{position:relative;height:240px;display:grid;place-items:center;background:
+ radial-gradient(460px 180px at 50% 50%,rgba(46,230,246,.06),transparent),
+ linear-gradient(rgba(46,230,246,.04) 1px,transparent 1px) 0 0/24px 24px,
+ linear-gradient(90deg,rgba(46,230,246,.04) 1px,transparent 1px) 0 0/24px 24px,#070a10;border-bottom:1px solid var(--line)}
+.stage svg{width:min(88%,640px);height:auto;overflow:visible}
+.num{position:absolute;left:14px;top:10px;color:var(--muted);font-size:12px}
+.replay{position:absolute;right:12px;top:10px;font:12px "JetBrains Mono",monospace;color:var(--fg);background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:6px 10px;cursor:pointer}
+.replay:hover{border-color:var(--cyan)}
+.info{display:grid;grid-template-columns:1.15fr 1fr;gap:18px;padding:14px 18px 16px}
+@media(max-width:820px){.info{grid-template-columns:1fr}}
+.info h2{margin:0 0 2px;font-size:15px;color:#fff}
+.info h2 small{color:var(--muted);font-weight:400;font-size:12px;margin-left:8px}
+.info ul{margin:6px 0 0;padding-left:18px;color:#b4c0cc}
+.glyphs{margin-top:10px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:#080b11;color:#e9eff5;font-size:19px;letter-spacing:.04em;white-space:nowrap;overflow:auto}
+.previews{display:grid;gap:10px;align-content:start}
+.nav{height:52px;display:flex;align-items:center;gap:14px;padding:0 14px;border:1px solid var(--line);border-radius:10px;background:rgba(6,8,13,.9)}
+.nav svg{height:24px;width:auto}
+.nav span{margin-left:auto;display:flex;gap:4px;flex-direction:column}
+.nav i{display:block;width:16px;height:2px;background:var(--fg);border-radius:2px}
+.icons{display:flex;align-items:end;gap:16px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel2)}
+.icons figure{margin:0;display:grid;justify-items:center;gap:4px;color:var(--muted);font-size:10px}
+.tab{display:flex;align-items:center;gap:7px;padding:6px 10px;border-radius:7px 7px 0 0;background:#1a2230;color:#c9d3dd;font-size:11px}
+a{color:var(--cyan)}
+footer{max-width:1180px;margin:0 auto;padding:6px 16px 40px;color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+ <h1>// Bracket, set in real coding fonts</h1>
+ <p>The Bracket identity kept intact: drawn chamfered brackets frame the name, cyan <code>D</code>, magenta <code>W</code>, steel <code>CODE</code>, and the block cursor. The letters are now a FOSS coding font at its heaviest weight, so the type is editable. All six fonts use the SIL Open Font License 1.1. Motion: <code>anime.js 4.5.0</code>.</p>
+</header>
+<div class="controls" role="group" aria-label="Wordmark text">
+ <button type="button" aria-pressed="true" data-text="DWCODE">DWCODE</button>
+ <button type="button" aria-pressed="false" data-text="DWCode">DWCode</button>
+ <button type="button" aria-pressed="false" data-text="dwcode">dwcode</button>
+</div>
+<main id="cards"></main>
+<footer>After you pick, the chosen font is self-hosted with its licence, and the logo is exported both as editable SVG (live text) and as outlined paths for icons.</footer>
+
+<script type="module">
+import { animate, createTimeline, stagger, svg, utils } from 'https://cdn.jsdelivr.net/npm/animejs@4.5.0/dist/bundles/anime.esm.min.js';
+
+const FONTS = [
+ { id:'jetbrains', family:'JetBrains Mono', weight:800, label:'ExtraBold 800', repo:'https://github.com/JetBrains/JetBrainsMono',
+   notes:['Already the site\'s text font, so logo and page match exactly.','Tall x-height, rectangular rounds: reads as "IDE" instantly.','Tweak: edit in FontForge; OFL with no reserved name, so a modified copy can keep a related name.'] },
+ { id:'iosevka', family:'Iosevka', weight:800, label:'ExtraBold 800', repo:'https://github.com/be5invis/Iosevka',
+   notes:['Narrow, technical, very "terminal".','The most tweakable of the six: Iosevka builds custom variants from a config file (pick each glyph\'s shape, e.g. a slab D or a pointed W) without drawing anything.','Tweak: write a build plan TOML, or edit outlines in FontForge.'] },
+ { id:'krypton', family:'Monaspace Krypton', weight:800, label:'ExtraBold 800', repo:'https://github.com/githubnext/monaspace',
+   notes:['GitHub Next\'s mechanical, squared superfamily member.','Hard corners echo the chamfered brackets, so the pairing is tight.','Tweak: variable-font sources are published; edit in FontForge or Glyphs.'] },
+ { id:'martian', family:'Martian Mono', weight:800, label:'ExtraBold 800', repo:'https://github.com/evilmartians/mono',
+   notes:['Wide, grotesk-like, futuristic. The boldest presence of the six.','Has a width axis in the variable version, useful if the nav needs a tighter cut.','Tweak: sources on GitHub; FontForge or Glyphs.'] },
+ { id:'space', family:'Space Mono', weight:700, label:'Bold 700', repo:'https://github.com/googlefonts/spacemono',
+   notes:['Retro-futuristic, geometric, slightly 70s-sci-fi.','Very distinctive D and W; the most "logo-like" shapes out of the box.','Tweak: sources on GitHub (Google Fonts); FontForge.'] },
+ { id:'geist', family:'Geist Mono', weight:800, label:'ExtraBold 800', repo:'https://github.com/vercel/geist-font',
+   notes:['Clean, modern, Swiss-precise; Vercel\'s coding font.','Quietest of the six: lets the brackets and colour carry the identity.','Tweak: sources on GitHub; FontForge or Glyphs.'] },
+];
+const C = { cyan:'#2ee6f6', pink:'#ff2e97', steel:'#e3eaf0', dim:'#5f6f82', bg:'#0b1018' };
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const NS = 'http://www.w3.org/2000/svg';
+let word = 'DWCODE', uid = 0;
+const el = (n, a = {}, p) => { const e = document.createElementNS(NS, n); for (const [k, v] of Object.entries(a)) e.setAttribute(k, v); p?.append(e); return e; };
+
+// Chamfered bracket, the drawn part of the Bracket identity. h = cap height.
+const bracket = (side, x, h, w = h * .2) => side === 'L'
+  ? `M${x + w} ${-h * .08}H${x + w * .45}L${x} ${h * .12}V${h * .88}L${x + w * .45} ${h * 1.08}H${x + w}`
+  : `M${x - w} ${-h * .08}H${x - w * .45}L${x} ${h * .12}V${h * .88}L${x - w * .45} ${h * 1.08}H${x - w}`;
+
+// Lays out the wordmark once the font is ready; returns the svg.
+function lockup(f, { icon = true, text = true } = {}) {
+  const id = `${f.id}-${++uid}`;
+  const s = el('svg', { role: 'img', 'aria-label': `DWCode logo in ${f.family}` });
+  const defs = el('defs', {}, s);
+  const fl = el('filter', { id: `g-${id}`, filterUnits: 'userSpaceOnUse', x: -100, y: -100, width: 2000, height: 400 }, defs);
+  el('feGaussianBlur', { stdDeviation: 2.4, result: 'b' }, fl);
+  const m = el('feMerge', {}, fl); el('feMergeNode', { in: 'b' }, m); el('feMergeNode', { in: 'SourceGraphic' }, m);
+  const g = el('g', {}, s);
+  const H = 100; // cap height target
+  let x = 0;
+  if (icon) {
+    const ic = el('g', { class: 'icon' }, g);
+    el('rect', { x: 0, y: -22, width: 144, height: 144, rx: 30, fill: C.bg, stroke: '#223044', 'stroke-width': 2 }, ic);
+    el('path', { d: bracket('L', 22, 64), transform: 'translate(0 18)', fill: 'none', stroke: C.dim, 'stroke-width': 7, class: 'br' }, ic);
+    el('path', { d: bracket('R', 122, 64), transform: 'translate(0 18)', fill: 'none', stroke: C.dim, 'stroke-width': 7, class: 'br' }, ic);
+    const t = el('text', { x: 72, y: 82, 'text-anchor': 'middle', 'font-family': f.family, 'font-weight': f.weight, 'font-size': 64, 'letter-spacing': -2, class: 'ictext' }, ic);
+    el('tspan', { fill: C.cyan, filter: `url(#g-${id})` }, t).textContent = 'D';
+    el('tspan', { fill: C.pink, filter: `url(#g-${id})` }, t).textContent = 'W';
+    el('rect', { x: 100, y: 96, width: 18, height: 6, fill: C.cyan, class: 'cursor' }, ic);
+    x = 176;
+  }
+  if (text) {
+    const wg = el('g', { class: 'word' }, g);
+    const left = el('path', { d: bracket('L', x, H), fill: 'none', stroke: C.dim, 'stroke-width': 8, class: 'br' }, wg);
+    const t = el('text', { x: x + 34, y: 0, 'font-family': f.family, 'font-weight': f.weight, 'font-size': 100, class: 'wtext' }, wg);
+    [...word].forEach((ch, i) => {
+      const sp = el('tspan', { class: 'ch', fill: i === 0 ? C.cyan : i === 1 ? C.pink : C.steel }, t);
+      if (i < 2) sp.setAttribute('filter', `url(#g-${id})`);
+      sp.textContent = ch;
+    });
+    // Fit: size the font so its capitals are exactly H tall (canvas gives the real
+    // ink ascent), baseline at y=H, then place the cursor and the right bracket.
+    const ctx = document.createElement('canvas').getContext('2d');
+    ctx.font = `${f.weight} 100px "${f.family}"`;
+    const m = ctx.measureText(word);
+    const k = H / m.actualBoundingBoxAscent;
+    t.setAttribute('font-size', (100 * k).toFixed(2));
+    t.setAttribute('y', H);
+    const end = x + 34 + m.width * k + 14;
+    el('rect', { x: end, y: 0, width: H * .2, height: H, fill: C.cyan, opacity: .9, class: 'cursor' }, wg);
+    el('path', { d: bracket('R', end + H * .2 + 30, H), fill: 'none', stroke: C.dim, 'stroke-width': 8, class: 'br' }, wg);
+    s.setAttribute('viewBox', `-10 -24 ${end + H * .2 + 44} ${H + 48}`);
+  } else {
+    s.setAttribute('viewBox', '-6 -28 156 156');
+  }
+  return s;
+}
+
+function play(s) {
+  utils.remove(s.querySelectorAll('*'));
+  const tl = createTimeline({ defaults: { ease: 'outExpo' } });
+  const brs = s.querySelectorAll('.word .br');
+  tl.add(svg.createDrawable(brs), { draw: ['0 0', '0 1'], duration: 700, ease: 'inOutQuad' }, 0)
+    .add(brs[0], { translateX: [30, 0], duration: 700 }, 0)
+    .add(brs[1] ? [brs[1]] : [], { translateX: [-30, 0], duration: 700 }, 0)
+    .add(s.querySelectorAll('.word .ch'), { opacity: [0, 1], duration: 1, delay: stagger(85) }, 450)
+    .add(s.querySelectorAll('.icon .br'), { opacity: [0, 1], scale: [.9, 1], duration: 600 }, 0);
+  animate(s.querySelectorAll('.cursor'), { opacity: [.9, 0], duration: 530, loop: true, alternate: true, ease: 'steps(1)', delay: 1100 });
+}
+
+function render() {
+  const host = document.getElementById('cards');
+  host.replaceChildren();
+  FONTS.forEach((f, i) => {
+    const card = document.createElement('section'); card.className = 'card'; card.id = f.id;
+    card.innerHTML = `<div class="stage"><span class="num">${String(i + 1).padStart(2, '0')} / ${f.family}</span><button class="replay" type="button">↻ Replay</button></div>
+     <div class="info"><div><h2>${f.family}<small>${f.label} · OFL-1.1 · <a href="${f.repo}" target="_blank" rel="noopener">source ↗</a></small></h2><ul>${f.notes.map((n) => `<li>${n}</li>`).join('')}</ul>
+     <div class="glyphs" style="font-family:'${f.family}';font-weight:${f.weight}">DW dw {} [] () =&gt; != 0O 1lI ;</div></div>
+     <div class="previews"><div class="nav"></div><div class="icons"></div></div></div>`;
+    host.append(card);
+    const big = lockup(f); card.querySelector('.stage').append(big);
+    const nav = card.querySelector('.nav'); const navLogo = lockup(f); nav.append(navLogo); nav.insertAdjacentHTML('beforeend', '<span aria-hidden="true"><i></i><i></i><i></i></span>');
+    const icons = card.querySelector('.icons');
+    for (const px of [64, 32, 16]) { const fig = document.createElement('figure'); const ic = lockup(f, { text: false }); ic.style.width = ic.style.height = px + 'px'; fig.append(ic); fig.insertAdjacentHTML('beforeend', `<figcaption>${px}px</figcaption>`); icons.append(fig); }
+    const tab = document.createElement('figure'); const t = document.createElement('div'); t.className = 'tab'; const ti = lockup(f, { text: false }); ti.style.width = ti.style.height = '16px'; t.append(ti, 'DWCode'); tab.append(t); tab.insertAdjacentHTML('beforeend', '<figcaption>browser tab</figcaption>'); icons.append(tab);
+    const run = () => { if (!reduce) { play(big); play(navLogo); } };
+    card.querySelector('.replay').addEventListener('click', run);
+    new IntersectionObserver((e, o) => { if (e[0].isIntersecting) { setTimeout(run, 60); o.disconnect(); } }, { threshold: .4 }).observe(card);
+  });
+}
+
+document.querySelectorAll('.controls button').forEach((b, _, all) => b.addEventListener('click', () => {
+  all.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+  word = b.dataset.text; render();
+}));
+await Promise.all(FONTS.map((f) => document.fonts.load(`${f.weight} 100px "${f.family}"`)));
+render();
+</script>
+</body>
+</html>

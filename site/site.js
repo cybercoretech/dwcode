@@ -1,6 +1,6 @@
 // DWCode site behaviour: drawer menu, feature sheets, screenshot tour,
 // theme explorer, the lazy browser demo and small anime.js effects.
-import { animate, stagger, scrambleText } from './vendor/anime.esm.min.js';
+import { animate, stagger, scrambleText, svg } from './vendor/anime.esm.min.js';
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
@@ -328,6 +328,26 @@ fetch('data/themes.json').then((r) => r.json()).then((list) => {
   select.value = selectedTheme;
   buildTree();
 }).catch(() => { tree.textContent = 'Theme list unavailable right now.'; });
+
+// ---------------------------------------------------------------- logo
+// The Bracket mark (Monaspace Krypton, outlined): wordmark in the bar, full
+// lockup in the hero. Brackets draw in, letters type, the cursor blinks.
+function placeLogo(file, holder, before) {
+  return fetch(`assets/${file}`).then((r) => r.ok ? r.text() : Promise.reject(r.status)).then((markup) => {
+    before?.remove();
+    holder.insertAdjacentHTML('afterbegin', markup);
+    const logo = $('svg', holder);
+    logo.removeAttribute('width'); logo.removeAttribute('height');
+    logo.setAttribute('aria-hidden', 'true');
+    if (reduce) return;
+    animate(svg.createDrawable($$('.br', logo)), { draw: ['0 0', '0 1'], duration: 700, ease: 'inOutQuad' });
+    animate($$('.br-l', logo), { translateX: [14, 0], duration: 700, ease: 'outExpo' });
+    animate($$('.br-r', logo), { translateX: [-14, 0], duration: 700, ease: 'outExpo' });
+    animate($$('[class^="ch ch-"]', logo), { opacity: [0, 1], duration: 1, delay: stagger(85, { start: 380 }) });
+  }).catch(() => { /* keep the fallback */ });
+}
+placeLogo('dwcode-wordmark.svg', $('.wordmark'), $('.wordmark .wm-fallback'));
+placeLogo('dwcode-lockup.svg', $('.hero-logo'));
 
 // ---------------------------------------------------------------- copy
 $$('[data-copy]').forEach((btn) => btn.addEventListener('click', async () => {

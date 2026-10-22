@@ -17,6 +17,9 @@ fi
 npm run build
 rm -rf site/demo
 cp -r web/dist site/demo
+# Conventional root favicon for direct links and browsers requesting /favicon.ico.
+cp site/assets/favicon.ico site/favicon.ico
+cp site/assets/favicon.svg site/favicon.svg
 
 # Screenshots: 2x PNG captures -> WebP, full size plus a 1440 px variant.
 raw=build/site-shots

@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
     app.setApplicationName(QStringLiteral("DWCode"));
     app.setOrganizationName(QStringLiteral("Cybercore Tech"));
     app.setDesktopFileName(QStringLiteral("dwcode"));
-    app.setWindowIcon(QIcon(QStringLiteral(":/qml/railshift-icon.png")));
+    app.setWindowIcon(QIcon(QStringLiteral(":/qml/dwcode-icon.png")));
 
     LocalWebServer editorServer(QStringLiteral(DWCODE_WEB_ROOT));
     if (!editorServer.start()) {
