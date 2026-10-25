@@ -14,7 +14,9 @@ build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
   npm ci
   npm run build
-  qmake6 "DWCODE_WEB_ROOT=/usr/share/dwcode/web" dwcode.pro
+  mkdir -p build
+  cd build
+  qmake6 "DWCODE_WEB_ROOT=/usr/share/dwcode/web" ../dwcode.pro
   make
 }
 
