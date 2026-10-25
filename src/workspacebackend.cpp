@@ -26,6 +26,14 @@ QString language(const QString &path){
  static const QMap<QString,QString> ids={{"ts","typescript"},{"tsx","typescriptreact"},{"js","javascript"},{"mjs","javascript"},{"jsx","javascriptreact"},{"rs","rust"},{"cpp","cpp"},{"h","cpp"},{"hpp","cpp"},{"cc","cpp"},{"c","c"},{"py","python"},{"json","json"},{"css","css"},{"html","html"},{"md","markdown"},{"qml","qml"},{"sh","shell"},{"toml","ini"},{"yaml","yaml"},{"yml","yaml"}};
  return ids.value(ext,"plaintext");
 }
+QVariantMap preferenceDefaults(){return {
+ {"appearance/uiScale",100},{"appearance/density","comfortable"},{"appearance/sidebarPosition","left"},{"appearance/statusBar",true},
+ {"editor/fontFamily","JetBrains Mono, Cascadia Code, monospace"},{"editor/fontSize",14},{"editor/fontLigatures",true},{"editor/lineHeight",23},{"editor/wordWrap","off"},{"editor/minimap",true},{"editor/lineNumbers","on"},{"editor/rulers",""},{"editor/renderWhitespace","none"},{"editor/bracketGuides",true},{"editor/currentLineHighlight",true},{"editor/smoothScrolling",true},
+ {"editing/tabSize",2},{"editing/insertSpaces",true},{"editing/autoIndent",true},{"editing/autoClosingBrackets",true},{"editing/trimTrailingWhitespace",false},{"editing/insertFinalNewline",false},{"editing/lineEnding","auto"},
+ {"files/autoSave","off"},{"files/autoSaveDelay",1000},{"files/excludes",""},
+ {"terminal/shell","/bin/bash"},{"terminal/workingDirectory","workspace"},{"terminal/fontFamily","monospace"},{"terminal/fontSize",11},{"terminal/scrollback",200000},{"terminal/copyOnSelect",true},{"terminal/clearOnRun",false},{"terminal/environment",""},{"terminal/warnRisky",true},
+ {"keyboard/modalDefault",false},{"keyboard/modalCursor","block"}
+};}
 void terminateGroup(QProcess &process){
  if(process.state()==QProcess::NotRunning)return;
  const auto pid=process.processId();
@@ -34,6 +42,7 @@ void terminateGroup(QProcess &process){
 }
 }
 WorkspaceBackend::WorkspaceBackend(QObject *parent):QObject(parent){
+ loadPreferences();
  m_terminal.setChildProcessModifier([]{::setsid();});
  m_terminal.setProcessChannelMode(QProcess::MergedChannels);
  connect(&m_terminal,&QProcess::readyReadStandardOutput,this,[this]{appendTerminal(QString::fromUtf8(m_terminal.readAllStandardOutput()));});
@@ -50,6 +59,10 @@ WorkspaceBackend::WorkspaceBackend(QObject *parent):QObject(parent){
  setTheme(QSettings().value("theme","cyberpunk-chrome").toString());
 }
 WorkspaceBackend::~WorkspaceBackend(){terminateGroup(m_terminal);terminateGroup(m_lsp);}
+void WorkspaceBackend::loadPreferences(){
+ m_preferences=preferenceDefaults();QSettings settings;
+ for(auto it=m_preferences.begin();it!=m_preferences.end();++it)it.value()=settings.value("settings/"+it.key(),it.value());
+}
 void WorkspaceBackend::report(const QString &text){m_message=text;emit messageChanged();}
 bool WorkspaceBackend::dirty() const{return m_documents.contains(m_active)&&m_documents.value(m_active).dirty;}
 bool WorkspaceBackend::hasUnsaved() const{for(const auto &d:m_documents)if(d.dirty)return true;return false;}
@@ -74,11 +87,14 @@ bool WorkspaceBackend::openWorkspace(const QString &input){
 void WorkspaceBackend::refreshFiles(){
  m_files.clear();int count=0;
  const QSet<QString> skipped={".git","node_modules","target","build","dist",".cache",".venv","__pycache__"};
+ const auto excluded=m_preferences.value("files/excludes").toString().split(QRegularExpression("[;\\n]"),Qt::SkipEmptyParts);
  std::function<void(const QDir&,int)> scan=[&](const QDir &dir,int depth){
   if(depth>10||count>=3000)return;
   const auto entries=dir.entryInfoList(QDir::Files|QDir::Dirs|QDir::NoDotAndDotDot,QDir::DirsFirst|QDir::Name);
-  for(const auto &info:entries){if(count>=3000)break;if(info.isSymLink()||skipped.contains(info.fileName()))continue;
+  for(const auto &info:entries){if(count>=3000)break;
    const auto rel=QDir(m_root).relativeFilePath(info.filePath());
+   bool ignored=info.isSymLink()||skipped.contains(info.fileName());for(const auto &pattern:excluded)ignored=ignored||QDir::match(pattern.trimmed(),info.fileName())||QDir::match(pattern.trimmed(),rel);
+   if(ignored)continue;
    m_files.append(QVariantMap{{"name",info.fileName()},{"path",rel},{"depth",depth},{"kind",info.isDir()?"folder":"file"},{"language",language(info.fileName())}});++count;
    if(info.isDir())scan(QDir(info.filePath()),depth+1);
   }
@@ -113,6 +129,8 @@ bool WorkspaceBackend::writeDocument(Document &doc,const QString &target,bool ov
   if(!overwrite){report("Save As will not overwrite an existing file. Choose another name.");return false;}
   QFile old(target);if(!old.open(QIODevice::ReadOnly)||digest(old.readAll())!=doc.diskHash){report("Save blocked: the file changed on disk. Use Save As to preserve your edits.");return false;}
  }
+ const auto before=doc.text;doc.text=preparedForSave(doc.text);
+ if(doc.text!=before){++doc.version;if(m_lspReady&&supports(doc))notifyLsp("textDocument/didChange",{{"textDocument",QJsonObject{{"uri",QUrl::fromLocalFile(doc.path).toString()},{"version",doc.version}}},{"contentChanges",QJsonArray{QJsonObject{{"text",doc.text}}}}});}
  QSaveFile out(target);const auto bytes=doc.text.toUtf8();
  if(!out.open(QIODevice::WriteOnly)||out.write(bytes)!=bytes.size()||!out.commit()){report("Save failed: "+out.errorString());return false;}
  doc.diskHash=digest(bytes);doc.dirty=false;report("Saved "+QDir(m_root).relativeFilePath(target));emit documentStateChanged();return true;
@@ -122,6 +140,7 @@ bool WorkspaceBackend::saveDocument(const QString &path){
  if(resolve(path)!=path){report("Save blocked: file path no longer belongs to this workspace.");return false;}
  auto &doc=m_documents[path];if(!writeDocument(doc,path,true))return false;
  if(m_lspReady&&supports(doc))notifyLsp("textDocument/didSave",{{"textDocument",QJsonObject{{"uri",QUrl::fromLocalFile(path).toString()}}}});
+ emit documentUpdated(describe(doc));
  return true;
 }
 bool WorkspaceBackend::saveAs(const QString &url){
@@ -130,13 +149,16 @@ bool WorkspaceBackend::saveAs(const QString &url){
  auto doc=m_documents[m_active];if(!writeDocument(doc,target,false))return false;
  doc.path=target;doc.language=language(target);m_documents.insert(target,doc);m_active=target;refreshFiles();emit documentStateChanged();emit documentActivated(describe(doc));openInLsp(doc);return true;
 }
-void WorkspaceBackend::appendTerminal(const QString &text){m_terminalOutput+=text;m_terminalOutput=m_terminalOutput.right(200000);emit terminalChanged();}
+void WorkspaceBackend::appendTerminal(const QString &text){m_terminalOutput+=text;m_terminalOutput=m_terminalOutput.right(m_preferences.value("terminal/scrollback",200000).toInt());emit terminalChanged();}
 bool WorkspaceBackend::runCommand(const QString &command){
  if(m_root.isEmpty()){report("Open a folder before running commands.");return false;}
  if(terminalRunning()||command.trimmed().isEmpty())return false;
- appendTerminal("\n"+m_root+" $ "+command+"\n");m_terminal.setWorkingDirectory(m_root);
+ if(m_preferences.value("terminal/clearOnRun").toBool())m_terminalOutput.clear();
+ appendTerminal("\n"+m_root+" $ "+command+"\n");m_terminal.setWorkingDirectory(m_preferences.value("terminal/workingDirectory").toString()=="home"?QDir::homePath():m_root);
  auto env=QProcessEnvironment::systemEnvironment();env.insert("TERM","dumb");env.insert("NO_COLOR","1");m_terminal.setProcessEnvironment(env);
- m_terminal.start("/bin/bash",{"--noprofile","--norc","-c",command});return true;
+ for(const auto &line:m_preferences.value("terminal/environment").toString().split('\n')){const int equals=line.indexOf('=');if(equals>0)env.insert(line.left(equals).trimmed(),line.mid(equals+1));}
+ m_terminal.setProcessEnvironment(env);const auto shell=m_preferences.value("terminal/shell").toString();
+ m_terminal.start(shell,shell.endsWith("bash")?QStringList{"--noprofile","--norc","-c",command}:QStringList{"-c",command});return true;
 }
 void WorkspaceBackend::sendInput(const QString &text){if(terminalRunning())m_terminal.write((text+"\n").toUtf8());}
 void WorkspaceBackend::stopCommand(){terminateGroup(m_terminal);emit terminalChanged();}
@@ -144,6 +166,33 @@ void WorkspaceBackend::clearTerminal(){m_terminalOutput.clear();emit terminalCha
 void WorkspaceBackend::setTheme(const QString &id){
  for(const auto &value:m_themes){const auto theme=value.toMap();if(theme.value("id")==id){m_theme=theme;QSettings().setValue("theme",id);emit themeChanged();return;}}
  if(!m_themes.isEmpty()){m_theme=m_themes.first().toMap();emit themeChanged();}
+}
+QString WorkspaceBackend::preparedForSave(const QString &input) const{
+ QString text=input;text.replace("\r\n","\n");text.replace('\r','\n');
+ if(m_preferences.value("editing/trimTrailingWhitespace").toBool())text.replace(QRegularExpression("[ \\t]+(?=\\n|$)"),"");
+ if(m_preferences.value("editing/insertFinalNewline").toBool()&&!text.endsWith('\n'))text.append('\n');
+ if(m_preferences.value("editing/lineEnding").toString()=="crlf")text.replace("\n","\r\n");
+ return text;
+}
+void WorkspaceBackend::setPreference(const QString &key,const QVariant &value){
+ const auto defaults=preferenceDefaults();if(!defaults.contains(key))return;
+ QVariant normalized=value;
+ if(key=="appearance/uiScale")normalized=qBound(80,value.toInt(),150);
+ else if(key=="editor/fontSize")normalized=qBound(9,value.toInt(),32);
+ else if(key=="editor/lineHeight")normalized=qBound(12,value.toInt(),48);
+ else if(key=="editing/tabSize")normalized=(value.toInt()==8?8:value.toInt()==4?4:2);
+ else if(key=="files/autoSaveDelay")normalized=qBound(250,value.toInt(),10000);
+ else if(key=="terminal/fontSize")normalized=qBound(8,value.toInt(),28);
+ else if(key=="terminal/scrollback")normalized=qBound(1000,value.toInt(),1000000);
+ if(m_preferences.value(key)==normalized)return;
+ m_preferences[key]=normalized;
+ QSettings().setValue("settings/"+key,normalized);
+ if(key=="files/excludes")refreshFiles();
+ emit preferencesChanged(m_preferences);
+}
+void WorkspaceBackend::resetPreferences(){
+ const auto defaults=preferenceDefaults();QSettings settings;for(auto it=defaults.cbegin();it!=defaults.cend();++it)settings.remove("settings/"+it.key());
+ loadPreferences();setTheme("cyberpunk-chrome");emit preferencesChanged(m_preferences);
 }
 void WorkspaceBackend::sendLsp(const QJsonObject &object){
  if(m_lsp.state()!=QProcess::Running)return;

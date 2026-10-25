@@ -22,6 +22,7 @@ class WorkspaceBackend final : public QObject {
     Q_PROPERTY(QVariantList problems READ problems NOTIFY problemsChanged)
     Q_PROPERTY(QVariantList themes READ themes CONSTANT)
     Q_PROPERTY(QVariantMap theme READ theme NOTIFY themeChanged)
+    Q_PROPERTY(QVariantMap preferences READ preferences NOTIFY preferencesChanged)
 public:
     explicit WorkspaceBackend(QObject *parent=nullptr);
     ~WorkspaceBackend() override;
@@ -38,6 +39,7 @@ public:
     QVariantList problems() const { return m_problems; }
     QVariantList themes() const { return m_themes; }
     QVariantMap theme() const { return m_theme; }
+    QVariantMap preferences() const { return m_preferences; }
     Q_INVOKABLE bool openWorkspace(const QString &path);
     Q_INVOKABLE void refreshFiles();
     Q_INVOKABLE QVariantMap openFile(const QString &path);
@@ -55,6 +57,8 @@ public:
     Q_INVOKABLE void stopLanguageServer();
     Q_INVOKABLE int languageRequest(const QString &method,const QVariantMap &params);
     Q_INVOKABLE void setTheme(const QString &id);
+    Q_INVOKABLE void setPreference(const QString &key,const QVariant &value);
+    Q_INVOKABLE void resetPreferences();
 signals:
     void workspaceChanged();
     void documentStateChanged();
@@ -65,6 +69,7 @@ signals:
     void lspChanged();
     void problemsChanged();
     void themeChanged();
+    void preferencesChanged(const QVariantMap &preferences);
     void languageReply(int id,const QVariant &result,const QString &error);
     void diagnosticsReceived(const QString &uri,const QVariantList &diagnostics);
 private:
@@ -80,9 +85,12 @@ private:
     void handleLsp(const QJsonObject &message);
     void openInLsp(const Document &doc);
     bool supports(const Document &doc) const;
+    QString preparedForSave(const QString &text) const;
+    void loadPreferences();
     QString m_root,m_active,m_message="Open a folder to begin.",m_terminalOutput,m_lspStatus="Disconnected",m_lspFamily;
     QVariantList m_files,m_themes,m_problems;
     QVariantMap m_theme;
+    QVariantMap m_preferences;
     QMap<QString,Document> m_documents;
     QMap<QString,QVariantList> m_diagnostics;
     QProcess m_terminal,m_lsp;

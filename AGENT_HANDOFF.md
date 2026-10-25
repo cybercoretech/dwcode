@@ -18,6 +18,10 @@
 - 🎨 **Theme integration:** the shell and Monaco editor remain bound to the
   persisted 84-theme catalog. Do not hard-code interface colors outside the
   existing theme tokens.
+- ⚙️ **Settings:** the menubar has **Settings** between
+  Terminal and Help, with **Preferences… (Ctrl+,)**. It opens a searchable,
+  persistent settings dialog covering Appearance, Editor, Editing, Files &
+  Workspace, Terminal, and Keyboard & Modal Editing.
 
 ## 🧪 Validation baseline
 
@@ -39,8 +43,43 @@ make -j"$(nproc)"
 QTWEBENGINE_DISABLE_SANDBOX=1 ./ui-tests
 ```
 
-The current UI suite has 10 passing checks, including Explorer folder-control
-availability and the native window icon.
+The current UI suite has 11 passing checks, including Explorer folder-control
+availability, the native window icon, and the Settings dialog.
+
+### Settings validation
+
+- `npm ci` and `npm run build` completed successfully. (`node_modules/` is
+  ignored and was installed locally only.)
+- The full backend suite passed **7/7 checks**.
+- The full offscreen Qt WebEngine UI suite passed **11/11 checks**, including
+  `settingsDialogAndEditorPreferences`. In this Codex environment it runs
+  outside the command sandbox so Qt WebEngine can create its loopback server
+  and browser subprocess. Vulkan fallback warnings are expected in offscreen
+  mode.
+- **Still perform a real-display layout pass** for the dialog and the
+  right-sidebar option before calling the UI visually signed off:
+
+```sh
+DWCODE_UI_PLATFORM=wayland QTWEBENGINE_DISABLE_SANDBOX=1 \
+  QTWEBENGINE_CHROMIUM_FLAGS=--no-sandbox ./build/ui-tests/ui-tests \
+  settingsDialogAndEditorPreferences
+```
+
+### Settings behavior implemented
+
+- Preferences use DWCode's existing `QSettings` store and have a reset action.
+- Appearance: theme, shell scale/density, Explorer side, status bar.
+- Monaco editor: font, size, ligatures, line height, wrapping, minimap, line
+  numbers, rulers, whitespace, guides, current-line highlight, and smooth
+  scrolling; settings apply live to both editor views.
+- Editing: indentation, tab size, auto-indent/closing pairs, whitespace
+  cleanup, final newline, and CRLF output on save. Save normalization reports
+  a `didChange` to a connected language server before `didSave`.
+- Workspace: delayed autosave and explorer glob exclusions.
+- Terminal: shell, workspace/home working directory, font, scrollback,
+  copy-on-select, clear-before-run, multiline environment additions, and
+  confirmation for a deliberately narrow set of risky command patterns.
+- Keyboard: persisted modal-mode default and normal-mode cursor shape.
 
 ## 💻 Local installation state
 

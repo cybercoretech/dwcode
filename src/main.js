@@ -106,6 +106,27 @@ const editor = monaco.editor.create(document.querySelector("#editor"), {
 
 window.addEventListener("resize", () => editor.layout());
 window.dwcodeEditor = editor;
+let dwcodeSettings = {};
+const numberList = value => String(value || "").split(",").map(x => Number(x.trim())).filter(x => Number.isInteger(x) && x > 0 && x < 1000);
+window.dwcodeApplySettings = preferences => {
+  dwcodeSettings = preferences || {};
+  const option = (key, fallback) => dwcodeSettings[key] === undefined ? fallback : dwcodeSettings[key];
+  editor.updateOptions({
+    fontFamily: option("editor/fontFamily", '"JetBrains Mono", "Cascadia Code", monospace'),
+    fontSize: Number(option("editor/fontSize", 14)), lineHeight: Number(option("editor/lineHeight", 23)),
+    fontLigatures: !!option("editor/fontLigatures", true), wordWrap: option("editor/wordWrap", "off"),
+    minimap: { enabled: !!option("editor/minimap", true), scale: 1 }, lineNumbers: option("editor/lineNumbers", "on"),
+    rulers: numberList(option("editor/rulers", "")), renderWhitespace: option("editor/renderWhitespace", "none"),
+    bracketPairColorization: { enabled: !!option("editor/bracketGuides", true) },
+    guides: { bracketPairs: !!option("editor/bracketGuides", true), indentation: !!option("editor/bracketGuides", true) },
+    renderLineHighlight: option("editor/currentLineHighlight", true) ? "all" : "none",
+    smoothScrolling: !!option("editor/smoothScrolling", true),
+    autoIndent: option("editing/autoIndent", true) ? "advanced" : "none",
+    autoClosingBrackets: option("editing/autoClosingBrackets", true) ? "always" : "never"
+  });
+  for (const model of models.values()) model.updateOptions({tabSize:Number(option("editing/tabSize",2)),insertSpaces:!!option("editing/insertSpaces",true)});
+  if (document.body.dataset.mode === "normal") editor.updateOptions({cursorStyle: option("keyboard/modalCursor", "block")});
+};
 window.dwcodeOpenSample = (name) => {
   const sample = samples[name] ?? samples["main.ts"];
   editor.setValue(sample.code);
@@ -113,6 +134,7 @@ window.dwcodeOpenSample = (name) => {
 };
 window.dwcodeSetMode = (normalMode) => {
   document.body.dataset.mode = normalMode ? "normal" : "insert";
+  editor.updateOptions({cursorStyle: normalMode ? (dwcodeSettings["keyboard/modalCursor"] || "block") : "line"});
 };
 
 editor.onKeyDown((event) => {
@@ -179,8 +201,17 @@ const applyDocument = (doc, activate = true) => {
     model.onDidChangeContent(() => {
       if (applyingNative || !native) return;
       inFlight.set(doc.uri, (inFlight.get(doc.uri) || 0) + 1);
-      native.updateDocument(doc.path, model.getValue(), () => inFlight.set(doc.uri, inFlight.get(doc.uri) - 1));
+      native.updateDocument(doc.path, model.getValue(), ok => {
+        inFlight.set(doc.uri, inFlight.get(doc.uri) - 1);
+        if (!ok || dwcodeSettings["files/autoSave"] !== "after delay") return;
+        clearTimeout(model.dwcodeAutoSaveTimer);
+        model.dwcodeAutoSaveTimer = setTimeout(() => {
+          if (native)
+            native.updateDocument(doc.path, model.getValue(), saved => { if (saved) native.saveDocument(doc.path); });
+        }, Number(dwcodeSettings["files/autoSaveDelay"] || 1000));
+      });
     });
+    model.updateOptions({tabSize:Number(dwcodeSettings["editing/tabSize"] || 2),insertSpaces:dwcodeSettings["editing/insertSpaces"] !== false});
   } else if (model.getValue() !== doc.text && !inFlight.get(doc.uri)) {
     // Skip while this view has edits in flight: the backend is echoing an older
     // text, and applying it would rewind the cursor and cancel completion.
@@ -258,6 +289,7 @@ function connectNative() {
       if (workspaceRoot !== native.root) {workspaceRoot=native.root;editor.setModel(null);for (const m of models.values())m.dispose();models.clear()}
     });
     native.themeChanged.connect(() => window.dwcodeSetTheme(native.theme.id));
+    native.preferencesChanged.connect(preferences => window.dwcodeApplySettings(preferences));
     native.languageReply.connect((id,result,error) => {pendingLanguage.get(id)?.(error?null:result);pendingLanguage.delete(id)});
     native.diagnosticsReceived.connect((uri,diagnostics) => {
       const model = models.get(uri);if (!model) return;
@@ -265,6 +297,7 @@ function connectNative() {
     });
     native.lspChanged.connect(() => {if(!native.lspReady) for(const m of models.values())monaco.editor.setModelMarkers(m,'dwcode-lsp',[])});
     window.dwcodeSetTheme(native.theme.id);
+    window.dwcodeApplySettings(native.preferences);
     native.activeDocument(doc => applyDocument(doc));
     window.dwcodeNativeReady = true;
   });

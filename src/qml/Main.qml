@@ -19,6 +19,10 @@ ApplicationWindow {
  property string activeBottomTab: "OUTPUT"
  property string pendingAction: ""
  property bool closingApproved: false
+ property real uiScale: Number(workspaceBackend.preferences["appearance/uiScale"] || 100) / 100
+ property bool compactUi: workspaceBackend.preferences["appearance/density"] === "compact"
+ property bool sidebarRight: workspaceBackend.preferences["appearance/sidebarPosition"] === "right"
+ property int tabHeight: Math.round((compactUi ? 32 : 38) * uiScale)
  property var commands: [
   { title: "Open Folder", shortcut: "Ctrl+O", action: "folder" },
   { title: "Save File", shortcut: "Ctrl+S", action: "save" },
@@ -51,13 +55,24 @@ ApplicationWindow {
   else if(action==="lspstop")workspaceBackend.stopLanguageServer()
   else if(action==="refresh")workspaceBackend.refreshFiles()
   else if(action==="palette")paletteVisible=true
+  else if(action==="settings")settingsDialog.open()
   else if(action==="undo")editor.runJavaScript("window.dwcodeEditor && window.dwcodeEditor.trigger('dwcode','undo',{})")
   else if(action==="redo")editor.runJavaScript("window.dwcodeEditor && window.dwcodeEditor.trigger('dwcode','redo',{})")
   else if(action==="selectall")editor.runJavaScript("window.dwcodeEditor && window.dwcodeEditor.trigger('dwcode','editor.action.selectAll',{})")
   else if(action==="modal"){modalMode=!modalMode;editor.runJavaScript("window.dwcodeSetMode("+modalMode+")");splitEditor.runJavaScript("window.dwcodeSetMode && window.dwcodeSetMode("+modalMode+")")}
  }
+ function runTerminal(command){
+  const risky=/(^|\s)(sudo|rm\s+-[^\n]*r|git\s+reset\s+--hard|git\s+clean\s+-[fd]|mkfs|dd\s+if=|chmod\s+-R)(\s|$)/.test(command)
+  if(workspaceBackend.preferences["terminal/warnRisky"]&&risky){pendingCommand=command;riskyCommand.open()}else workspaceBackend.runCommand(command)
+ }
  FolderDialog {id:folderDialog;objectName:"folderDialog";title:"Open DWCode workspace";onAccepted:workspaceBackend.openWorkspace(selectedFolder.toString())}
  FileDialog {id:saveDialog;title:"Save file as (inside workspace)";fileMode:FileDialog.SaveFile;onAccepted:workspaceBackend.saveAs(selectedFile.toString())}
+ SettingsDialog { id: settingsDialog }
+ property string pendingCommand: ""
+ Dialog { id: riskyCommand; title: "Run potentially risky command?"; anchors.centerIn: parent; modal: true; standardButtons: Dialog.Cancel
+  Label { width: 420; wrapMode: Text.WordWrap; text: "DWCode detected a command that can modify or remove data:\n\n"+win.pendingCommand+"\n\nReview it before continuing."; color: theme.foreground }
+  footer: DialogButtonBox { Button { text: "Cancel"; onClicked: riskyCommand.close() } Button { text: "Run command"; highlighted: true; onClicked: { riskyCommand.close(); workspaceBackend.runCommand(win.pendingCommand) } } }
+ }
  Dialog {id:unsaved;title:"Unsaved files";anchors.centerIn:parent;modal:true;standardButtons:Dialog.Discard|Dialog.Cancel
   Label{text:"You have unsaved changes. Discard them to continue?";color:theme.foreground}
   onDiscarded:{workspaceBackend.discardChanges();if(pendingAction==="close"){closingApproved=true;win.close()}else folderDialog.open()}
@@ -65,7 +80,8 @@ ApplicationWindow {
  onClosing:function(event){if(!closingApproved&&workspaceBackend.hasUnsaved()){event.accepted=false;pendingAction="close";unsaved.open()}}
  WebChannel {id:channel;Component.onCompleted:registerObject("native",workspaceBackend)}
  WebChannel {id:splitChannel;Component.onCompleted:registerObject("native",workspaceBackend)}
- Component.onCompleted:{if(workspaceBackend.files.length>0){for(let i=0;i<workspaceBackend.files.length;i++){let f=workspaceBackend.files[i];if(f.kind==="file"){workspaceBackend.openFile(f.path);break}}}}
+ Component.onCompleted:{modalMode=workspaceBackend.preferences["keyboard/modalDefault"];if(workspaceBackend.files.length>0){for(let i=0;i<workspaceBackend.files.length;i++){let f=workspaceBackend.files[i];if(f.kind==="file"){workspaceBackend.openFile(f.path);break}}}}
+ onModalModeChanged:{editor.runJavaScript("window.dwcodeSetMode && window.dwcodeSetMode("+modalMode+")");splitEditor.runJavaScript("window.dwcodeSetMode && window.dwcodeSetMode("+modalMode+")")}
  Shortcut {sequence:"Ctrl+O";onActivated:chooseFolder()}
  Shortcut {sequence:"Ctrl+S";onActivated:save()}
  Shortcut {sequence:"Ctrl+Shift+S";onActivated:saveDialog.open()}
@@ -75,11 +91,12 @@ ApplicationWindow {
  Shortcut {sequence:"Ctrl+J";onActivated:activate("terminal")}
  Shortcut {sequence:"Ctrl+\\";onActivated:win.splitVisible=!win.splitVisible}
  Shortcut {sequence:"Ctrl+Alt+M";onActivated:activate("modal")}
+ Shortcut {sequence:"Ctrl+,";onActivated:activate("settings")}
  Shortcut {sequence:"Escape";enabled:win.paletteVisible;onActivated:win.paletteVisible=false}
  ColumnLayout {
   anchors.fill:parent;spacing:0
   Rectangle {
-   Layout.fillWidth:true;Layout.preferredHeight:64;color:theme.shell;border.color:theme.border
+   Layout.fillWidth:true;Layout.preferredHeight:Math.round((compactUi?54:64)*uiScale);color:theme.shell;border.color:theme.border
    ColumnLayout {anchors.fill:parent;spacing:0
     RowLayout {Layout.fillWidth:true;Layout.preferredHeight:31;Layout.leftMargin:10;Layout.rightMargin:10;spacing:10
      Image {source:"qrc:/qml/dwcode-icon.png";Layout.preferredHeight:18;Layout.preferredWidth:18;fillMode:Image.PreserveAspectFit;smooth:true;mipmap:true;Accessible.name:"DWCode"}
@@ -118,6 +135,9 @@ ApplicationWindow {
        MenuItem{text:"Toggle Terminal";onTriggered:activate("terminal")}
        MenuItem{text:"Clear Terminal";onTriggered:workspaceBackend.clearTerminal()}
       }
+      Menu {title:"Settings"
+       MenuItem{text:"Preferences… (Ctrl+,)";onTriggered:activate("settings")}
+      }
       Menu {title:"Help"
        MenuItem{text:"Command Palette…";onTriggered:activate("palette")}
       }
@@ -140,7 +160,7 @@ ApplicationWindow {
     }
    }
   }
-  RowLayout {
+  RowLayout { layoutDirection: win.sidebarRight ? Qt.RightToLeft : Qt.LeftToRight
    Layout.fillWidth:true;Layout.fillHeight:true;spacing:0
    Rectangle {Layout.preferredWidth:235;Layout.fillHeight:true;visible:win.explorerVisible;color:theme.sidebar;border.color:theme.border
     ColumnLayout {anchors.fill:parent;spacing:0
@@ -164,11 +184,11 @@ ApplicationWindow {
     }
    }
    ColumnLayout {Layout.fillWidth:true;Layout.fillHeight:true;spacing:0
-    Rectangle {Layout.fillWidth:true;Layout.preferredHeight:38;color:theme.shell;border.color:theme.border
+    Rectangle {Layout.fillWidth:true;Layout.preferredHeight:win.tabHeight;color:theme.shell;border.color:theme.border
      RowLayout {anchors.fill:parent;spacing:1
       Flickable {Layout.fillWidth:true;Layout.fillHeight:true;contentWidth:tabs.width;clip:true
        Row{id:tabs;height:parent.height
-        Repeater{model:workspaceBackend.documents;delegate:Button{id:tabButton;required property var modelData;property bool activeTab:workspaceBackend.activePath===modelData.path;height:38;leftPadding:15;rightPadding:15;text:(modelData.dirty?"● ":"")+modelData.name;flat:true;highlighted:activeTab;onClicked:workspaceBackend.openFile(modelData.path)
+        Repeater{model:workspaceBackend.documents;delegate:Button{id:tabButton;required property var modelData;property bool activeTab:workspaceBackend.activePath===modelData.path;height:win.tabHeight;leftPadding:15;rightPadding:15;text:(modelData.dirty?"● ":"")+modelData.name;flat:true;highlighted:activeTab;onClicked:workspaceBackend.openFile(modelData.path)
           background:Rectangle{color:tabButton.activeTab?theme.canvas:"transparent";border.color:theme.border
            Rectangle{visible:tabButton.activeTab;anchors.left:parent.left;anchors.right:parent.right;anchors.top:parent.top;height:2;color:theme.cyan}
           }
@@ -201,8 +221,8 @@ ApplicationWindow {
        ToolButton{text:"Stop";enabled:workspaceBackend.terminalRunning;visible:win.activeBottomTab==="TERMINAL";onClicked:workspaceBackend.stopCommand()}
       }
       ScrollView{Layout.fillWidth:true;Layout.fillHeight:true;visible:win.activeBottomTab!=="PROBLEMS";clip:true
-       TextArea{id:consoleText;readOnly:true;selectByMouse:true;wrapMode:TextEdit.Wrap;color:theme.secondaryText;font.family:"monospace";font.pixelSize:11;background:null
-        text:win.activeBottomTab==="TERMINAL"?workspaceBackend.terminalOutput:workspaceBackend.message+"\n\n"+workspaceBackend.lspStatus
+       TextArea{id:consoleText;readOnly:true;wrapMode:TextEdit.Wrap;color:theme.secondaryText;background:null
+        text:win.activeBottomTab==="TERMINAL"?workspaceBackend.terminalOutput:workspaceBackend.message+"\n\n"+workspaceBackend.lspStatus;font.family:win.activeBottomTab==="TERMINAL"?workspaceBackend.preferences["terminal/fontFamily"]:"monospace";font.pixelSize:win.activeBottomTab==="TERMINAL"?workspaceBackend.preferences["terminal/fontSize"]:11;selectByMouse:win.activeBottomTab==="TERMINAL"?workspaceBackend.preferences["terminal/copyOnSelect"]:true
         onTextChanged:if(win.activeBottomTab==="TERMINAL")cursorPosition=length
        }
       }
@@ -212,15 +232,15 @@ ApplicationWindow {
       RowLayout{Layout.fillWidth:true;Layout.margins:8;visible:win.activeBottomTab==="TERMINAL"
        Label{text:workspaceBackend.terminalRunning?"stdin ›":"$";color:theme.cyan}
        TextField{id:commandLine;Layout.fillWidth:true;placeholderText:workspaceBackend.terminalRunning?"Send input to running command…":"Run a command in the workspace…";font.family:"monospace";font.pixelSize:11
-        onAccepted:{if(workspaceBackend.terminalRunning)workspaceBackend.sendInput(text);else workspaceBackend.runCommand(text);text=""}
+        onAccepted:{if(workspaceBackend.terminalRunning)workspaceBackend.sendInput(text);else win.runTerminal(text);text=""}
        }
-       Button{text:workspaceBackend.terminalRunning?"Send":"Run";onClicked:{if(workspaceBackend.terminalRunning)workspaceBackend.sendInput(commandLine.text);else workspaceBackend.runCommand(commandLine.text);commandLine.clear()}}
+       Button{text:workspaceBackend.terminalRunning?"Send":"Run";onClicked:{if(workspaceBackend.terminalRunning)workspaceBackend.sendInput(commandLine.text);else win.runTerminal(commandLine.text);commandLine.clear()}}
       }
      }
     }
    }
   }
-  Rectangle{Layout.fillWidth:true;Layout.preferredHeight:25;color:theme.shell
+  Rectangle{visible:workspaceBackend.preferences["appearance/statusBar"];Layout.fillWidth:true;Layout.preferredHeight:visible?25:0;color:theme.shell
    RowLayout{anchors.fill:parent;anchors.leftMargin:12;anchors.rightMargin:12
     Label{text:workspaceBackend.message;color:theme.secondaryText;font.pixelSize:10;elide:Text.ElideMiddle;Layout.fillWidth:true}
     Label{text:"DWCODE / DESKTOP PREVIEW";color:theme.cyan;font.pixelSize:9;font.letterSpacing:1}

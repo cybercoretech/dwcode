@@ -14,8 +14,14 @@ DWCode keeps a familiar application menu, project tree, tabs, splits, command pa
 - 🖥️ **Terminal:** runs commands in the workspace with `bash`, streams output, accepts input for a running command, and can stop it. It is a command runner, not a full PTY, so full-screen programs such as `vim` or `htop` do not work yet.
 - 🧠 **Language servers:** **Connect LSP** starts a server for the active file: TypeScript/JavaScript (bundled), C/C++ (`clangd`), Rust (`rust-analyzer`), Python (`pyright-langserver`). Diagnostics, completion, hover, and go-to-definition. TypeScript is covered by automated tests; the others depend on the server being on `PATH`.
 - 🎨 **Themes:** 84 palettes, the 81 canonical Cybercore themes plus 3 DWCode ones, recolour the shell and editor together and are remembered between runs.
+- ⚙️ **Settings:** **Settings → Preferences…** (`Ctrl+,`) opens searchable,
+  persistent controls for appearance, Monaco, save behavior, workspace files,
+  the command runner, and modal editing.
 - 🪟 **Split view** shares the same document, so edits in one pane appear in the other.
-- 🧭 **Application menu:** File, Edit, Selection, View, Run, Terminal, and Help expose the existing folder, save, editor, panel, language-server, terminal, and command-palette actions. The active tab is clearly marked with the current theme's primary accent.
+- 🧭 **Application menu:** File, Edit, Selection, View, Run, Terminal, Settings,
+  and Help expose the existing folder, save, editor, panel, language-server,
+  terminal, command-palette, and preference actions. The active tab is clearly
+  marked with the current theme's primary accent.
 
 Not yet: file watching, crash recovery, a New File command, a real PTY terminal, loading extension packs at runtime.
 

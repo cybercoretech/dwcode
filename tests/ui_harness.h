@@ -112,8 +112,9 @@ protected:
 
 // Never open a window on the developer's desktop; DWCODE_UI_PLATFORM overrides.
 inline void prepareUiEnvironment(){
- qputenv("QT_QPA_PLATFORM",qEnvironmentVariableIsEmpty("DWCODE_UI_PLATFORM")?"offscreen":qgetenv("DWCODE_UI_PLATFORM"));
- qunsetenv("WAYLAND_DISPLAY");
+ const bool offscreen=qEnvironmentVariableIsEmpty("DWCODE_UI_PLATFORM");
+ qputenv("QT_QPA_PLATFORM",offscreen?"offscreen":qgetenv("DWCODE_UI_PLATFORM"));
+ if(offscreen)qunsetenv("WAYLAND_DISPLAY");
  qputenv("QT_QPA_PLATFORMTHEME","");
  if(qEnvironmentVariableIsEmpty("QT_QUICK_BACKEND"))qputenv("QT_QUICK_BACKEND","software");
  if(qEnvironmentVariableIsEmpty("QTWEBENGINE_CHROMIUM_FLAGS"))qputenv("QTWEBENGINE_CHROMIUM_FLAGS","--disable-gpu");

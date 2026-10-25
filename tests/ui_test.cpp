@@ -59,6 +59,16 @@ private slots:
   auto *openFolder=withText("Open Folder","QQuickButton");QVERIFY(openFolder);
   QVERIFY(openFolder->property("enabled").toBool());
  }
+ void settingsDialogAndEditorPreferences(){
+  auto *dialog=app.window->findChild<QObject*>("settingsDialog");QVERIFY(dialog);
+  QVERIFY(QMetaObject::invokeMethod(dialog,"open"));QTRY_VERIFY(dialog->property("visible").toBool());
+  QVERIFY(withText("SETTINGS"));
+  app.backend->setPreference("editor/fontSize",18);
+  app.backend->setPreference("editing/tabSize",4);
+  QVERIFY(waitJs(editor(),"window.dwcodeEditor.getModel().getOptions().tabSize===4"));
+  QVERIFY(QMetaObject::invokeMethod(dialog,"close"));
+  app.backend->resetPreferences();
+ }
  void splitViewSharesThemeAndText(){
   click(withText("Split editor"));
   QTRY_VERIFY(app.window->property("splitVisible").toBool());

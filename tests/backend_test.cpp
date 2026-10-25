@@ -26,6 +26,14 @@ private slots:
   b.clearTerminal();QVERIFY(b.runCommand("read line; printf 'received:%s' \"$line\""));QTRY_VERIFY(b.terminalRunning());b.sendInput("hello");QTRY_VERIFY_WITH_TIMEOUT(b.terminalOutput().contains("received:hello"),5000);QTRY_VERIFY(!b.terminalRunning());
   QVERIFY(b.runCommand("sleep 60"));QTRY_VERIFY(b.terminalRunning());b.stopCommand();QVERIFY(!b.terminalRunning());
  }
+ void preferencesPersistAndAffectFiles(){
+  QTemporaryDir root;put(root.filePath("visible.ts"),"export {}\n");put(root.filePath("ignored.log"),"ignore\n");
+  WorkspaceBackend first;first.setPreference("editor/fontSize",19);first.setPreference("files/excludes","*.log");
+  QVERIFY(first.openWorkspace(root.path()));
+  for(const auto &entry:first.files())QVERIFY(entry.toMap().value("name")!="ignored.log");
+  WorkspaceBackend second;QCOMPARE(second.preferences().value("editor/fontSize").toInt(),19);
+  second.resetPreferences();QCOMPARE(second.preferences().value("editor/fontSize").toInt(),14);
+ }
  void themes(){WorkspaceBackend b;QVERIFY(b.themes().size()>=80);b.setTheme("cyberpunk-chrome");QCOMPARE(b.theme().value("id").toString(),QString("cyberpunk-chrome"));b.setTheme("tokyo-night");WorkspaceBackend restored;QCOMPARE(restored.theme().value("id").toString(),QString("tokyo-night"));}
  void languageServer(){
   QTemporaryDir root;put(root.filePath("main.ts"),"const message: string = 123;\nmessage.toUpperCase();\n");WorkspaceBackend b;QVERIFY(b.openWorkspace(root.path()));auto doc=b.openFile("main.ts");QSignalSpy diagnostics(&b,&WorkspaceBackend::diagnosticsReceived);QSignalSpy replies(&b,&WorkspaceBackend::languageReply);
