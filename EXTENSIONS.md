@@ -6,7 +6,7 @@ DWCode will have its own extension contract. Open VSX is an optional discovery a
 
 The Visual Studio Marketplace is not a source for DWCode. Microsoft documents it as intended for Visual Studio-family products, and marketplace packages can have separate licenses and use conditions.
 
-The first DWCode-authored data-only reference pack is `packs/dwcode-core`. It demonstrates the proposed visual and contribution rules; it is not yet loaded into the running app and is marked `UNLICENSED` until a repository license is selected. See [PACK_FORMAT.md](PACK_FORMAT.md) for its contents and validation limits.
+The first DWCode-authored data-only reference pack is `packs/dwcode-core`. It demonstrates the proposed visual and contribution rules, is MIT-licensed with DWCode, and is not yet loaded into the running app. See [PACK_FORMAT.md](PACK_FORMAT.md) for its contents and validation limits.
 
 ## Release stages
 

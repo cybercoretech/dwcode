@@ -24,7 +24,7 @@ Icon packs are normalized to the DWCode icon canvas and subdued contrast. Do not
 - Seven original 24px SVG file/folder icons and associations for common web, Markdown, and data files.
 - Small JavaScript, TypeScript, and Markdown snippets authored for this project.
 
-These assets are custom DWCode work, not copied theme or icon files. The pack is not wired into a live theme picker or extension browser yet. Its manifest is marked `UNLICENSED` until the repository owner selects a license for this project; do not publish it as a redistributable VSIX before then.
+These assets are custom DWCode work, not copied theme or icon files. The pack is MIT-licensed with DWCode and is not wired into a live theme picker or extension browser yet. Third-party assets remain subject to their own licenses and attribution requirements.
 
 ## 🔍 Validation
 

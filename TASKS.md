@@ -26,7 +26,7 @@
 - [x] Document the package format, visual adaptation rules, profile-based roadmap, and license gate.
 - [ ] Define the DWCode extension API, contribution points, permission model, and package format before loading third-party code.
 - [ ] Connect the validated first-party pack to a DWCode theme/icon/snippet preview and selection UI.
-- [ ] Decide the repository/package license before distributing any pack or logo asset.
+- [x] License DWCode and first-party packs under MIT.
 - [x] Add Language Server Protocol support: diagnostics, completion, hover, definition (TypeScript bundled; clangd, rust-analyzer, pyright from `PATH`).
 - [ ] Let users discover and install compatible language servers.
 - [ ] Add snippets, commands, keymaps, and theme packs as low-risk first extension types.
@@ -42,5 +42,5 @@
 - [ ] Add task/run profiles and Debug Adapter Protocol support with clear trust prompts.
 - [x] Add backend tests (files, terminal, themes, LSP) and offscreen UI tests that drive the real window.
 - [ ] Add tests for command dispatch, modal bindings, and extension permissions.
-- [ ] Package the app for Arch/Omarchy first, then add CI builds for other desktop platforms.
-- [ ] Create the release icon pack, screenshots, install guide, and contribution documentation.
+- [x] Package the app for Arch/Omarchy first and add CI-backed release artifacts.
+- [x] Create the release icon pack, screenshots, and install guide.

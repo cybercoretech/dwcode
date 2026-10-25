@@ -12,3 +12,8 @@ site/downloads/
 site/demo/
 site/data/
 site/vendor/
+dist/
+packaging/arch/pkg/
+packaging/arch/src/
+packaging/arch/*.pkg.tar.zst
+packaging/arch/*.tar

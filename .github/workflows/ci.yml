@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install Qt build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes \
+            qmake6 qt6-base-dev qt6-declarative-dev qt6-webengine-dev \
+            qt6-webchannel-dev qml6-module-qtqml-workerscript \
+            qml6-module-qtquick qml6-module-qtquick-controls \
+            qml6-module-qtquick-dialogs qml6-module-qtquick-layouts \
+            qml6-module-qtquick-templates \
+            qml6-module-qtquick-window qml6-module-qtwebchannel \
+            qml6-module-qtwebengine xvfb desktop-file-utils
+      - name: Build Monaco surface
+        run: |
+          npm ci
+          npm run build
+          npm run validate:packs
+      - name: Audit production web dependencies
+        run: npm audit --omit=dev --audit-level=high
+      - name: Validate desktop launcher
+        run: desktop-file-validate packaging/arch/dwcode.desktop
+      - name: Build native editor
+        run: |
+          mkdir -p build
+          cd build
+          qmake6 ../dwcode.pro
+          make -j"$(nproc)"
+          ./dwcode --version
+          ./dwcode --help
+      - name: Run backend tests
+        run: |
+          mkdir -p build/tests
+          cd build/tests
+          qmake6 ../../tests/backend.pro
+          make -j"$(nproc)"
+          ./backend-tests
+      - name: Run offscreen UI tests
+        env:
+          QT_QPA_PLATFORM: offscreen
+          QTWEBENGINE_DISABLE_SANDBOX: "1"
+        run: |
+          mkdir -p build/ui-tests
+          cd build/ui-tests
+          qmake6 ../../tests/ui.pro
+          make -j"$(nproc)"
+          xvfb-run --auto-servernum ./ui-tests
