@@ -22,4 +22,4 @@ DWCode-native executable extensions come later, behind a versioned API, separate
 - Normalize icons to DWCode's small canvas and restrained contrast. Preserve original licensing and attribution; create original assets if adaptation rights are not clear.
 - The local `dwcode-core` pack demonstrates three palettes, seven file/folder icons, and starter snippets. It is not yet connected to runtime loading.
 - The ten mark concepts in `brand/logo-selection.html` are a review gallery. Keep the existing app mark until the product owner selects and approves one concept.
-- No project license is selected yet. The sample pack is therefore marked `UNLICENSED` and must not be distributed as a redistributable VSIX until licensing is resolved.
+- DWCode and its first-party sample pack are MIT-licensed. Third-party assets and packages still require their own license and attribution review before distribution.

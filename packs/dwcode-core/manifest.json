@@ -9,7 +9,7 @@
   },
   "dwcodeApi": "1.0",
   "kind": "declarative",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "publisher": "Cybercore Tech",
   "contributes": {
     "themes": [

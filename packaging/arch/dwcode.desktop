@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=DWCode
+GenericName=Code Editor
+Comment=Keyboard-first Cybercore desktop editor
+Exec=dwcode
+Icon=dwcode
+Terminal=false
+Categories=Development;IDE;
+Keywords=code;editor;IDE;development;Cybercore;
+StartupWMClass=dwcode

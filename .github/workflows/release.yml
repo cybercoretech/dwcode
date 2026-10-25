@@ -1,0 +1,47 @@
+name: Release Arch alpha
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-arch-package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build package in Arch Linux
+        run: |
+          mkdir -p "${RUNNER_TEMP}/dwcode-artifacts"
+          docker run --rm \
+            --volume "${GITHUB_WORKSPACE}:/source:ro" \
+            --volume "${RUNNER_TEMP}/dwcode-artifacts:/artifacts" \
+            archlinux:base-devel \
+            bash -lc '
+              pacman -Syu --noconfirm nodejs npm qt6-base qt6-declarative qt6-webchannel qt6-webengine git
+              useradd --create-home builder
+              cp -a /source/. /home/builder/dwcode
+              chown -R builder:builder /home/builder/dwcode /artifacts
+              su --login builder --shell /bin/bash --command "cd /home/builder/dwcode && ./packaging/arch/build-package.sh --output /artifacts"
+            '
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dwcode-arch-package
+          path: ${{ runner.temp }}/dwcode-artifacts/*
+          if-no-files-found: error
+  publish-release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build-arch-package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dwcode-arch-package
+          path: dist
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${GITHUB_REF_NAME}" dist/* --generate-notes --title "DWCode ${GITHUB_REF_NAME}"

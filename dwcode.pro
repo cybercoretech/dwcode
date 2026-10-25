@@ -4,8 +4,13 @@ CONFIG += console
 CONFIG -= app_bundle
 TEMPLATE = app
 TARGET = dwcode
+VERSION = 0.1.0
 
-DEFINES += DWCODE_WEB_ROOT=\\\"$$PWD/web/dist\\\"
+isEmpty(DWCODE_WEB_ROOT) {
+    DWCODE_WEB_ROOT = $$PWD/web/dist
+}
+DEFINES += DWCODE_WEB_ROOT=\\\"$$DWCODE_WEB_ROOT\\\"
+DEFINES += DWCODE_VERSION=\\\"$$VERSION\\\"
 
 SOURCES += src/main.cpp \
            src/localwebserver.cpp

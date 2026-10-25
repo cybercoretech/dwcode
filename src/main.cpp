@@ -5,6 +5,8 @@
 #include <QDir>
 #include <QImage>
 #include <QIcon>
+#include <QCommandLineOption>
+#include <QCommandLineParser>
 
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
@@ -19,7 +21,24 @@ int main(int argc, char *argv[])
     app.setApplicationName(QStringLiteral("DWCode"));
     app.setOrganizationName(QStringLiteral("Cybercore Tech"));
     app.setDesktopFileName(QStringLiteral("dwcode"));
+    app.setApplicationVersion(QStringLiteral(DWCODE_VERSION));
     app.setWindowIcon(QIcon(QStringLiteral(":/qml/dwcode-icon.png")));
+
+    QCommandLineParser parser;
+    parser.setApplicationDescription(QStringLiteral("DWCode keyboard-first desktop editor"));
+    parser.addHelpOption();
+    parser.addVersionOption();
+    const QCommandLineOption workspaceOption(
+        {QStringLiteral("w"), QStringLiteral("workspace")},
+        QStringLiteral("Open a workspace folder."),
+        QStringLiteral("folder"));
+    const QCommandLineOption captureOption(
+        QStringLiteral("capture-dir"),
+        QStringLiteral("Capture prototype screenshots for project automation."),
+        QStringLiteral("directory"));
+    parser.addOption(workspaceOption);
+    parser.addOption(captureOption);
+    parser.process(app);
 
     LocalWebServer editorServer(QStringLiteral(DWCODE_WEB_ROOT));
     if (!editorServer.start()) {
@@ -28,9 +47,8 @@ int main(int argc, char *argv[])
     }
 
     WorkspaceBackend workspace;
-    const auto args = app.arguments();
-    const int workspaceFlag = args.indexOf("--workspace");
-    if (workspaceFlag >= 0 && workspaceFlag + 1 < args.size()) workspace.openWorkspace(args.at(workspaceFlag + 1));
+    if (parser.isSet(workspaceOption))
+        workspace.openWorkspace(parser.value(workspaceOption));
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty(QStringLiteral("workspaceBackend"), &workspace);
     engine.rootContext()->setContextProperty(QStringLiteral("webEditorUrl"), editorServer.url());
@@ -38,9 +56,8 @@ int main(int argc, char *argv[])
     if (engine.rootObjects().isEmpty())
         return 1;
 
-    const int captureFlag = args.indexOf("--capture-dir");
-    if (captureFlag >= 0 && captureFlag + 1 < args.size()) {
-        const QString destination = args.at(captureFlag + 1);
+    if (parser.isSet(captureOption)) {
+        const QString destination = parser.value(captureOption);
         QDir().mkpath(destination);
         auto *window = qobject_cast<QQuickWindow *>(engine.rootObjects().first());
         QTimer::singleShot(7000, &app, [&, window, destination] {

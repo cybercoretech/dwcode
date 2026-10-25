@@ -29,6 +29,22 @@ npm ci
 
 The Monaco UI is built into `web/dist` and served from a loopback-only HTTP listener so its editor workers run without loading code from a third-party site. Native capabilities are exposed to the editor only through Qt WebChannel, never on that HTTP listener.
 
+## 🐧 Arch / Omarchy alpha
+
+DWCode has a local-first Arch package for its alpha release. It installs the
+binary, Railshift launcher icon, desktop entry, and bundled Monaco assets, so
+the installed app does not depend on a source checkout.
+
+```sh
+./packaging/arch/build-package.sh
+sudo pacman -U dist/dwcode-0.1.0-1-x86_64.pkg.tar.zst
+```
+
+Launch **DWCode** from the application launcher or run `dwcode`. To remove it
+cleanly, run `sudo pacman -Rns dwcode`. See
+[the Arch installation guide](docs/install-arch.md) for prerequisites, updates,
+and the current alpha limitations.
+
 ## 🧪 Tests
 
 ```sh
@@ -89,7 +105,7 @@ The first pack at [`packs/dwcode-core`](packs/dwcode-core) is an original DWCode
 
 Open VSX is a discovery and package source, not a compatibility guarantee. DWCode will begin with reviewed declarative data such as theme, icon, snippet, keymap, and grammar contributions. Executable VSIX extensions wait for a DWCode-native isolated host and a versioned permission broker. Read [`EXTENSIONS.md`](EXTENSIONS.md), [`USER_EXTENSION_PROFILE.md`](USER_EXTENSION_PROFILE.md), and [`PACK_FORMAT.md`](PACK_FORMAT.md) for the selection, design, and compatibility decisions.
 
-Every pack must look and behave like DWCode: the Cybercore shell remains consistent, palettes map into DWCode tokens, icons use the app's restrained sizing and contrast, and upstream license and attribution terms are retained. The starter pack is marked `UNLICENSED` until the repository owner selects a project license; it must not be published as a redistributable package before that choice.
+Every pack must look and behave like DWCode: the Cybercore shell remains consistent, palettes map into DWCode tokens, icons use the app's restrained sizing and contrast, and upstream license and attribution terms are retained. The first-party starter pack is MIT-licensed with the project; third-party packs still require independent license and attribution review before distribution.
 
 ## 📚 Project notes
 
