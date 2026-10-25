@@ -93,11 +93,14 @@ int main(int argc, char *argv[])
     engine.load(QUrl(QStringLiteral("qrc:/qml/Main.qml")));
     if (engine.rootObjects().isEmpty())
         return 1;
+    auto *window = qobject_cast<QQuickWindow *>(engine.rootObjects().first());
+    if (!window)
+        return 1;
+    window->setIcon(QIcon(QStringLiteral(":/qml/dwcode-icon.png")));
 
     if (parser.isSet(captureOption)) {
         const QString destination = parser.value(captureOption);
         QDir().mkpath(destination);
-        auto *window = qobject_cast<QQuickWindow *>(engine.rootObjects().first());
         QTimer::singleShot(7000, &app, [&, window, destination] {
             window->grabWindow().save(destination + "/workspace.png");
             window->setProperty("splitVisible", true);
