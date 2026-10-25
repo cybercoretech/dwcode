@@ -56,7 +56,7 @@ ApplicationWindow {
   else if(action==="selectall")editor.runJavaScript("window.dwcodeEditor && window.dwcodeEditor.trigger('dwcode','editor.action.selectAll',{})")
   else if(action==="modal"){modalMode=!modalMode;editor.runJavaScript("window.dwcodeSetMode("+modalMode+")");splitEditor.runJavaScript("window.dwcodeSetMode && window.dwcodeSetMode("+modalMode+")")}
  }
- FolderDialog {id:folderDialog;title:"Open DWCode workspace";onAccepted:workspaceBackend.openWorkspace(selectedFolder.toString())}
+ FolderDialog {id:folderDialog;objectName:"folderDialog";title:"Open DWCode workspace";onAccepted:workspaceBackend.openWorkspace(selectedFolder.toString())}
  FileDialog {id:saveDialog;title:"Save file as (inside workspace)";fileMode:FileDialog.SaveFile;onAccepted:workspaceBackend.saveAs(selectedFile.toString())}
  Dialog {id:unsaved;title:"Unsaved files";anchors.centerIn:parent;modal:true;standardButtons:Dialog.Discard|Dialog.Cancel
   Label{text:"You have unsaved changes. Discard them to continue?";color:theme.foreground}
@@ -146,7 +146,9 @@ ApplicationWindow {
     ColumnLayout {anchors.fill:parent;spacing:0
      RowLayout {Layout.fillWidth:true;Layout.margins:12
       Label{text:"EXPLORER";color:theme.secondaryText;font.pixelSize:10;font.letterSpacing:1}
-      Item{Layout.fillWidth:true}ToolButton{text:"↻";onClicked:workspaceBackend.refreshFiles()}
+      Item{Layout.fillWidth:true}
+      Button{text:"Open Folder";onClicked:chooseFolder()}
+      ToolButton{text:"↻";Accessible.name:"Refresh explorer";onClicked:workspaceBackend.refreshFiles()}
      }
      Label{text:workspaceBackend.root.split('/').pop()||"NO WORKSPACE";color:theme.cyan;Layout.leftMargin:14;font.bold:true;font.pixelSize:11}
      ListView {Layout.fillWidth:true;Layout.fillHeight:true;clip:true;model:workspaceBackend.files;ScrollBar.vertical:ScrollBar{}

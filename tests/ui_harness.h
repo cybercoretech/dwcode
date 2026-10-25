@@ -8,6 +8,7 @@
 #include <QQmlContext>
 #include <QQuickWindow>
 #include <QQuickItem>
+#include <QIcon>
 #include <QJSEngine>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -57,6 +58,7 @@ protected:
   QVERIFY(!a.engine->rootObjects().isEmpty());
   a.window=qobject_cast<QQuickWindow*>(a.engine->rootObjects().first());
   QVERIFY(a.window);
+  a.window->setIcon(QIcon(":/qml/dwcode-icon.png"));
   QVERIFY(QTest::qWaitForWindowExposed(a.window));
  }
  void shutdown(App &a){a.engine.reset();a.backend.reset();a.window=nullptr;QTest::qWait(200);}

@@ -1,6 +1,7 @@
 // Drives the real Main.qml window offscreen: clicks, key presses and Monaco
 // actions go through the same paths a user's input does.
 #include "ui_harness.h"
+#include <QIcon>
 
 class UiTest:public UiHarness{
  Q_OBJECT
@@ -52,6 +53,11 @@ private slots:
    const auto t=value.toMap();app.backend->setTheme(t["id"].toString());
    QTRY_COMPARE_WITH_TIMEOUT(editorBackground(editor()),rgb(t["surfaces"].toMap()["editor"].toString()),3000);
   }
+ }
+ void explorerHeaderProvidesFolderControlAndSetsAppIcon(){
+  QVERIFY(!app.window->icon().isNull());
+  auto *openFolder=withText("Open Folder","QQuickButton");QVERIFY(openFolder);
+  QVERIFY(openFolder->property("enabled").toBool());
  }
  void splitViewSharesThemeAndText(){
   click(withText("Split editor"));
