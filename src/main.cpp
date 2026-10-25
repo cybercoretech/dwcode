@@ -13,9 +13,47 @@
 #include <QQmlContext>
 #include <QUrl>
 #include <QtWebEngineQuick/qtwebenginequickglobal.h>
+#include <cstdio>
+#include <cstring>
+
+namespace {
+
+bool hasArgument(int argc, char *argv[], const char *shortOption, const char *longOption)
+{
+    for (int index = 1; index < argc; ++index) {
+        if ((shortOption && std::strcmp(argv[index], shortOption) == 0) ||
+            std::strcmp(argv[index], longOption) == 0)
+            return true;
+    }
+    return false;
+}
+
+void printHelp()
+{
+    std::printf(
+        "Usage: dwcode [options]\n"
+        "DWCode keyboard-first desktop editor\n\n"
+        "Options:\n"
+        "  -h, --help                 Display this help text.\n"
+        "  -v, --version              Display version information.\n"
+        "  -w, --workspace <folder>   Open a workspace folder.\n"
+        "      --capture-dir <folder> Capture prototype screenshots.\n");
+}
+
+} // namespace
 
 int main(int argc, char *argv[])
 {
+    if (hasArgument(argc, argv, "-v", "--version")) {
+        std::printf("DWCode %s\n", DWCODE_VERSION);
+        return 0;
+    }
+    if (hasArgument(argc, argv, "-h", "--help") ||
+        hasArgument(argc, argv, nullptr, "--help-all")) {
+        printHelp();
+        return 0;
+    }
+
     QtWebEngineQuick::initialize();
     QGuiApplication app(argc, argv);
     app.setApplicationName(QStringLiteral("DWCode"));
