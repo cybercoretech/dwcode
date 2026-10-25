@@ -33,4 +33,7 @@ if (( ${#packages[@]} != 1 )) || [[ ! -f "${packages[0]}" ]]; then
 fi
 
 cp "${packages[0]}" "${output}/"
-sha256sum "${packages[0]}" > "${output}/$(basename "${packages[0]}").sha256"
+(
+  cd "${output}"
+  sha256sum "$(basename "${packages[0]}")" > "$(basename "${packages[0]}").sha256"
+)
