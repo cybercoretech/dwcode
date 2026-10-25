@@ -26,6 +26,7 @@ jobs:
             qt6-webchannel-dev qml6-module-qtqml-workerscript \
             qml6-module-qtquick qml6-module-qtquick-controls \
             qml6-module-qtquick-dialogs qml6-module-qtquick-layouts \
+            qml6-module-qtquick-templates \
             qml6-module-qtquick-window qml6-module-qtwebchannel \
             qml6-module-qtwebengine xvfb desktop-file-utils
       - name: Build Monaco surface
