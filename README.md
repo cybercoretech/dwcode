@@ -4,7 +4,7 @@ DWCode is Cybercore's keyboard-first desktop editor project. The prototype pairs
 
 ## 🧭 Product direction
 
-DWCode keeps a familiar project tree, tabs, splits, command palette, and lower panels, with optional modal navigation. Qt Quick owns the desktop shell; Monaco is the text editing surface. DWCode owns its workspace model, commands, settings, themes, integrations, and extension contract. Monaco does not make DWCode compatible with Visual Studio Code extensions by itself.
+DWCode keeps a familiar application menu, project tree, tabs, splits, command palette, and lower panels, with optional modal navigation. The VS Codium-inspired layout preserves DWCode's own Cybercore palette and branding. Qt Quick owns the desktop shell; Monaco is the text editing surface. DWCode owns its workspace model, commands, settings, themes, integrations, and extension contract. Monaco does not make DWCode compatible with Visual Studio Code extensions by itself.
 
 ## ⚡ What works today
 
@@ -14,6 +14,7 @@ DWCode keeps a familiar project tree, tabs, splits, command palette, and lower p
 - 🧠 **Language servers:** **Connect LSP** starts a server for the active file: TypeScript/JavaScript (bundled), C/C++ (`clangd`), Rust (`rust-analyzer`), Python (`pyright-langserver`). Diagnostics, completion, hover, and go-to-definition. TypeScript is covered by automated tests; the others depend on the server being on `PATH`.
 - 🎨 **Themes:** 84 palettes, the 81 canonical Cybercore themes plus 3 DWCode ones, recolour the shell and editor together and are remembered between runs.
 - 🪟 **Split view** shares the same document, so edits in one pane appear in the other.
+- 🧭 **Application menu:** File, Edit, Selection, View, Run, Terminal, and Help expose the existing folder, save, editor, panel, language-server, terminal, and command-palette actions. The active tab is clearly marked with the current theme's primary accent.
 
 Not yet: file watching, crash recovery, a New File command, a real PTY terminal, loading extension packs at runtime.
 
@@ -91,7 +92,7 @@ The exploration that led there is kept for reference: [`brand/logo-selection.htm
 | `Ctrl+B` | Toggle the explorer |
 | `Ctrl+J` | Toggle the bottom panel |
 | `Ctrl+\\` | Split the editor surface |
-| `Ctrl+Shift+M` | Toggle Helix-inspired modal editing |
+| `Ctrl+Alt+M` | Toggle Helix-inspired modal editing |
 
 In modal mode, `h`, `j`, `k`, and `l` move the cursor, `x` deletes the character to the right, and `i` returns to insert mode.
 

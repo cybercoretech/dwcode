@@ -54,7 +54,7 @@ private slots:
   }
  }
  void splitViewSharesThemeAndText(){
-  click(withText("Split view"));
+  click(withText("Split editor"));
   QTRY_VERIFY(app.window->property("splitVisible").toBool());
   QObject *second=split();QVERIFY(second);
   QVERIFY2(waitJs(second,"window.dwcodeNativeReady===true && !!window.dwcodeEditor.getModel()"),"split editor never connected");
@@ -105,7 +105,7 @@ private slots:
   QTRY_VERIFY_WITH_TIMEOUT(app.backend->terminalOutput().contains("ui-42"),5000);
   QTRY_VERIFY(app.backend->terminalOutput().contains("[exit 0]"));
   QVERIFY(app.backend->terminalOutput().contains(root.path()));
-  click(field);typeText("read line; echo got:$line");click(withText("Run"));
+  click(field);typeText("read line; echo got:$line");click(withText("Run","QQuickButton"));
   QTRY_VERIFY(app.backend->terminalRunning());
   QTRY_VERIFY(withText("Send"));
   click(field);typeText("cyber");QTest::keyClick(app.window,Qt::Key_Return);
