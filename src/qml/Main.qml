@@ -25,9 +25,11 @@ ApplicationWindow {
   { title: "Save File As", shortcut: "Ctrl+Shift+S", action: "saveas" },
   { title: "Toggle File Explorer", shortcut: "Ctrl+B", action: "explorer" },
   { title: "Toggle Terminal", shortcut: "Ctrl+J", action: "terminal" },
+  { title: "Show Problems", shortcut: "Ctrl+Shift+M", action: "problems" },
   { title: "Split Editor", shortcut: "Ctrl+\\", action: "split" },
   { title: "Connect Language Server", shortcut: "", action: "lsp" },
-  { title: "Toggle Helix Mode", shortcut: "Ctrl+Shift+M", action: "modal" }
+  { title: "Disconnect Language Server", shortcut: "", action: "lspstop" },
+  { title: "Toggle Helix Mode", shortcut: "Ctrl+Alt+M", action: "modal" }
  ]
  Theme { id: theme }
  palette.window: theme.background; palette.windowText: theme.foreground; palette.base: theme.canvas
@@ -42,8 +44,16 @@ ApplicationWindow {
   else if(action==="saveas")saveDialog.open()
   else if(action==="explorer")explorerVisible=!explorerVisible
   else if(action==="terminal"){bottomVisible=!bottomVisible;activeBottomTab="TERMINAL"}
+  else if(action==="output"){bottomVisible=true;activeBottomTab="OUTPUT"}
+  else if(action==="problems"){bottomVisible=true;activeBottomTab="PROBLEMS"}
   else if(action==="split")splitVisible=!splitVisible
   else if(action==="lsp")workspaceBackend.startLanguageServer()
+  else if(action==="lspstop")workspaceBackend.stopLanguageServer()
+  else if(action==="refresh")workspaceBackend.refreshFiles()
+  else if(action==="palette")paletteVisible=true
+  else if(action==="undo")editor.runJavaScript("window.dwcodeEditor && window.dwcodeEditor.trigger('dwcode','undo',{})")
+  else if(action==="redo")editor.runJavaScript("window.dwcodeEditor && window.dwcodeEditor.trigger('dwcode','redo',{})")
+  else if(action==="selectall")editor.runJavaScript("window.dwcodeEditor && window.dwcodeEditor.trigger('dwcode','editor.action.selectAll',{})")
   else if(action==="modal"){modalMode=!modalMode;editor.runJavaScript("window.dwcodeSetMode("+modalMode+")");splitEditor.runJavaScript("window.dwcodeSetMode && window.dwcodeSetMode("+modalMode+")")}
  }
  FolderDialog {id:folderDialog;title:"Open DWCode workspace";onAccepted:workspaceBackend.openWorkspace(selectedFolder.toString())}
@@ -64,25 +74,70 @@ ApplicationWindow {
  Shortcut {sequence:"Ctrl+B";onActivated:win.explorerVisible=!win.explorerVisible}
  Shortcut {sequence:"Ctrl+J";onActivated:activate("terminal")}
  Shortcut {sequence:"Ctrl+\\";onActivated:win.splitVisible=!win.splitVisible}
- Shortcut {sequence:"Ctrl+Shift+M";onActivated:activate("modal")}
+ Shortcut {sequence:"Ctrl+Alt+M";onActivated:activate("modal")}
  Shortcut {sequence:"Escape";enabled:win.paletteVisible;onActivated:win.paletteVisible=false}
  ColumnLayout {
   anchors.fill:parent;spacing:0
   Rectangle {
-   Layout.fillWidth:true;Layout.preferredHeight:56;color:theme.shell;border.color:theme.border
-   RowLayout {anchors.fill:parent;anchors.margins:10;spacing:12
-    Image {source:"qrc:/qml/dwcode-wordmark.png";Layout.preferredHeight:22;Layout.preferredWidth:sourceSize.width*22/Math.max(1,sourceSize.height);fillMode:Image.PreserveAspectFit;smooth:true;mipmap:true;Accessible.name:"DWCode"}
-    Button{text:"Open folder";onClicked:chooseFolder()}
-    Button{text:workspaceBackend.dirty?"Save ●":"Save";enabled:workspaceBackend.activePath!=="";onClicked:save()}
-    Button{text:"Commands ⌘";onClicked:win.paletteVisible=true}
-    Item{Layout.fillWidth:true}
-    Label{text:"CYBERCORE";color:theme.mutedText;font.pixelSize:9;font.letterSpacing:1}
-    ComboBox {id:themePicker;Layout.preferredWidth:210;model:workspaceBackend.themes;textRole:"name";valueRole:"id"
-     currentIndex:{for(let i=0;i<workspaceBackend.themes.length;i++)if(workspaceBackend.themes[i].id===workspaceBackend.theme.id)return i;return 0}
-     onActivated:workspaceBackend.setTheme(currentValue)
-     popup.height:Math.min(420,themePicker.count*36+16)
+   Layout.fillWidth:true;Layout.preferredHeight:64;color:theme.shell;border.color:theme.border
+   ColumnLayout {anchors.fill:parent;spacing:0
+    RowLayout {Layout.fillWidth:true;Layout.preferredHeight:31;Layout.leftMargin:10;Layout.rightMargin:10;spacing:10
+     Image {source:"qrc:/qml/dwcode-icon.png";Layout.preferredHeight:18;Layout.preferredWidth:18;fillMode:Image.PreserveAspectFit;smooth:true;mipmap:true;Accessible.name:"DWCode"}
+     MenuBar {id:applicationMenuBar;objectName:"applicationMenuBar";Layout.fillWidth:true;Layout.preferredHeight:31
+      background:Rectangle{color:"transparent"}
+      Menu {title:"File"
+       MenuItem{text:"Open Folder…";onTriggered:chooseFolder()}
+       MenuSeparator{}
+       MenuItem{text:"Save";enabled:workspaceBackend.activePath!=="";onTriggered:save()}
+       MenuItem{text:"Save As…";enabled:workspaceBackend.activePath!=="";onTriggered:saveDialog.open()}
+      }
+      Menu {title:"Edit"
+       MenuItem{text:"Undo";onTriggered:activate("undo")}
+       MenuItem{text:"Redo";onTriggered:activate("redo")}
+       MenuSeparator{}
+       MenuItem{text:"Select All";onTriggered:activate("selectall")}
+       MenuItem{text:"Command Palette…";onTriggered:activate("palette")}
+      }
+      Menu {title:"Selection"
+       MenuItem{text:"Select All";onTriggered:activate("selectall")}
+       MenuItem{text:modalMode?"Disable Helix Mode":"Enable Helix Mode";onTriggered:activate("modal")}
+      }
+      Menu {title:"View"
+       MenuItem{text:explorerVisible?"Hide Explorer":"Show Explorer";onTriggered:activate("explorer")}
+       MenuItem{text:bottomVisible?"Hide Terminal":"Show Terminal";onTriggered:activate("terminal")}
+       MenuItem{text:"Show Output";onTriggered:activate("output")}
+       MenuItem{text:"Show Problems";onTriggered:activate("problems")}
+       MenuSeparator{}
+       MenuItem{text:splitVisible?"Single Editor":"Split Editor";onTriggered:activate("split")}
+      }
+      Menu {title:"Run"
+       MenuItem{text:"Connect Language Server";enabled:!workspaceBackend.lspReady;onTriggered:activate("lsp")}
+       MenuItem{text:"Disconnect Language Server";enabled:workspaceBackend.lspReady;onTriggered:activate("lspstop")}
+      }
+      Menu {title:"Terminal"
+       MenuItem{text:"Toggle Terminal";onTriggered:activate("terminal")}
+       MenuItem{text:"Clear Terminal";onTriggered:workspaceBackend.clearTerminal()}
+      }
+      Menu {title:"Help"
+       MenuItem{text:"Command Palette…";onTriggered:activate("palette")}
+      }
+     }
+     Label{text:"CYBERCORE";color:theme.mutedText;font.pixelSize:9;font.letterSpacing:1}
+     ComboBox {id:themePicker;Layout.preferredWidth:200;Layout.preferredHeight:24;model:workspaceBackend.themes;textRole:"name";valueRole:"id"
+      currentIndex:{for(let i=0;i<workspaceBackend.themes.length;i++)if(workspaceBackend.themes[i].id===workspaceBackend.theme.id)return i;return 0}
+      onActivated:workspaceBackend.setTheme(currentValue)
+      popup.height:Math.min(420,themePicker.count*36+16)
+     }
+     ToolButton{text:workspaceBackend.lspReady?"LSP connected":"Connect LSP";Accessible.name:"Connect language server";onClicked:workspaceBackend.startLanguageServer()}
     }
-    Button{text:workspaceBackend.lspReady?"LSP connected":"Connect LSP";onClicked:workspaceBackend.startLanguageServer()}
+    Rectangle{Layout.fillWidth:true;Layout.preferredHeight:1;color:theme.border}
+    RowLayout {Layout.fillWidth:true;Layout.preferredHeight:32;Layout.leftMargin:10;Layout.rightMargin:10;spacing:8
+     Image {source:"qrc:/qml/dwcode-wordmark.png";Layout.preferredHeight:16;Layout.preferredWidth:sourceSize.width*16/Math.max(1,sourceSize.height);fillMode:Image.PreserveAspectFit;smooth:true;mipmap:true;Accessible.name:"DWCode"}
+     Label{text:workspaceBackend.root?workspaceBackend.root:"Open a workspace";Layout.fillWidth:true;elide:Text.ElideMiddle;color:theme.secondaryText;font.pixelSize:11}
+     ToolButton{text:"↻";Accessible.name:"Refresh explorer";onClicked:activate("refresh")}
+     ToolButton{text:workspaceBackend.dirty?"Save ●":"Save";enabled:workspaceBackend.activePath!=="";onClicked:save()}
+     ToolButton{text:"⌘";Accessible.name:"Open command palette";onClicked:activate("palette")}
+    }
    }
   }
   RowLayout {
@@ -111,10 +166,14 @@ ApplicationWindow {
      RowLayout {anchors.fill:parent;spacing:1
       Flickable {Layout.fillWidth:true;Layout.fillHeight:true;contentWidth:tabs.width;clip:true
        Row{id:tabs;height:parent.height
-        Repeater{model:workspaceBackend.documents;delegate:Button{required property var modelData;height:38;text:(modelData.dirty?"● ":"")+modelData.name;flat:true;highlighted:workspaceBackend.activePath===modelData.path;onClicked:workspaceBackend.openFile(modelData.path)}}
+        Repeater{model:workspaceBackend.documents;delegate:Button{id:tabButton;required property var modelData;property bool activeTab:workspaceBackend.activePath===modelData.path;height:38;leftPadding:15;rightPadding:15;text:(modelData.dirty?"● ":"")+modelData.name;flat:true;highlighted:activeTab;onClicked:workspaceBackend.openFile(modelData.path)
+          background:Rectangle{color:tabButton.activeTab?theme.canvas:"transparent";border.color:theme.border
+           Rectangle{visible:tabButton.activeTab;anchors.left:parent.left;anchors.right:parent.right;anchors.top:parent.top;height:2;color:theme.cyan}
+          }
+        }}
        }
       }
-      ToolButton{text:win.splitVisible?"Single view":"Split view";onClicked:win.splitVisible=!win.splitVisible}
+      ToolButton{text:win.splitVisible?"Single view":"Split editor";onClicked:win.splitVisible=!win.splitVisible}
      }
     }
     RowLayout {Layout.fillWidth:true;Layout.fillHeight:true;spacing:1

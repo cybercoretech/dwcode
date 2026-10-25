@@ -87,7 +87,7 @@ private slots:
   QTest::keyClick(app.window,Qt::Key_Return);
   // Split view on the two source files.
   click(withText("OUTPUT"));
-  click(withText("Split view"));QTRY_VERIFY(app.window->property("splitVisible").toBool());
+  click(withText("Split editor"));QTRY_VERIFY(app.window->property("splitVisible").toBool());
   QObject *second=nullptr;
   for(auto *v:app.window->findChildren<QObject*>())if(v->inherits("QQuickWebEngineView")&&v->objectName().isEmpty())second=v;
   QVERIFY(second);QVERIFY(waitJs(second,"window.dwcodeNativeReady===true && !!window.dwcodeEditor.getModel()"));
