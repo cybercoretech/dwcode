@@ -398,7 +398,7 @@ function cardHtml(c) {
           <div class="xc-actions">
             <button class="btn btn-ghost btn-sm" type="button" data-copy-id="${esc(c.id)}">copy id</button>
             <a class="btn btn-ghost btn-sm" href="${esc(c.registry)}" target="_blank" rel="noopener">registry <span aria-hidden="true">↗</span><span class="sr"> (opens in a new tab)</span></a>
-            <span class="btn btn-sm xc-install" role="img" aria-label="Install is not available yet: the catalog index ships with milestone M5" title="Ships with M5 — the checksum-pinned catalog index is not live yet">install · M5</span>
+            <span class="btn btn-sm xc-install" role="img" aria-label="Install is reference-only for this row: DWCode links to the publisher's registry instead of redistributing the package" title="M5 — this is a reference row. DWCode does not redistribute third-party packages, so their install happens at the publisher's registry (↗). First-party packs install from the DWCode index, checksum-verified against docs/PACK_INDEX.md">install · M5</span>
           </div>
         </article>`;
 }
@@ -414,7 +414,17 @@ function render() {
   }
 
   const all = data.families.length;
-  const stats = `        <p class="cat-stats"><span class="mono">${data.cards.length} extensions</span><span class="mono">${all} families</span><span class="mono">licence gate: ${data.gate.pending} pending</span><span class="mono">generated ${esc(data.generated)}</span></p>\n`;
+  // The machine-readable twin is worth surfacing: it tells the reader that the
+  // grid they are looking at is also what a client fetches. Absent (e.g. right
+  // after `catalog:build` before `catalog:index`) simply drops the chip.
+  let indexStat = '';
+  try {
+    const index = JSON.parse(readFileSync(INDEX, 'utf8'));
+    const installable = index.entries.filter((e) => e.kind === 'pack').length;
+    indexStat = `<span class="mono">index: schema ${esc(index.schema)} · ${index.entries.length} entries · ${installable} installable</span>`;
+  } catch {
+    indexStat = '';
+  }
   const cats = [
     `            <li><button class="cat is-on" type="button" data-family="all" aria-pressed="true">All extensions <span class="cat-n">${data.cards.length}</span></button></li>`,
     ...data.families.map((f) => `            <li><button class="cat" type="button" data-family="${esc(f.key)}" aria-pressed="false">${esc(f.label)} <span class="cat-n">${f.count}</span></button></li>`),
@@ -426,6 +436,7 @@ function render() {
           <span class="mono">${data.cards.length} extensions</span>
           <span class="mono">${all} families</span>
           <span class="mono">licence gate: ${data.gate.pending} pending</span>
+          ${indexStat}
           <span class="mono">generated ${esc(data.generated)}</span>
         </div>
         <div class="catalog">
