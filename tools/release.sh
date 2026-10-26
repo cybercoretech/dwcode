@@ -53,10 +53,6 @@ done
 
 # ---------------------------------------------------------------- 1. tree
 step "checking the tree"
-[[ -z "$(git status --porcelain | grep -v '^?? site/screenshots/')" ]] \
-  || die "the working tree has uncommitted changes — commit or stash them first
-so the tag describes exactly what was tested:
-$(git status --porcelain | grep -v '^?? site/screenshots/')"
 [[ "$(git branch --show-current)" == "main" ]] || die "releases are cut from main, not $(git branch --show-current)"
 git fetch --quiet origin main || die "cannot reach $repo"
 # `rev-list --count` prints 0 when level, and `[[ -z "0" ]]` would be false —
@@ -67,10 +63,12 @@ ahead="$(git rev-list --count origin/main..HEAD)"
 # A tag is never moved. But a release that died halfway (a failed asset build,
 # say) must be resumable, so the only question is whether the tag that already
 # exists points at *this* commit — then finishing the job changes nothing that
-# was published.
+# was published. Existence is checked with --exit-code rather than by parsing
+# `ls-remote`: its pattern is fnmatch'd against the ref name, so
+# "refs/tags/v0.1.0" would never match the peeled "refs/tags/v0.1.0^{}" line,
+# and the peeled commit is then read locally, where rev-parse peels for us.
 resume=0
-remote_peeled="$(git ls-remote --tags "$repo" "refs/tags/$tag" | awk '$2 ~ /\^\{\}$/ { print $1 }')"
-if [[ -n "$remote_peeled" ]]; then
+if git ls-remote --exit-code --tags "$repo" "refs/tags/$tag" >/dev/null 2>&1; then
   git fetch --quiet origin "refs/tags/$tag:refs/tags/$tag" 2>/dev/null || true
   local_commit="$(git rev-parse --verify --quiet "refs/tags/$tag^{commit}" || true)"
   [[ -n "$local_commit" ]] || die "$tag exists on GitHub but could not be fetched locally"
@@ -81,6 +79,33 @@ A tag is never moved. Bump VERSION in dwcode.pro (and package.json) to release a
   info "$tag already points at HEAD — resuming this release"
 else
   info "main == origin/main at $(git rev-parse --short HEAD), no $tag yet"
+fi
+
+# Why a dirty tree is only fatal when there is no tag yet: both things this
+# script publishes derive from HEAD — the tag is `git tag -a` of HEAD, and
+# packaging/arch/build-package.sh writes `git archive HEAD` — so an
+# uncommitted edit cannot sneak into them. Before tagging, though, a dirty
+# tree is a lie waiting to happen: you would believe your edit was released.
+# On a resume, HEAD is already pinned by the tag, so the edit is provably
+# *not* in the release and is reported rather than fatal — with one exception:
+# the artifact is assembled from files on disk (packs/, the index, the tar
+# writer), and a divergence there would produce an .dwpack that the committed
+# index does not describe. Those stay fatal.
+dirty="$(git status --porcelain | grep -v '^?? site/screenshots/' || true)"
+if [[ -n "$dirty" ]]; then
+  if (( resume )); then
+    payload="$(printf '%s\n' "$dirty" | awk '{print $2}' \
+      | grep -E '^(packs/|site/data/|tools/(tar|build-pack)\.mjs$)' || true)"
+    [[ -z "$payload" ]] || die "resuming, but these uncommitted files feed the release artifacts:
+$(printf '%s\n' $payload)
+Commit or stash them so the .dwpack matches the index it is published with."
+    printf '  ! resuming with uncommitted changes (they are not in %s, which pins HEAD):\n' "$tag"
+    printf '%s\n' "$dirty" | sed 's/^/    /'
+  else
+    die "the working tree has uncommitted changes — commit or stash them first
+so the tag describes exactly what was tested:
+$dirty"
+  fi
 fi
 
 # ---------------------------------------------------------------- 2. gates
