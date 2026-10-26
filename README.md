@@ -10,7 +10,8 @@ DWCode keeps a familiar application menu, project tree, tabs, splits, command pa
 
 - 📂 **Workspace:** open any folder (`Ctrl+O` or `--workspace <folder>`), browse it in the explorer, create unsaved files (`Ctrl+N`), and edit UTF-8 text files up to 8 MiB in tabs. Paths are confined to the workspace; symlinks that escape it are refused.
 - 🗂️ **Explorer controls:** the Explorer header provides **Open Folder** and refresh controls, and the native window uses the Railshift app icon.
-- 💾 **Saving:** `Ctrl+S` or **Save** writes atomically. Workspace changes refresh the Explorer, and an open file changed or deleted outside DWCode prompts you to reload or keep your editor copy. Saving an externally changed file remains blocked so nothing is lost; use **Save As** for your copy. Unsaved changes prompt before closing or switching folders.
+- ♻️ **Session restore:** the open tabs, their order, the active file, and unsaved buffers are journaled as you type and come back after a restart or crash (**Keep Changes** on close keeps them; a new `files/restoreSession` setting turns it off). If a file changed on disk while DWCode was closed, saving the restored buffer is refused and reported as an external change instead of overwriting it.
+- 💾 **Saving:** `Ctrl+S` or **Save** writes atomically. Workspace changes refresh the Explorer, and an open file changed or deleted outside DWCode prompts you to reload or keep your editor copy. Saving an externally changed file remains blocked so nothing is lost; use **Save As** for your copy. Unsaved changes prompt before closing or switching folders, and closing offers **Keep Changes** so the work reappears next launch.
 - 🖥️ **Terminal:** runs commands in the workspace with `bash`, streams output, accepts input for a running command, and can stop it. It is a command runner, not a full PTY, so full-screen programs such as `vim` or `htop` do not work yet.
 - 🧠 **Language servers:** **Connect LSP** starts a server for the active file: TypeScript/JavaScript (bundled), C/C++ (`clangd`), Rust (`rust-analyzer`), Python (`pyright-langserver`). Diagnostics, completion, hover, and go-to-definition. TypeScript is covered by automated tests; the others depend on the server being on `PATH`.
 - 🎨 **Themes:** 84 palettes, the 81 canonical Cybercore themes plus 3 DWCode ones, recolour the shell and editor together and are remembered between runs.
@@ -23,7 +24,8 @@ DWCode keeps a familiar application menu, project tree, tabs, splits, command pa
   terminal, command-palette, and preference actions. The active tab is clearly
   marked with the current theme's primary accent.
 
-Not yet: crash recovery, a real PTY terminal, loading extension packs at runtime.
+Not yet: a real PTY terminal, loading extension packs at runtime, and
+executable extensions (see the extension blueprint).
 
 ## 🛠️ Build and run
 
@@ -56,10 +58,10 @@ and the current alpha limitations.
 ## 🧪 Tests
 
 ```sh
-# Backend: files, conflicts, path boundaries, terminal, themes, TypeScript LSP
+# Backend: files, conflicts, path boundaries, terminal, themes, TypeScript LSP, session restore (9 checks)
 mkdir -p build/tests && cd build/tests && qmake6 ../../tests/backend.pro && make -j"$(nproc)" && ./backend-tests
 
-# UI: drives the real window offscreen (dropdown, split view, save, terminal, LSP in the editor)
+# UI: drives the real window offscreen (dropdown, split view, save, terminal, LSP in the editor; 13 checks)
 mkdir -p build/ui-tests && cd build/ui-tests && qmake6 ../../tests/ui.pro && make -j"$(nproc)" && ./ui-tests
 ```
 
@@ -111,7 +113,7 @@ DWCode will own its workspace model, command system, settings, theme schema, and
 
 The first pack at [`packs/dwcode-core`](packs/dwcode-core) is an original DWCode contribution set with Dark, Frost, and Clear Signal palettes, muted file icons, and JavaScript/TypeScript/Markdown starter snippets. It is a data-format prototype, not yet loaded into the running app. The validator confirms that it contains no executable entry point and that its local resources and theme tokens are valid.
 
-Open VSX is a discovery and package source, not a compatibility guarantee. DWCode will begin with reviewed declarative data such as theme, icon, snippet, keymap, and grammar contributions. Executable VSIX extensions wait for a DWCode-native isolated host and a versioned permission broker. Read [`EXTENSIONS.md`](EXTENSIONS.md), [`USER_EXTENSION_PROFILE.md`](USER_EXTENSION_PROFILE.md), and [`PACK_FORMAT.md`](PACK_FORMAT.md) for the selection, design, and compatibility decisions.
+Open VSX is a discovery and package source, not a compatibility guarantee. DWCode will begin with reviewed declarative data such as theme, icon, snippet, keymap, and grammar contributions. Executable VSIX extensions wait for a DWCode-native isolated host and a versioned permission broker. Read [`EXTENSIONS.md`](EXTENSIONS.md) for the policy, [`EXTENSIONS_BLUEPRINT.md`](EXTENSIONS_BLUEPRINT.md) for the phased implementation design (contribution registries → declarative loader → out-of-process host and capability broker), and [`USER_EXTENSION_PROFILE.md`](USER_EXTENSION_PROFILE.md) and [`PACK_FORMAT.md`](PACK_FORMAT.md) for the selection, design, and compatibility decisions.
 
 Every pack must look and behave like DWCode: the Cybercore shell remains consistent, palettes map into DWCode tokens, icons use the app's restrained sizing and contrast, and upstream license and attribution terms are retained. The first-party starter pack is MIT-licensed with the project; third-party packs still require independent license and attribution review before distribution.
 
@@ -119,6 +121,7 @@ Every pack must look and behave like DWCode: the Cybercore shell remains consist
 
 - [Design decisions](DESIGN.md)
 - [Extension API and package policy](EXTENSIONS.md)
+- [Extensions implementation blueprint](EXTENSIONS_BLUEPRINT.md)
 - [Declarative pack format](PACK_FORMAT.md)
 - [VS Code profile and integration shortlist](USER_EXTENSION_PROFILE.md)
 - [Project checklist](TASKS.md)

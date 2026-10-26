@@ -47,7 +47,8 @@ sudo pacman -Rns dwcode
 ## ⚠️ Alpha limitations
 
 - The terminal is a command runner, not a full PTY.
-- File watching, New File, and crash recovery are not implemented.
+- Session restore covers editor documents; open panels and terminal scrollback
+  are not restored.
 - Language servers other than bundled TypeScript must already be installed.
 - Declarative packs validate but are not loaded at runtime.
 - Git, workspace search, debugging, and executable extensions are not yet

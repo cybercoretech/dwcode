@@ -7,13 +7,13 @@
 - [x] Add the first Cybercore identity mark and dark editor palette.
 - [x] Prototype explorer, tabs, split view, command palette, output panels, and status bar.
 - [x] Add a small optional Helix-inspired modal mode and keyboard shortcuts.
-- [ ] Review the running UI and refine the layout from feedback.
+- [x] Review the running UI and refine the layout (real-display pass for Settings, palette, and right-side Explorer; fixed placeholder contrast and search-field affordance).
 
 ## Editor foundation
 
 - [x] Define the DWCode workspace and document model, then connect editor tabs and split views to shared documents.
 - [x] Add safe local project open, file read, and atomic save with disk-conflict detection.
-- [ ] Add file watching, a New File command, and recovery for unsaved work.
+- [x] Add file watching, a New File command, and recovery for unsaved work (session journal + restore, `6389275`).
 - [ ] Establish a versioned theme schema and ship cohesive dark, light, and high-contrast Cybercore themes.
 - [x] Decide the extension-source policy: reviewed declarative packs may come from Open VSX; executable extensions require a DWCode host.
 - [x] Draft manifest/API versioning and capability-permission model for future extensions.
@@ -24,7 +24,9 @@
 - [x] Replace the in-app mark with Railshift (top bar and window icon).
 - [x] Publish the project site at dwcode.pages.dev with real screenshots and a browser demo.
 - [x] Document the package format, visual adaptation rules, profile-based roadmap, and license gate.
-- [ ] Define the DWCode extension API, contribution points, permission model, and package format before loading third-party code.
+- [x] Define the DWCode extension API, contribution points, permission model, and package format before loading third-party code (`EXTENSIONS.md` policy + `EXTENSIONS_BLUEPRINT.md` implementation design).
+- [ ] Implement blueprint phase M0: turn commands, menus, keybindings, and status items into registries.
+- [ ] Implement blueprint phase M1: load validated declarative packs at runtime with enable/disable UI.
 - [ ] Connect the validated first-party pack to a DWCode theme/icon/snippet preview and selection UI.
 - [x] License DWCode and first-party packs under MIT.
 - [x] Add Language Server Protocol support: diagnostics, completion, hover, definition (TypeScript bundled; clangd, rust-analyzer, pyright from `PATH`).
