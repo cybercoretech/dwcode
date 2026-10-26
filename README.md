@@ -55,6 +55,25 @@ cleanly, run `sudo pacman -Rns dwcode`. See
 [the Arch installation guide](docs/install-arch.md) for prerequisites, updates,
 and the current alpha limitations.
 
+### Arch User Repository
+
+The same two packages are scaffolded for the AUR under
+[`packaging/aur/`](packaging/aur/) — `dwcode` (source build) and `dwcode-bin`
+(prebuilt, `provides`/`conflicts` on `dwcode`), each with a generated
+`.SRCINFO`. Releases are cut by one command:
+
+```sh
+tools/aur-release.sh --dry-run   # bump pkgver, recompute both sha256sums,
+                                  # regenerate .SRCINFO, show the AUR pushes
+tools/aur-release.sh             # …and actually push to
+                                  # ssh://aur@aur.archlinux.org/dwcode.git
+```
+
+The script refuses to publish while any `sha256sums` is still `SKIP`, so an
+unverifiable package cannot reach the AUR by accident. Full flow, SSH setup,
+and the `-bin` asset recipe are in
+[`packaging/aur/README.md`](packaging/aur/README.md).
+
 ## 🧪 Tests
 
 ```sh

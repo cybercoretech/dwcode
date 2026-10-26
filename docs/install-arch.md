@@ -29,6 +29,40 @@ dwcode
 dwcode --workspace ~/path/to/project
 ```
 
+## 📮 Arch User Repository (AUR)
+
+Besides building locally, DWCode ships two AUR package definitions maintained
+inside this repository:
+
+- **`dwcode`** — builds from the GitHub tag with `makepkg` (`npm ci`,
+  `npm run build`, `qmake6`, `make`), then runs `npm run validate:packs` and
+  the backend test suite in `check()`. For people who want the source build.
+- **`dwcode-bin`** — downloads a prebuilt `usr/` tarball from the GitHub
+  release and unpacks it. `provides=('dwcode')` and `conflicts=('dwcode')`
+  (never `replaces`) keep the two mutually exclusive while letting either
+  satisfy a `dwcode` dependency. For people who just want the editor.
+
+Both live under `packaging/aur/` with a generated `.SRCINFO`, and both are
+updated by a single command:
+
+```sh
+tools/aur-release.sh --dry-run    # verify: tag check, checksums, .SRCINFO, pushes
+tools/aur-release.sh              # publish to ssh://aur@aur.archlinux.org/<pkg>.git
+```
+
+`tools/aur-release.sh` refuses to push while any `sha256sums` is `SKIP`, so
+nothing unverifiable can reach the AUR. Once published, install with an AUR
+helper:
+
+```sh
+yay -S dwcode          # source build
+yay -S dwcode-bin      # prebuilt
+```
+
+First-time SSH key registration, the `-bin` asset recipe
+(`packaging/aur/make-bin-tarball.sh`), and the full release checklist are in
+[`packaging/aur/README.md`](../packaging/aur/README.md).
+
 ## 🔄 Update and uninstall
 
 Build a new package from the revision you want to use, then replace the

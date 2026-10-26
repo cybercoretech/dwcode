@@ -6,6 +6,19 @@
 
 ## ✅ Completed milestones
 
+- 📮 **AUR packaging:** `packaging/aur/` now holds both AUR packages —
+  `dwcode` (source build) and `dwcode-bin` (prebuilt, with
+  `provides`/`conflicts` on `dwcode`, never `replaces`) — each with a
+  generated `.SRCINFO`. `packaging/aur/make-bin-tarball.sh` produces the
+  byte-reproducible `usr/` tarball `-bin` downloads (verified: 109 entries,
+  `usr/bin/dwcode`, stable sha256 across runs), and `tools/aur-release.sh`
+  verifies the GitHub tag, recomputes both checksums, bumps `pkgver`/`pkgrel`,
+  regenerates `.SRCINFO` and pushes to `ssh://aur@aur.archlinux.org/<pkg>.git`.
+  It refuses to publish while any `sha256sums` is `SKIP` — which is the
+  current state until `v0.1.0` is tagged (GitHub has no tags or releases yet).
+  `packaging/arch/PKGBUILD` stays the local-only build and points at
+  `packaging/aur/`; docs: `packaging/aur/README.md`, README, install-arch.
+
 - 🐧 **Arch / Omarchy alpha:** DWCode has a reproducible Arch package, desktop
   launcher, Railshift icon, bundled Monaco assets, clean uninstall path, CI,
   and a tag-driven release-artifact workflow.

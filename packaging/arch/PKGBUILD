@@ -1,3 +1,8 @@
+# Local package build: used by packaging/arch/build-package.sh on this machine,
+# never pushed anywhere. The two published AUR packages (source `dwcode` and
+# prebuilt `dwcode-bin`) live in packaging/aur/ and are released by
+# tools/aur-release.sh — see packaging/aur/README.md. Change this file only for
+# the local build path; the AUR copies do not read it.
 pkgname=dwcode
 pkgver=0.1.0
 pkgrel=1
