@@ -20,6 +20,6 @@ DWCode-native executable extensions come later, behind a versioned API, separate
 - Keep application chrome in the Cybercore DWCode visual language: charcoal surfaces, muted separators, readable text, and sparing cyan/rose/green signals.
 - Treat imported VS Code themes as source palettes to map into DWCode-owned tokens; do not let an imported theme replace the shell or typography.
 - Normalize icons to DWCode's small canvas and restrained contrast. Preserve original licensing and attribution; create original assets if adaptation rights are not clear.
-- The local `dwcode-core` pack demonstrates three palettes, seven file/folder icons, and starter snippets. It is not yet connected to runtime loading.
+- The local `dwcode-core` pack demonstrates three palettes, seven file/folder icons, and starter snippets, and is loaded in-process as data with an enable switch in Settings → EXTENSIONS.
 - The ten mark concepts in `brand/logo-selection.html` are a review gallery. Keep the existing app mark until the product owner selects and approves one concept.
 - DWCode and its first-party sample pack are MIT-licensed. Third-party assets and packages still require their own license and attribution review before distribution.

@@ -50,6 +50,7 @@ sudo pacman -Rns dwcode
 - Session restore covers editor documents; open panels and terminal scrollback
   are not restored.
 - Language servers other than bundled TypeScript must already be installed.
-- Declarative packs validate but are not loaded at runtime.
+- Declarative packs load in-process as data (themes and snippets, toggleable
+  in Settings → EXTENSIONS); executable extensions are not available.
 - Git, workspace search, debugging, and executable extensions are not yet
   available.

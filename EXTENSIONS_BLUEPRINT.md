@@ -190,7 +190,7 @@ No capabilities yet. Prove process lifecycle, versioning, and fail-closed behavi
   - unknown method → error reply, host killed;
   - heartbeat timeout → supervisor kills and reports;
   - grant removed → next request rejected and host stopped.
-- No UI changes; `ui_test` must stay 13/13.
+- No UI changes; `ui_test` must stay 14/14.
 
 ---
 
