@@ -10,8 +10,8 @@
   launcher, Railshift icon, bundled Monaco assets, clean uninstall path, CI,
   and a tag-driven release-artifact workflow.
 - 🧭 **Codium-inspired application chrome:** `main` includes a compact,
-  functional File/Edit/Selection/View/Run/Terminal/Help menu bar, workspace
-  controls, and Cybercore-accented document tabs.
+  functional File/Edit/Selection/View/Run/Terminal/Settings/Help menu bar,
+  workspace controls, and Cybercore-accented document tabs.
 - 📂 **Explorer and window identity:** the Explorer header has **Open Folder**
   and refresh controls. Railshift is set explicitly on the native Qt window as
   well as the desktop entry, so the compositor receives DWCode's app icon.
@@ -25,6 +25,17 @@
 - 🛡️ **Reliability foundation:** **New File… (Ctrl+N)** creates an unsaved,
   workspace-confined document. The Explorer watches workspace folders, and
   changed or deleted open files prompt to reload or preserve the editor copy.
+  Later external versions still prompt, while duplicate notifications for the
+  same version are suppressed. Landed in `907f93c`.
+
+## 🧾 Recent implementation record
+
+- `ef3b2fe feat(settings): add persistent preferences dialog` added searchable,
+  persisted editor, workspace, terminal, appearance, and modal-editing
+  preferences, including live Monaco application.
+- `907f93c feat(workspace): add new files and change detection` added the first
+  reliability slice: New File UI and API, recursive workspace watching,
+  external-change/reload handling, and test coverage.
 
 ## 🧪 Validation baseline
 
@@ -110,11 +121,24 @@ an unrelated dirty checkout without explicit reconciliation.
 
 ## 🛠️ Next recommended work
 
-1. 📦 Test-install the newest package locally and verify launcher, window icon,
-   bundled assets, and uninstall behavior.
-2. 📝 Add New File, file watching, and crash recovery before larger integrations.
-3. 🔎 Add workspace search and Git status/actions.
-4. 🧩 Connect declarative theme, icon, snippet, and keymap packs to the live UI
-   with safe preview and reset controls.
-5. 🔐 Design the extension-host security model before allowing executable
-   third-party code.
+Follow this product sequence; the first two reliability items are complete.
+
+1. 💾 **Finish reliability:** add crash recovery/session restore, then perform
+   a real-display layout pass for Settings and the right-side Explorer.
+2. 🔎 **Navigation:** implement `Ctrl+P` fuzzy Quick Open, then `Ctrl+Shift+F`
+   workspace search backed by `rg` with clickable result locations.
+3. 🌿 **Git:** add Explorer status decorations, a diff view, stage/unstage, and
+   a focused commit flow. Build it on the watcher foundation above.
+4. ▶️ **Tasks and terminal:** add named build/test/run tasks and problem
+   matchers; replace the command runner with a PTY only when its interaction
+   and lifecycle model is ready.
+5. 🧩 **Data-only packs:** load validated theme, icon, snippet, and keymap packs
+   with safe preview, enable/disable, and reset controls.
+6. 🔐 **Extensions:** design the sandboxed extension host and capability model
+   before executing third-party code. Keep extensions isolated from the Qt app,
+   Monaco page, filesystem, terminal, and network behind explicit RPC-granted
+   permissions; distribution/registry work comes last.
+
+Separate release verification remains worthwhile: test-install the newest Arch
+package locally and verify launcher, window icon, bundled assets, and uninstall
+behavior.
