@@ -37,8 +37,9 @@ const NAV = [
     { ico: '01', text: 'the question', href: '#question' },
     { ico: '02', text: 'how it works', href: '#design' },
     { ico: '03', text: 'license gate', href: '#gate' },
-    { ico: '04', text: 'excluded list', href: '#excluded' },
-    { ico: '05', text: 'submit a pack', href: '#submit' },
+    { ico: '04', text: 'accepted list', href: '#accepted' },
+    { ico: '05', text: 'excluded list', href: '#excluded' },
+    { ico: '06', text: 'submit a pack', href: '#submit' },
   ]) },
   { label: 'pages', items: [
     { ico: '~', text: 'home', href: '/', current: onHome },
