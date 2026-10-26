@@ -25,8 +25,9 @@
 - [x] Publish the project site at dwcode.pages.dev with real screenshots and a browser demo.
 - [x] Document the package format, visual adaptation rules, profile-based roadmap, and license gate.
 - [x] Define the DWCode extension API, contribution points, permission model, and package format before loading third-party code (`EXTENSIONS.md` policy + `EXTENSIONS_BLUEPRINT.md` implementation design).
-- [ ] Implement blueprint phase M0: turn commands, menus, keybindings, and status items into registries.
-- [ ] Implement blueprint phase M1: load validated declarative packs at runtime with enable/disable UI.
+- [x] Implement blueprint phase M0: turn commands into the `CommandRegistry` the palette and `activate()` share (menu-bar and status-bar models, plus the keybinding conflict compiler, stay open for M3).
+- [x] Implement blueprint phase M1: load validated declarative packs at runtime with an enable/disable switch in Settings → EXTENSIONS.
+- [x] Research the FOSS shortlist on Open VSX and publish [`FOSS_EXTENSION_SHORTLIST.md`](FOSS_EXTENSION_SHORTLIST.md) (tiered candidates plus per-area coverage for needs, Rust, C++, Git, syntax highlighting, HTML/CSS, with licence and download verification).
 - [ ] Connect the validated first-party pack to a DWCode theme/icon/snippet preview and selection UI.
 - [x] License DWCode and first-party packs under MIT.
 - [x] Add Language Server Protocol support: diagnostics, completion, hover, definition (TypeScript bundled; clangd, rust-analyzer, pyright from `PATH`).

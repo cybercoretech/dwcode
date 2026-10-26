@@ -75,8 +75,9 @@ make -j"$(nproc)"
 QTWEBENGINE_DISABLE_SANDBOX=1 ./ui-tests
 ```
 
-The current UI suite has 13 passing checks, including Explorer folder-control
-availability, the native window icon, the Settings dialog, New File, and
+The current UI suite has 14 passing checks, including Explorer folder-control
+availability, the native window icon, the Settings dialog, the EXTENSIONS
+section (`extensionsSectionManagesPacks`), New File, and
 `unsavedWorkSurvivesRestart` (edit → close → relaunch → buffer restored).
 
 ### Current validation
@@ -84,18 +85,21 @@ availability, the native window icon, the Settings dialog, New File, and
 - `npm ci` and `npm run build` completed successfully. (`node_modules/` is
   ignored and was installed locally only.) `npm run validate:packs` passes:
   3 themes, 7 icon assets, 3 snippet groups.
-- The full backend suite passed **9/9 checks**, including `sessionRestore`
+- The full backend suite passed **10/10 checks**, including `packLoader` (pack
+  fixtures from `tests/fixtures/packs/`, bad-manifest rejection, `../` escape
+  rejection, semver range table) and `sessionRestore`
   (tab order, active file, unsaved buffer, external-change refusal, deleted
   file retention, discard stays discarded).
-- The full offscreen Qt WebEngine UI suite passed **13/13 checks**, including
-  `settingsDialogAndEditorPreferences` and `unsavedWorkSurvivesRestart`. In
+- The full offscreen Qt WebEngine UI suite passed **14/14 checks**, including
+  `settingsDialogAndEditorPreferences`, `extensionsSectionManagesPacks` and
+  `unsavedWorkSurvivesRestart`. In
   this environment it runs outside the command sandbox so Qt WebEngine can
   create its loopback server and browser subprocess. Vulkan fallback warnings
   are expected in offscreen mode.
 - **Real-display layout pass completed** on Wayland at `QT_SCALE_FACTOR=1`.
-  Settings, the settings search (unfocused and filtered), the command palette,
-  and the right-side Explorer were captured and reviewed; the two defects it
-  surfaced are fixed. Reproduce with:
+  Settings, the settings search (unfocused and filtered), the extensions
+  section, the command palette, and the right-side Explorer were captured and
+  reviewed; the two defects it surfaced are fixed. Reproduce with:
 
 ```sh
 mkdir -p build/site-shots && cd build/site-shots
@@ -121,6 +125,34 @@ DWCODE_UI_PLATFORM=wayland QT_SCALE_FACTOR=1 QTWEBENGINE_DISABLE_SANDBOX=1 \
   confirmation for a deliberately narrow set of risky command patterns.
 - Keyboard: persisted modal-mode default and normal-mode cursor shape.
 
+### Extensions (M0 + M1) implemented
+
+- `src/qml/CommandRegistry.qml`: `register` / `unregister` / `run`;
+  built-ins self-register in `Component.onCompleted`, the palette reads it.
+- `src/packloader.{h,cpp}` re-validates every pack with the same rules as
+  `tools/validate-packs.mjs` (fail-closed `engines.dwcode` semver, path
+  containment on disk and for `:/` resources), so a file that merely passed CI
+  is never trusted by the app.
+- `WorkspaceBackend`: `packs`, `packSnippets`, `packDirectory()`,
+  `setPackEnabled()` (persisted at `settings/packs/<id>/enabled`),
+  `rebuildThemes()`.
+- **Theme catalog split:** `src/data/themes.json` holds the **81** built-in
+  themes; the three `cybercore.dwcode-*` themes live only in
+  `packs/dwcode-core/themes/`. The shipped total stays **84** — the backend
+  merges built-ins first, and `node tools/theme-catalog.mjs` (wired into
+  `tools/build-site.sh`) regenerates `site/data/themes.json` with the merge
+  for the site gallery. Do not add the pack themes back to `themes.json`.
+
+Two traps found the hard way:
+
+- **Never put a `R"json(...)"` raw string containing `"#RRGGBB` inside a
+  moc-parsed `.cpp`** — Qt's moc silently emits "No relevant classes found"
+  and the link fails with `undefined reference to vtable`. JSON fixtures live
+  in `tests/fixtures/packs/` and are copied at runtime with `QFINDTESTDATA`.
+- Toggling a pack rebuilds the Repeater, so its delegates are recreated; a UI
+  test must re-locate `packToggle-<id>` after every toggle or it dereferences
+  a deleted item.
+
 ## 💻 Local installation state
 
 The packaged application is source-independent, but it is **not automatically
@@ -139,12 +171,13 @@ an unrelated dirty checkout without explicit reconciliation.
 ## ⚠️ Current product boundaries
 
 - The terminal is a command runner, not a PTY.
-- Git, workspace search, debugging, runtime pack loading, and executable
-  extensions are not implemented. Session restore covers editor documents only
+- Git, workspace search, debugging, and executable extensions are not
+  implemented. Declarative packs *are* loaded in-process (themes, snippets,
+  enable/disable in Settings → EXTENSIONS); icon themes are validated but not
+  rendered yet. Session restore covers editor documents only
   (not open panels, split state, or terminal scrollback).
 - TypeScript is bundled for LSP. C/C++, Rust, and Python support require their
   language servers on `PATH`.
-- Declarative packs validate but are not loaded by the application yet.
 
 ## 🛠️ Next recommended work
 
@@ -159,15 +192,20 @@ Follow this product sequence; the reliability items are complete.
 4. ▶️ **Tasks and terminal:** add named build/test/run tasks and problem
    matchers; replace the command runner with a PTY only when its interaction
    and lifecycle model is ready.
-5. 🧩 **Data-only packs:** load validated theme, icon, snippet, and keymap packs
-   with safe preview, enable/disable, and reset controls (blueprint phase M1).
+5. 🧩 **Data-only packs (M1 done):** theme, snippet, and icon packs now load
+   in-process with enable/disable in Settings → EXTENSIONS. Remaining: icon
+   rendering, keymap packs, a safe preview, and the `[packDir]` /
+   `dwcode --check-pack` validator argument.
 6. 🔐 **Extensions:** follow [`EXTENSIONS_BLUEPRINT.md`](EXTENSIONS_BLUEPRINT.md)
-   — M0 converts the closed command/menu/status/keybinding surfaces in
-   `Main.qml` into registries, M1 loads declarative packs, M2 adds the
+   — M0's `CommandRegistry` landed (menu-bar/status-bar models and the
+   keybinding conflict compiler are still M3 work); M1 loads declarative packs;
+   M2 adds the
    out-of-process host with the versioned JSON-RPC handshake, and M3/M4 add the
    narrow executable API behind the capability broker. Keep extensions isolated
    from the Qt app, Monaco page, filesystem, terminal, and network behind
-   explicit RPC-granted permissions; distribution/registry work is M5.
+   explicit RPC-granted permissions; distribution/registry work is M5. The
+   candidate set to evaluate first is in
+   [`FOSS_EXTENSION_SHORTLIST.md`](FOSS_EXTENSION_SHORTLIST.md).
 
 Separate release verification remains worthwhile: test-install the newest Arch
 package locally and verify launcher, window icon, bundled assets, and uninstall

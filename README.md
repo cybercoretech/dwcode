@@ -58,10 +58,10 @@ and the current alpha limitations.
 ## 🧪 Tests
 
 ```sh
-# Backend: files, conflicts, path boundaries, terminal, themes, TypeScript LSP, session restore (9 checks)
+# Backend: files, conflicts, path boundaries, terminal, themes, pack loading, TypeScript LSP, session restore (10 checks)
 mkdir -p build/tests && cd build/tests && qmake6 ../../tests/backend.pro && make -j"$(nproc)" && ./backend-tests
 
-# UI: drives the real window offscreen (dropdown, split view, save, terminal, LSP in the editor; 13 checks)
+# UI: drives the real window offscreen (dropdown, split view, save, terminal, LSP, extensions section; 14 checks)
 mkdir -p build/ui-tests && cd build/ui-tests && qmake6 ../../tests/ui.pro && make -j"$(nproc)" && ./ui-tests
 ```
 
@@ -111,9 +111,9 @@ DWCode will own its workspace model, command system, settings, theme schema, and
 
 ## 🧩 Extension plan
 
-The first pack at [`packs/dwcode-core`](packs/dwcode-core) is an original DWCode contribution set with Dark, Frost, and Clear Signal palettes, muted file icons, and JavaScript/TypeScript/Markdown starter snippets. It is a data-format prototype, not yet loaded into the running app. The validator confirms that it contains no executable entry point and that its local resources and theme tokens are valid.
+The first pack at [`packs/dwcode-core`](packs/dwcode-core) is an original DWCode contribution set with Dark, Frost, and Clear Signal palettes, muted file icons, and JavaScript/TypeScript/Markdown starter snippets. It loads in-process as data: the backend re-validates it with the same rules as the Node validator, its three themes merge into the 84-theme catalog, its snippets reach Monaco, and Settings → EXTENSIONS can switch the whole pack off. The validator confirms that it contains no executable entry point and that its local resources and theme tokens are valid.
 
-Open VSX is a discovery and package source, not a compatibility guarantee. DWCode will begin with reviewed declarative data such as theme, icon, snippet, keymap, and grammar contributions. Executable VSIX extensions wait for a DWCode-native isolated host and a versioned permission broker. Read [`EXTENSIONS.md`](EXTENSIONS.md) for the policy, [`EXTENSIONS_BLUEPRINT.md`](EXTENSIONS_BLUEPRINT.md) for the phased implementation design (contribution registries → declarative loader → out-of-process host and capability broker), and [`USER_EXTENSION_PROFILE.md`](USER_EXTENSION_PROFILE.md) and [`PACK_FORMAT.md`](PACK_FORMAT.md) for the selection, design, and compatibility decisions.
+Open VSX is a discovery and package source, not a compatibility guarantee. DWCode will begin with reviewed declarative data such as theme, icon, snippet, keymap, and grammar contributions. Executable VSIX extensions wait for a DWCode-native isolated host and a versioned permission broker. Read [`EXTENSIONS.md`](EXTENSIONS.md) for the policy, [`EXTENSIONS_BLUEPRINT.md`](EXTENSIONS_BLUEPRINT.md) for the phased implementation design (contribution registries → declarative loader → out-of-process host and capability broker), [`USER_EXTENSION_PROFILE.md`](USER_EXTENSION_PROFILE.md) for the selection decisions, [`FOSS_EXTENSION_SHORTLIST.md`](FOSS_EXTENSION_SHORTLIST.md) for the verified FOSS candidates on Open VSX, and [`PACK_FORMAT.md`](PACK_FORMAT.md) for the pack schema.
 
 Every pack must look and behave like DWCode: the Cybercore shell remains consistent, palettes map into DWCode tokens, icons use the app's restrained sizing and contrast, and upstream license and attribution terms are retained. The first-party starter pack is MIT-licensed with the project; third-party packs still require independent license and attribution review before distribution.
 
@@ -124,4 +124,5 @@ Every pack must look and behave like DWCode: the Cybercore shell remains consist
 - [Extensions implementation blueprint](EXTENSIONS_BLUEPRINT.md)
 - [Declarative pack format](PACK_FORMAT.md)
 - [VS Code profile and integration shortlist](USER_EXTENSION_PROFILE.md)
+- [FOSS extension shortlist on Open VSX](FOSS_EXTENSION_SHORTLIST.md)
 - [Project checklist](TASKS.md)

@@ -1,8 +1,10 @@
 # DWCode extensions: implementation blueprint
 
-**Status:** design for implementation · **Companion to:** [EXTENSIONS.md](EXTENSIONS.md) (policy),
+**Status:** M0 (command registry) and M1 (declarative pack loader) delivered · **Companion to:**
+[EXTENSIONS.md](EXTENSIONS.md) (policy),
 [PACK_FORMAT.md](PACK_FORMAT.md) (declarative pack schema),
-[USER_EXTENSION_PROFILE.md](USER_EXTENSION_PROFILE.md) (target-workload inventory)
+[USER_EXTENSION_PROFILE.md](USER_EXTENSION_PROFILE.md) (target-workload inventory),
+[FOSS_EXTENSION_SHORTLIST.md](FOSS_EXTENSION_SHORTLIST.md) (verified FOSS candidates on Open VSX)
 
 EXTENSIONS.md decides *what* DWCode will and will not accept. This document says *how* to build it
 against the code that exists today, seam by seam, with milestones that each land green.
@@ -64,6 +66,12 @@ channel with no port at all.
 
 ## 3. Phase M0 — contribution seams (no extension code yet)
 
+> **Status: delivered (registry core).** `src/qml/CommandRegistry.qml` landed: `register`,
+> `unregister`, `run`, `commandsChanged`; `Main.qml` routes unknown `activate()` ids through it,
+> the palette reads it, and every built-in command self-registers in `Component.onCompleted` with
+> `dwcode.*` ids. Still open from this section, deferred to M3: the menu-bar/status-bar models
+> (`contributes.menus`, status `Repeater`), and the keybinding conflict compiler.
+
 Refactor the closed surfaces into registries, with zero visible behavior change. This is the
 prerequisite for every later phase and is independently shippable.
 
@@ -98,6 +106,17 @@ prerequisite for every later phase and is independently shippable.
 ---
 
 ## 4. Phase M1 — load declarative packs (first user-visible extensions)
+
+> **Status: delivered.** `src/packloader.{h,cpp}` validates and loads packs in C++ (same rules as
+> `tools/validate-packs.mjs`, fail-closed `engines.dwcode` semver, path containment on disk and
+> for `:/` resources); `WorkspaceBackend` exposes `packs`/`packSnippets`/`packDirectory` with
+> `setPackEnabled()` persisting to `settings/packs/<id>/enabled`, and `rebuildThemes()` merges pack
+> themes into the catalog (built-ins first, pack wins only for a missing id — chrome tokens stay
+> DWCode's). `src/main.js` syncs `window.dwcodeThemes` and registers pack snippets per language.
+> Settings gained the **EXTENSIONS** section with search keywords and an enable switch.
+> Tests: `backend_test::packLoader` (10 total, fixtures under `tests/fixtures/packs/`) and
+> `ui_test::extensionsSectionManagesPacks` (14 total). Still open from this section: the
+> `[packDir]` argument / `dwcode --check-pack <dir>` CLI flag, and pack `languages`/`keymaps`.
 
 Bring `packs/dwcode-core` from "validates" to "loads", still data-only, still in-process.
 
@@ -244,15 +263,17 @@ the suite with executable extensions forced on.
 
 | Phase | New | Modified |
 | --- | --- | --- |
-| M0 | `src/qml/CommandRegistry.qml` | `src/qml/Main.qml`, `tests/ui_test.cpp` |
-| M1 | `src/packloader.{h,cpp}` | `dwcode.pro`, `src/main.js`, `src/qml/SettingsDialog.qml`, `src/resources.qrc`, `tools/validate-packs.mjs`, `tests/backend_test.cpp` |
+| M0 ✅ | `src/qml/CommandRegistry.qml` | `src/qml/Main.qml`, `tests/ui_test.cpp` |
+| M1 ✅ | `src/packloader.{h,cpp}`, `tests/fixtures/packs/*`, `tools/theme-catalog.mjs` | `dwcode.pro`, `src/main.js`, `src/qml/SettingsDialog.qml`, `src/resources.qrc`, `src/data/themes.json`, `tools/build-site.sh`, `tests/backend_test.cpp`, `tests/ui_test.cpp`, `tests/shots.cpp` |
 | M2 | `src/extensionbroker.{h,cpp}`, `tests/fixtures/host/*` | `src/main.cpp`, `tests/backend_test.cpp` |
 | M3 | `src/qml/ExtensionStatusDelegate.qml` (or equivalent) | `src/extensionbroker.cpp`, `src/qml/Main.qml`, `tests/{backend,ui}_test.cpp`, `tests/shots.cpp` |
 | M4 | `tests/threatmodel.md` | `src/extensionbroker.cpp`, `tests/backend_test.cpp` |
 | M5 | `tools/fetch-catalog.mjs` | `src/packloader.cpp`, docs |
 
-Every phase keeps the three suites green: `./backend-tests` (currently 9/9),
-`./ui-tests` (currently 13/13), `npm run build && npm run validate:packs`.
+Every phase keeps the three suites green: `./backend-tests` (currently 10/10),
+`./ui-tests` (currently 14/14), `npm run build && npm run validate:packs`.
+(`tests/shots.cpp` is not a suite; `layout()` currently saves `settings`, `settings-search`,
+`settings-extensions`, `sidebar-right`, `command-palette`.)
 
 ---
 
