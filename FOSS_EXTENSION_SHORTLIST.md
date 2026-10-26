@@ -3,7 +3,9 @@
 **Verified:** 2026-10-25 against the live Open VSX registry API (`/api/<ns>/<name>` for license and
 presence, `/api/-/search?orderBy=downloadCount&sortOrder=desc` for a full popularity sweep of the
 registry's top 80 of 20,163 extensions) and the GitHub license API for packages whose registry
-license field was empty, a `SEE LICENSE IN …` pointer, or a placeholder. Re-run these lookups
+license field was empty, a `SEE LICENSE IN …` pointer, or a placeholder. Extended 2026-10-26 with
+an AI-agent sweep — `codex`, `antigravity`, `gemini`, `opencode`, `copilot` (40 results each,
+licences re-checked upstream). Re-run these lookups
 before each catalog release — licenses and availability change.
 
 **Purpose:** decide which of the most-used free/open-source extensions DWCode should cover, and
@@ -198,6 +200,21 @@ FOSS, but they execute code and/or spawn processes, so they wait for the capabil
 | Go (`golang.Go`) | MIT | (registry) | `gopls` on `PATH`, `process.exec` grant |
 | Java (Red Hat) | EPL-2.0 | (registry) | large JVM language server; only after resource limits from blueprint M4 exist |
 | rust-analyzer (`rust-lang.rust-analyzer`) | MIT OR Apache-2.0 | (registry) | `rust-analyzer` on `PATH` — DWCode already expects it per README |
+| **opencode** (`sst-dev.opencode`) | MIT (upstream `sst/opencode`, 221 K★, verified) | 678 K | the official agent extension: `process.exec` to launch the `opencode` agent + `network.connect`. **Top pick of the AI sweep.** Stage 1 alternative: DWCode ships one agent panel that drives a user-supplied CLI, same pattern as its language-server picker |
+| Gemini CLI Companion (`Google.gemini-cli-vscode-ide-companion`) | Apache-2.0 (upstream `google-gemini/gemini-cli`, 108 K★) | 1.59 M | `process.exec` for the `gemini` binary + `network.connect`; bridges the terminal agent into the editor rather than embedding a service SDK |
+| Codex / Claude Code history viewer (`HizTam.codex-history-viewer`) | MIT (verified) | 19 K | `workspace.read` only — the lightest host-gated candidate here. Reads local session logs, so DWCode's own session journal makes this a natural **native** feature instead (Stage 1) |
+| Varro — OpenCode workbench (`koltyakov.varro`) | MIT (verified) | 52 K | alternative to the official opencode extension: project-aware chat + parallel agent sessions; same `process.exec` + `network.connect` ask |
+
+**AI-agent sweep note (codex / antigravity / gemini / opencode / copilot, checked 2026-10-26 —
+200 results across five registry queries, licences re-checked upstream):** every high-download
+*agent* extension is proprietary, but **every agent's CLI core is FOSS** — `openai/codex`
+Apache-2.0 (131 K★), `sst/opencode` MIT (221 K★), `google-gemini/gemini-cli` Apache-2.0 (108 K★),
+Claude Code `NONE`. That is the useful signal: DWCode's agent story should be one panel that
+drives a *user-supplied* CLI (`codex`, `opencode`, `gemini`, …) with a `process.exec` grant,
+rather than packaging any vendor's editor extension. Third-party OpenCode clients also exist
+under other publisher ids (`ZiShuo.opencode` points at the same upstream as `sst-dev.opencode`;
+`haoyangzeng.opencui` "OpenCode Panel", MIT, 113 K, and `K-Arthur.opencode-harness`, MIT, 11 K)
+— prefer the official publisher.
 
 ## Excluded — free but not FOSS, or not on Open VSX
 
@@ -207,13 +224,18 @@ FOSS, but they execute code and/or spawn processes, so they wait for the capabil
 | Thunder Client | Proprietary freemium; repository carries no OSS license (GitHub API `NONE`). |
 | GitHub Copilot | Proprietary; returns 404 from Open VSX. |
 | Pylance, IntelliCode, C++ extension pack extras | Microsoft proprietary components; `ms-vscode.cpptools` returns 404 from Open VSX. |
-| Claude Code (`Anthropic.claude-code`) | Proprietary, despite high registry downloads. |
-| Claude Code (`Anthropic.claude-code`) | Proprietary; the registry `license` field is Anthropic's own legal notice, not a license grant — despite 61.5 M downloads. |
-| Codex (`openai.chatgpt`), Gemini Code Assist (`Google.geminicodeassist`) | `SEE LICENSE IN LICENSE.md` pointing at proprietary terms; not FOSS. |
+| Claude Code (`Anthropic.claude-code`) | Proprietary; the registry `license` field is Anthropic's own legal notice, not a license grant — despite 61.5 M downloads. Upstream repo reports `NONE` too. |
+| Codex (`openai.chatgpt`, 12.5 M) and Codex Audio (`openai.codex-audio`) | `SEE LICENSE IN LICENSE.md` pointing at proprietary terms; not FOSS. **Distinction that matters:** the *extension* is proprietary while the *CLI core* `openai/codex` is Apache-2.0 — so the capability is reachable through a native `process.exec` integration, never as a package. |
+| Gemini Code Assist (`Google.geminicodeassist`, 4.2 M) | `SEE LICENSE IN LICENSE` — service EULA, not a FOSS grant. The FOSS route is the Gemini CLI Companion row in Tier C. |
+| Google Antigravity (`Google.google-antigravity`) | `SEE LICENSE IN LICENSE.txt`, no public repo — Google proprietary. |
+| Antigravity quota monitors (`jlcodes.antigravity-cockpit` 5.0 M, `n2ns.antigravity-panel` 468 K) | FOSS upstream (MIT / Apache-2.0, both verified) but **no target runtime**: they read Google Antigravity IDE quotas, an IDE DWCode is not. Capability is service-specific, not portable. (`iml1s.antigravity-plus` claims MIT on the registry but its repo is 404 — fails the verify rule regardless.) |
+| Code Web Chat / gemini-coder (`robertpiosik.gemini-coder`, 595 K) | GitHub API reports `NONE` — no license file. Stop-and-verify rule applies; high downloads do not substitute for a grant. |
+| Copilot bridges (`adguard.tokenguard-copilot`, `statiolake.vscode-copilot-lsp`, `allansantos-dv.copilot-delegate`) | MIT, but each needs GitHub Copilot or the Copilot CLI — proprietary and 404 on Open VSX. FOSS code depending on an out-of-reach product is out of reach as a package. |
+| Codex / ChatGPT account switchers (`woozy-masta.codex-switch`, `devhakeem5.codex-hub`, `zixfel.codex-account-swapper`) | Multi-account rotation has no DWCode capability to map to; excluded on usefulness, not licence (`codex-switch` is MIT, verified — the others were not taken further once that failed). |
 | Vue - Official (`Vue.volar`) | Registry lists **no license**; upstream `vuejs/language-tools` is MIT — verify at catalog time rather than trusting the registry field. |
 | Python Environments (`ms-python.vscode-python-envs`) | Registry lists **no license**; same verify-before-catalog rule as every `NONE` entry. |
 | Devsense PHP / Composer / PHP Profiler (`devsense.*`) | `LicenseRef-LICENSE` — a custom license reference, not an SPDX grant. |
-| Antigravity Cockpit, Thunder Client, Live Preview (`ms-vscode.live-server`), Mermaid Chart, Office Viewer, Posit Shiny | Registry license `NONE` or a service EULA. |
+| Live Preview (`ms-vscode.live-server`), Mermaid Chart, Office Viewer, Posit Shiny | Registry license `NONE` or a service EULA. |
 | Catppuccin, Tokyo Night theme packages | Marketplace-only (404 on Open VSX); recreation from license-clean sources only. |
 
 "Excluded" applies to *sourcing the package*. A compatible DWCode-native implementation of the
@@ -228,7 +250,10 @@ governed by the capability table in [EXTENSIONS.md](EXTENSIONS.md).
    ESLint → spell check (external process, GPL kept at arm's length) → path completion → preview.
    Each lands as a native feature with tests, not as a package.
 3. **After the host exists (M2/M3+):** Tier C, capability by capability, with the install prompt
-   listing publisher, version, license, package hash, and requested rights.
+   listing publisher, version, license, package hash, and requested rights. The AI-agent sweep
+   points at the first capability to build: **one agent panel driving a user-supplied CLI**
+   (`opencode`, `gemini`, `codex` — all FOSS cores) instead of any vendor's editor extension,
+   gated behind `process.exec` + `network.connect` and one explicit consent prompt.
 4. **Every entry:** pin exact version, record origin + sha256 in the lock record, re-check the
    license field on update — a license change is a reason to re-review, not a silent bump.
 
@@ -242,6 +267,9 @@ curl -s 'https://open-vsx.org/api/-/search?query=&size=40&offset=0&orderBy=downl
 curl -s https://open-vsx.org/api/<namespace>/<name> | jq '{version, license}'
 # upstream license when the registry field is empty or a placeholder
 curl -s https://api.github.com/repos/<owner>/<repo> | jq '.license.spdx_id'
+# a per-topic sweep (how the AI-agent list above was built); repeat per keyword
+curl -s 'https://open-vsx.org/api/-/search?query=opencode&size=40&orderBy=downloadCount&sortOrder=desc' \
+  | jq -r '.extensions[] | [.downloadCount, (.namespace.id + "." + .name), .displayName] | @tsv'
 ```
 
 A registry `license` value that is empty, a NUL placeholder (GitLens's `%gitlens.license%`), or a
