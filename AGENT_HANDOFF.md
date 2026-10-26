@@ -29,6 +29,19 @@
   **diagprint** 🛠️ medium value only if its diagnostics schema is adopted in C++ too,
   **ferraxis** 🛑 has **no licence file** and no usable output for years. Phases 0–5
   are checklist-linked from `TASKS.md`.
+- 📡 **Install index (M5 Phase 0):** `npm run catalog:index` emits
+  `site/data/catalog/index.json` (+ `.sha256`), schema 1, **173 entries** — one
+  installable first-party pack with a real `download` block and 172
+  `kind: "reference"` rows with `download: null` (DWCode does not redistribute
+  Open VSX packages). Contract: [`docs/PACK_INDEX.md`](docs/PACK_INDEX.md) —
+  fail-closed schema, https-or-loopback URLs, 64-hex sha256, bounded sizes,
+  `kind` ⟺ `download` pairing, and the lock-record shape the client writes.
+  `npm run validate:catalog` now enforces all of it *and* recomputes every pack
+  checksum from `packs/`; tamper tests confirm six mutation classes all exit 1.
+  Artifacts come from `tools/build-pack.mjs` + `tools/tar.mjs`: a hand-rolled,
+  byte-reproducible POSIX ustar writer (no gzip, no symlinks, fixed
+  ownership/mtime) so CI can derive the published sha256 without committing a
+  binary. `tools/build-site.sh` regenerates the index before every deploy.
 
 - 🐧 **Arch / Omarchy alpha:** DWCode has a reproducible Arch package, desktop
   launcher, Railshift icon, bundled Monaco assets, clean uninstall path, CI,

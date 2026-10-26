@@ -9,6 +9,8 @@
     "catalog:scan": "node tools/openvsx-scan.mjs --doc",
     "catalog:build": "node tools/catalog.mjs build",
     "catalog:render": "node tools/catalog.mjs render",
+    "catalog:index": "node tools/catalog.mjs index",
+    "pack:build": "node tools/build-pack.mjs",
     "validate:catalog": "node tools/catalog.mjs check",
     "grammar:test": "node tools/tm2monarch.mjs --self-test"
   },

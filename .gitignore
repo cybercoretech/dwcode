@@ -16,6 +16,11 @@ site/demo/
 # clone. Refresh it with `npm run catalog:build` (needs the registry).
 site/data/*
 !site/data/catalog.json
+# …and its machine-readable twin, the install index the app fetches
+# (docs/PACK_INDEX.md). Same reasoning: committed so an offline `check` can
+# prove page, data, index and artifact checksums still agree.
+!site/data/catalog/
+!site/data/catalog/**
 site/vendor/
 dist/
 packaging/arch/pkg/

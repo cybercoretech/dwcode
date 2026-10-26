@@ -95,7 +95,11 @@ npm run catalog:scan     # licence gate: every extension id in FOSS_EXTENSION_RE
                          # licence is still pending (refusals/absent ids are recorded, not failures)
 npm run catalog:build    # gate + curated content -> site/data/catalog.json (network; 172 cards)
 npm run catalog:render   # paint that data into site/repository.html between the CATALOG markers
-npm run validate:catalog # offline: data <-> HTML <-> repository doc must agree, refused ids absent
+npm run catalog:index    # offline: catalog.json + packs/ -> site/data/catalog/index.json + .sha256,
+                         # the install contract the app fetches (docs/PACK_INDEX.md)
+npm run pack:build       # offline: packs/ -> dist/packs/<id>-<version>.dwpack (deterministic ustar)
+npm run validate:catalog # offline: data <-> HTML <-> index <-> artifact checksums must agree,
+                         # refused ids absent; deliberately tampering with any of them fails CI
 npm run grammar:test     # tools/tm2monarch.mjs --self-test: 16 TextMate → Monarch conversion
                          # cases, each emitted definition also compiled by Monaco's monarchCompile.js
 ```
@@ -110,6 +114,23 @@ The project site, **[dwcode.pages.dev](https://dwcode.pages.dev)**, lives in [`s
 ```
 
 Screenshots come from `tests/shots.cpp`, which drives the real window through the same harness as the UI tests and saves 2x captures to `build/site-shots/`.
+
+## 📦 Install index (M5)
+
+The page above is the human rendering; [`site/data/catalog/index.json`](site/data/catalog/index.json) is the machine one — **173 entries** (1 installable first-party pack + 172 licence-checked reference rows) with a committed [`index.json.sha256`](site/data/catalog/index.json.sha256) beside it. The contract, its fail-closed rules and the `.dwpack` artifact format are specified in [`docs/PACK_INDEX.md`](docs/PACK_INDEX.md).
+
+```sh
+npm run catalog:index    # regenerate index.json + index.json.sha256 (offline, deterministic)
+npm run pack:build       # rebuild dist/packs/*.dwpack; byte-identical on any machine
+npm run validate:catalog # verifies page, data, index and artifact checksums still agree
+```
+
+Two facts worth stating plainly:
+
+- **Third-party rows are `kind: "reference"` with `download: null`.** DWCode does not redistribute the 172 Open VSX packages; their rows carry facts (licence, version, upstream, registry link) and an install there happens at the publisher's registry. Only first-party packs are downloadable through the index.
+- **Integrity today is TLS + per-artifact `sha256` + a recorded `indexSha256`.** The index is *not* yet signed — a signature with a key pinned in the binary is Phase 5. Nothing here claims more than it delivers.
+
+`tools/build-pack.mjs` writes the artifact from `packs/` as a hand-rolled POSIX ustar archive (no gzip, no symlinks, fixed ownership and mtimes) so the sha256 recorded in the index can be recomputed by CI without the binary ever being committed — and still match the file uploaded to a release.
 
 ## 🛰️ Brand: Railshift
 

@@ -41,6 +41,10 @@ node tools/theme-catalog.mjs > site/data/themes.json
 # the data itself is `npm run catalog:build` + `npm run catalog:render`, both of
 # which need the registry, so a deploy never silently re-sources the catalog.
 node tools/catalog.mjs render
+# The install index is derived from the committed catalog data plus packs/, so
+# it is regenerated here (deterministically) and then verified: page, data,
+# index and artifact checksums must agree before anything is uploaded.
+node tools/catalog.mjs index
 node tools/catalog.mjs check
 
 # anime.js, served locally (pinned in package.json).
