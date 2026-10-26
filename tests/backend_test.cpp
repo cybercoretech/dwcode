@@ -20,6 +20,15 @@ private slots:
   QVERIFY(b.openFile(other.filePath("outside.txt")).isEmpty());QVERIFY(QFile::link(other.filePath("outside.txt"),root.filePath("escape.txt")));QVERIFY(b.openFile("escape.txt").isEmpty());
   put(root.filePath("binary"),QByteArray("a\0b",3));QVERIFY(b.openFile("binary").isEmpty());
  }
+ void newFilesAndExternalChanges(){
+  QTemporaryDir root;put(root.filePath("main.ts"),"const local = 1;\n");WorkspaceBackend b;QVERIFY(b.openWorkspace(root.path()));
+  QVERIFY(b.createFile("src/missing.ts")==false);QVERIFY(b.createFile("new.ts"));const auto created=b.activeDocument();QVERIFY(created.value("dirty").toBool());QCOMPARE(created.value("name").toString(),QString("new.ts"));
+  QVERIFY(b.saveDocument(created.value("path").toString()));QCOMPARE(get(root.filePath("new.ts")),QByteArray());QVERIFY(!b.createFile("new.ts"));QVERIFY(!b.createFile("../outside.ts"));
+  const auto original=b.openFile("main.ts");QVERIFY(!original.isEmpty());const auto path=original.value("path").toString();QSignalSpy changes(&b,&WorkspaceBackend::documentExternalChange);
+  put(path,"const disk = 2;\n");QTRY_VERIFY_WITH_TIMEOUT(!changes.isEmpty(),5000);auto change=changes.takeFirst().at(0).toMap();QVERIFY(!change.value("dirty").toBool());QVERIFY(b.reloadDocument(path));QCOMPARE(b.activeDocument().value("text").toString(),QString("const disk = 2;\n"));
+  QVERIFY(b.updateDocument(path,"const mine = 3;\n"));put(path,"const theirs = 4;\n");QTRY_VERIFY_WITH_TIMEOUT(!changes.isEmpty(),5000);change=changes.takeFirst().at(0).toMap();QVERIFY(change.value("dirty").toBool());QCOMPARE(b.activeDocument().value("text").toString(),QString("const mine = 3;\n"));
+  put(path,"const theirsAgain = 5;\n");QTRY_VERIFY_WITH_TIMEOUT(!changes.isEmpty(),5000);QVERIFY(changes.takeFirst().at(0).toMap().value("dirty").toBool());
+ }
  void terminal(){
   QTemporaryDir root;WorkspaceBackend b;QVERIFY(b.openWorkspace(root.path()));QVERIFY(b.runCommand("pwd; printf 'stdout-ok'; printf 'stderr-ok' >&2"));QTRY_VERIFY_WITH_TIMEOUT(b.terminalOutput().contains("[exit 0]"),5000);
   QVERIFY(b.terminalOutput().contains(root.path()));QVERIFY(b.terminalOutput().contains("stdout-ok"));QVERIFY(b.terminalOutput().contains("stderr-ok"));

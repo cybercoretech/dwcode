@@ -69,6 +69,12 @@ private slots:
   QVERIFY(QMetaObject::invokeMethod(dialog,"close"));
   app.backend->resetPreferences();
  }
+ void newFileDialogCreatesAnUnsavedDocument(){
+  auto *dialog=app.window->findChild<QObject*>("newFileDialog");auto *input=qobject_cast<QQuickItem*>(app.window->findChild<QObject*>("newFilePath"));QVERIFY(dialog);QVERIFY(input);
+  QVERIFY(QMetaObject::invokeMethod(dialog,"open"));QTRY_VERIFY(dialog->property("visible").toBool());click(input);typeText("scratch.ts");click(withText("Create","QQuickButton"));
+  QTRY_VERIFY(app.backend->activePath().endsWith("/scratch.ts"));QVERIFY(app.backend->dirty());QVERIFY(waitJs(editor(),"window.dwcodeEditor.getModel().uri.path.endsWith('/scratch.ts')"));
+  QVERIFY(app.backend->saveDocument(app.backend->activePath()));QVERIFY(QFileInfo::exists(root.filePath("scratch.ts")));app.backend->openFile("main.ts");QVERIFY(waitJs(editor(),"window.dwcodeEditor.getModel().uri.path.endsWith('/main.ts')"));
+ }
  void splitViewSharesThemeAndText(){
   click(withText("Split editor"));
   QTRY_VERIFY(app.window->property("splitVisible").toBool());
@@ -107,6 +113,7 @@ private slots:
   click(withText("Save ●"));
   QTRY_VERIFY(app.backend->message().startsWith("Save blocked"));
   QCOMPARE(get(path),QByteArray("// theirs\n"));
+  auto *externalChange=app.window->findChild<QObject*>("externalChangeDialog");QVERIFY(externalChange);QTRY_VERIFY(externalChange->property("visible").toBool());click(withText("Keep Editor Copy","QQuickButton"));QTRY_VERIFY(!externalChange->property("visible").toBool());
   // Restore a clean, known file for the language-server test.
   app.backend->discardChanges();put(path,source.toUtf8());app.backend->openFile("main.ts");
   QVERIFY(waitJs(editor(),"window.dwcodeEditor.getValue().startsWith('const message')"));

@@ -43,6 +43,10 @@ void terminateGroup(QProcess &process){
 }
 WorkspaceBackend::WorkspaceBackend(QObject *parent):QObject(parent){
  loadPreferences();
+ m_refreshTimer.setSingleShot(true);m_refreshTimer.setInterval(150);
+ connect(&m_refreshTimer,&QTimer::timeout,this,&WorkspaceBackend::refreshFiles);
+ connect(&m_watcher,&QFileSystemWatcher::directoryChanged,this,[this](const QString &){scheduleRefresh();});
+ connect(&m_watcher,&QFileSystemWatcher::fileChanged,this,[this](const QString &path){checkExternalChange(path);scheduleRefresh();});
  m_terminal.setChildProcessModifier([]{::setsid();});
  m_terminal.setProcessChannelMode(QProcess::MergedChannels);
  connect(&m_terminal,&QProcess::readyReadStandardOutput,this,[this]{appendTerminal(QString::fromUtf8(m_terminal.readAllStandardOutput()));});
@@ -66,7 +70,7 @@ void WorkspaceBackend::loadPreferences(){
 void WorkspaceBackend::report(const QString &text){m_message=text;emit messageChanged();}
 bool WorkspaceBackend::dirty() const{return m_documents.contains(m_active)&&m_documents.value(m_active).dirty;}
 bool WorkspaceBackend::hasUnsaved() const{for(const auto &d:m_documents)if(d.dirty)return true;return false;}
-void WorkspaceBackend::discardChanges(){m_documents.clear();m_active.clear();emit documentStateChanged();}
+void WorkspaceBackend::discardChanges(){m_documents.clear();m_active.clear();m_externalChanges.clear();watchWorkspace();emit documentStateChanged();}
 QVariantList WorkspaceBackend::documents() const{QVariantList out;for(const auto &doc:m_documents)out.append(describe(doc));return out;}
 QVariantMap WorkspaceBackend::describe(const Document &doc)const{return {{"path",doc.path},{"name",QFileInfo(doc.path).fileName()},{"text",doc.text},{"language",doc.language},{"uri",QUrl::fromLocalFile(doc.path).toString()},{"version",doc.version},{"dirty",doc.dirty}};}
 QVariantMap WorkspaceBackend::activeDocument()const{return m_documents.contains(m_active)?describe(m_documents.value(m_active)):QVariantMap();}
@@ -82,7 +86,7 @@ bool WorkspaceBackend::openWorkspace(const QString &input){
  if(hasUnsaved()){report("Save or discard unsaved files before changing folders.");return false;}
  const auto path=QFileInfo(localPath(input)).canonicalFilePath();
  if(path.isEmpty()||!QFileInfo(path).isDir()){report("Choose an existing project folder.");return false;}
- stopCommand();stopLanguageServer();m_documents.clear();m_active.clear();m_root=path;refreshFiles();emit documentStateChanged();report("Workspace: "+path);return true;
+ stopCommand();stopLanguageServer();m_documents.clear();m_active.clear();m_externalChanges.clear();m_root=path;refreshFiles();emit documentStateChanged();report("Workspace: "+path);return true;
 }
 void WorkspaceBackend::refreshFiles(){
  m_files.clear();int count=0;
@@ -100,8 +104,39 @@ void WorkspaceBackend::refreshFiles(){
   }
  };
  if(!m_root.isEmpty())scan(QDir(m_root),0);
+ watchWorkspace();
  emit workspaceChanged();
  if(count>=3000)report("Explorer limited to 3,000 entries. Build and dependency folders are excluded.");
+}
+void WorkspaceBackend::watchWorkspace(){
+ const auto oldFiles=m_watcher.files(),oldDirectories=m_watcher.directories();
+ if(!oldFiles.isEmpty())m_watcher.removePaths(oldFiles);
+ if(!oldDirectories.isEmpty())m_watcher.removePaths(oldDirectories);
+ if(m_root.isEmpty())return;
+ QStringList directories{m_root},files;
+ for(const auto &entry:m_files){const auto path=QDir(m_root).filePath(entry.toMap().value("path").toString());if(entry.toMap().value("kind")=="folder"&&QFileInfo(path).isDir())directories.append(path);}
+ for(auto it=m_documents.cbegin();it!=m_documents.cend();++it)if(QFileInfo::exists(it.key()))files.append(it.key());
+ m_watcher.addPaths(directories);if(!files.isEmpty())m_watcher.addPaths(files);
+}
+void WorkspaceBackend::scheduleRefresh(){if(!m_refreshTimer.isActive())m_refreshTimer.start();}
+void WorkspaceBackend::checkExternalChange(const QString &path){
+ if(!m_documents.contains(path))return;
+ const auto &doc=m_documents.value(path);QFile file(path);
+ const bool deleted=!file.exists();QByteArray externalHash;
+ if(!deleted){if(!file.open(QIODevice::ReadOnly))return;externalHash=digest(file.readAll());}
+ if(!deleted&&externalHash==doc.diskHash)return;
+ if(m_externalChanges.contains(path)&&m_externalChanges.value(path)==externalHash)return;
+ m_externalChanges.insert(path,externalHash);
+ const auto name=QFileInfo(path).fileName();
+ report(deleted?name+" was deleted outside DWCode.":name+" changed outside DWCode.");
+ emit documentExternalChange({{"path",path},{"name",name},{"dirty",doc.dirty},{"deleted",deleted}});
+}
+bool WorkspaceBackend::createFile(const QString &input){
+ const auto path=resolve(input,true);
+ if(path.isEmpty()||QFileInfo(path).fileName().isEmpty()){report("Choose a new file name inside the workspace.");return false;}
+ if(QFileInfo::exists(path)||m_documents.contains(path)){report("A file with that name already exists.");return false;}
+ m_documents.insert(path,Document{path,"",language(path),digest({}),1,true});m_externalChanges.remove(path);m_active=path;
+ report("New unsaved file: "+QDir(m_root).relativeFilePath(path));emit documentStateChanged();emit documentActivated(activeDocument());return true;
 }
 QVariantMap WorkspaceBackend::openFile(const QString &input){
  const auto path=resolve(input);QFile file(path);
@@ -112,7 +147,7 @@ QVariantMap WorkspaceBackend::openFile(const QString &input){
   if(decoder.hasError()||bytes.contains('\0')){report("This file is not UTF-8 text.");return {};}
   m_documents.insert(path,Document{path,text,language(path),digest(bytes),1,false});
  }
- m_active=path;openInLsp(m_documents[path]);emit documentStateChanged();const auto doc=activeDocument();emit documentActivated(doc);return doc;
+ m_externalChanges.remove(path);watchWorkspace();m_active=path;openInLsp(m_documents[path]);emit documentStateChanged();const auto doc=activeDocument();emit documentActivated(doc);return doc;
 }
 bool WorkspaceBackend::updateDocument(const QString &path,const QString &text){
  if(!m_documents.contains(path)||text.toUtf8().size()>MaxFile)return false;
@@ -137,17 +172,27 @@ bool WorkspaceBackend::writeDocument(Document &doc,const QString &target,bool ov
 }
 bool WorkspaceBackend::saveDocument(const QString &path){
  if(!m_documents.contains(path)){report("Open a workspace file before saving.");return false;}
- if(resolve(path)!=path){report("Save blocked: file path no longer belongs to this workspace.");return false;}
+ if(resolve(path,true)!=path){report("Save blocked: file path no longer belongs to this workspace.");return false;}
  auto &doc=m_documents[path];if(!writeDocument(doc,path,true))return false;
+ m_externalChanges.remove(path);watchWorkspace();
  if(m_lspReady&&supports(doc))notifyLsp("textDocument/didSave",{{"textDocument",QJsonObject{{"uri",QUrl::fromLocalFile(path).toString()}}}});
  emit documentUpdated(describe(doc));
  return true;
+}
+bool WorkspaceBackend::reloadDocument(const QString &input){
+ const auto path=resolve(input);QFile file(path);
+ if(path.isEmpty()||!m_documents.contains(path)||!file.open(QIODevice::ReadOnly)){report("The changed file is no longer available to reload.");return false;}
+ const auto bytes=file.readAll();QStringDecoder decoder(QStringDecoder::Utf8);const QString text=decoder(bytes);
+ if(decoder.hasError()||bytes.contains('\0')||bytes.size()>MaxFile){report("The changed file is not supported UTF-8 text.");return false;}
+ auto &doc=m_documents[path];doc.text=text;doc.diskHash=digest(bytes);++doc.version;doc.dirty=false;m_externalChanges.remove(path);
+ if(m_lspReady&&supports(doc))notifyLsp("textDocument/didChange",{{"textDocument",QJsonObject{{"uri",QUrl::fromLocalFile(path).toString()},{"version",doc.version}}},{"contentChanges",QJsonArray{QJsonObject{{"text",doc.text}}}}});
+ report("Reloaded "+QDir(m_root).relativeFilePath(path));emit documentStateChanged();emit documentUpdated(describe(doc));return true;
 }
 bool WorkspaceBackend::saveAs(const QString &url){
  if(!m_documents.contains(m_active)){report("Open a file first.");return false;}
  const auto target=resolve(url,true);if(target==m_active)return saveDocument(m_active);
  auto doc=m_documents[m_active];if(!writeDocument(doc,target,false))return false;
- doc.path=target;doc.language=language(target);m_documents.insert(target,doc);m_active=target;refreshFiles();emit documentStateChanged();emit documentActivated(describe(doc));openInLsp(doc);return true;
+ doc.path=target;doc.language=language(target);m_documents.insert(target,doc);m_externalChanges.remove(target);m_active=target;refreshFiles();emit documentStateChanged();emit documentActivated(describe(doc));openInLsp(doc);return true;
 }
 void WorkspaceBackend::appendTerminal(const QString &text){m_terminalOutput+=text;m_terminalOutput=m_terminalOutput.right(m_preferences.value("terminal/scrollback",200000).toInt());emit terminalChanged();}
 bool WorkspaceBackend::runCommand(const QString &command){

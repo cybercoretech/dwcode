@@ -25,6 +25,7 @@ ApplicationWindow {
  property int tabHeight: Math.round((compactUi ? 32 : 38) * uiScale)
  property var commands: [
   { title: "Open Folder", shortcut: "Ctrl+O", action: "folder" },
+  { title: "New File", shortcut: "Ctrl+N", action: "newfile" },
   { title: "Save File", shortcut: "Ctrl+S", action: "save" },
   { title: "Save File As", shortcut: "Ctrl+Shift+S", action: "saveas" },
   { title: "Toggle File Explorer", shortcut: "Ctrl+B", action: "explorer" },
@@ -44,6 +45,7 @@ ApplicationWindow {
  function activate(action){
   paletteVisible=false
   if(action==="folder")chooseFolder()
+  else if(action==="newfile")newFileDialog.open()
   else if(action==="save")save()
   else if(action==="saveas")saveDialog.open()
   else if(action==="explorer")explorerVisible=!explorerVisible
@@ -67,6 +69,14 @@ ApplicationWindow {
  }
  FolderDialog {id:folderDialog;objectName:"folderDialog";title:"Open DWCode workspace";onAccepted:workspaceBackend.openWorkspace(selectedFolder.toString())}
  FileDialog {id:saveDialog;title:"Save file as (inside workspace)";fileMode:FileDialog.SaveFile;onAccepted:workspaceBackend.saveAs(selectedFile.toString())}
+ Dialog { id: newFileDialog; objectName: "newFileDialog"; title: "New File"; anchors.centerIn: parent; modal: true; width: 480
+  onOpened: { newFilePath.text=""; newFilePath.forceActiveFocus() }
+  contentItem: ColumnLayout { spacing: 10
+   Label { text: "Create an unsaved file inside the current workspace."; color: theme.secondaryText; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+   TextField { id: newFilePath; objectName: "newFilePath"; Layout.fillWidth: true; placeholderText: "e.g. src/new-feature.ts"; onAccepted: if(workspaceBackend.createFile(text))newFileDialog.close() }
+  }
+  footer: DialogButtonBox { Button { text: "Cancel"; onClicked: newFileDialog.close() } Button { text: "Create"; highlighted: true; onClicked: if(workspaceBackend.createFile(newFilePath.text))newFileDialog.close() } }
+ }
  SettingsDialog { id: settingsDialog }
  property string pendingCommand: ""
  Dialog { id: riskyCommand; title: "Run potentially risky command?"; anchors.centerIn: parent; modal: true; standardButtons: Dialog.Cancel
@@ -77,12 +87,19 @@ ApplicationWindow {
   Label{text:"You have unsaved changes. Discard them to continue?";color:theme.foreground}
   onDiscarded:{workspaceBackend.discardChanges();if(pendingAction==="close"){closingApproved=true;win.close()}else folderDialog.open()}
  }
+ property var externalDocument: ({})
+ Dialog { id: externalChangeDialog; objectName: "externalChangeDialog"; title: "File changed outside DWCode"; anchors.centerIn: parent; modal: true; width: 510
+  Label { width: 450; wrapMode: Text.WordWrap; color: theme.foreground; text: externalDocument.deleted ? externalDocument.name+" was deleted outside DWCode. Keep this editor copy, then Save to recreate it or Save As elsewhere." : externalDocument.name+" changed outside DWCode."+(externalDocument.dirty ? " Your unsaved edits are preserved." : " Reload it to use the disk version.") }
+  footer: DialogButtonBox { Button { text: "Keep Editor Copy"; onClicked: externalChangeDialog.close() } Button { visible: !externalDocument.deleted; text: "Reload from Disk"; highlighted: true; onClicked: { if(workspaceBackend.reloadDocument(externalDocument.path))externalChangeDialog.close() } } }
+ }
+ Connections { target: workspaceBackend; function onDocumentExternalChange(document) { win.externalDocument=document; externalChangeDialog.open() } }
  onClosing:function(event){if(!closingApproved&&workspaceBackend.hasUnsaved()){event.accepted=false;pendingAction="close";unsaved.open()}}
  WebChannel {id:channel;Component.onCompleted:registerObject("native",workspaceBackend)}
  WebChannel {id:splitChannel;Component.onCompleted:registerObject("native",workspaceBackend)}
  Component.onCompleted:{modalMode=workspaceBackend.preferences["keyboard/modalDefault"];if(workspaceBackend.files.length>0){for(let i=0;i<workspaceBackend.files.length;i++){let f=workspaceBackend.files[i];if(f.kind==="file"){workspaceBackend.openFile(f.path);break}}}}
  onModalModeChanged:{editor.runJavaScript("window.dwcodeSetMode && window.dwcodeSetMode("+modalMode+")");splitEditor.runJavaScript("window.dwcodeSetMode && window.dwcodeSetMode("+modalMode+")")}
  Shortcut {sequence:"Ctrl+O";onActivated:chooseFolder()}
+ Shortcut {sequence:"Ctrl+N";onActivated:newFileDialog.open()}
  Shortcut {sequence:"Ctrl+S";onActivated:save()}
  Shortcut {sequence:"Ctrl+Shift+S";onActivated:saveDialog.open()}
  Shortcut {sequence:"Ctrl+P";onActivated:win.paletteVisible=true}
@@ -104,6 +121,7 @@ ApplicationWindow {
       background:Rectangle{color:"transparent"}
       Menu {title:"File"
        MenuItem{text:"Open Folder…";onTriggered:chooseFolder()}
+       MenuItem{text:"New File…";onTriggered:newFileDialog.open()}
        MenuSeparator{}
        MenuItem{text:"Save";enabled:workspaceBackend.activePath!=="";onTriggered:save()}
        MenuItem{text:"Save As…";enabled:workspaceBackend.activePath!=="";onTriggered:saveDialog.open()}
@@ -168,6 +186,7 @@ ApplicationWindow {
       Label{text:"EXPLORER";color:theme.secondaryText;font.pixelSize:10;font.letterSpacing:1}
       Item{Layout.fillWidth:true}
       Button{text:"Open Folder";onClicked:chooseFolder()}
+      ToolButton{text:"+";Accessible.name:"New file";onClicked:newFileDialog.open()}
       ToolButton{text:"↻";Accessible.name:"Refresh explorer";onClicked:workspaceBackend.refreshFiles()}
      }
      Label{text:workspaceBackend.root.split('/').pop()||"NO WORKSPACE";color:theme.cyan;Layout.leftMargin:14;font.bold:true;font.pixelSize:11}

@@ -22,6 +22,9 @@
   Terminal and Help, with **Preferences… (Ctrl+,)**. It opens a searchable,
   persistent settings dialog covering Appearance, Editor, Editing, Files &
   Workspace, Terminal, and Keyboard & Modal Editing.
+- 🛡️ **Reliability foundation:** **New File… (Ctrl+N)** creates an unsaved,
+  workspace-confined document. The Explorer watches workspace folders, and
+  changed or deleted open files prompt to reload or preserve the editor copy.
 
 ## 🧪 Validation baseline
 
@@ -43,15 +46,15 @@ make -j"$(nproc)"
 QTWEBENGINE_DISABLE_SANDBOX=1 ./ui-tests
 ```
 
-The current UI suite has 11 passing checks, including Explorer folder-control
-availability, the native window icon, and the Settings dialog.
+The current UI suite has 12 passing checks, including Explorer folder-control
+availability, the native window icon, the Settings dialog, and New File.
 
-### Settings validation
+### Current validation
 
 - `npm ci` and `npm run build` completed successfully. (`node_modules/` is
   ignored and was installed locally only.)
-- The full backend suite passed **7/7 checks**.
-- The full offscreen Qt WebEngine UI suite passed **11/11 checks**, including
+- The full backend suite passed **8/8 checks**.
+- The full offscreen Qt WebEngine UI suite passed **12/12 checks**, including
   `settingsDialogAndEditorPreferences`. In this Codex environment it runs
   outside the command sandbox so Qt WebEngine can create its loopback server
   and browser subprocess. Vulkan fallback warnings are expected in offscreen
@@ -99,8 +102,8 @@ an unrelated dirty checkout without explicit reconciliation.
 ## ⚠️ Current product boundaries
 
 - The terminal is a command runner, not a PTY.
-- File watching, New File, crash recovery, Git, workspace search, debugging,
-  runtime pack loading, and executable extensions are not implemented.
+- Crash recovery, Git, workspace search, debugging, runtime pack loading, and
+  executable extensions are not implemented.
 - TypeScript is bundled for LSP. C/C++, Rust, and Python support require their
   language servers on `PATH`.
 - Declarative packs validate but are not loaded by the application yet.

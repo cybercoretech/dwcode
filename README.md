@@ -8,9 +8,9 @@ DWCode keeps a familiar application menu, project tree, tabs, splits, command pa
 
 ## ⚡ What works today
 
-- 📂 **Workspace:** open any folder (`Ctrl+O` or `--workspace <folder>`), browse it in the explorer, and edit UTF-8 text files up to 8 MiB in tabs. Paths are confined to the workspace; symlinks that escape it are refused.
+- 📂 **Workspace:** open any folder (`Ctrl+O` or `--workspace <folder>`), browse it in the explorer, create unsaved files (`Ctrl+N`), and edit UTF-8 text files up to 8 MiB in tabs. Paths are confined to the workspace; symlinks that escape it are refused.
 - 🗂️ **Explorer controls:** the Explorer header provides **Open Folder** and refresh controls, and the native window uses the Railshift app icon.
-- 💾 **Saving:** `Ctrl+S` or **Save** writes atomically. If the file changed on disk since you opened it, the save is blocked so nothing is lost; use **Save As** for your copy. Unsaved changes prompt before closing or switching folders.
+- 💾 **Saving:** `Ctrl+S` or **Save** writes atomically. Workspace changes refresh the Explorer, and an open file changed or deleted outside DWCode prompts you to reload or keep your editor copy. Saving an externally changed file remains blocked so nothing is lost; use **Save As** for your copy. Unsaved changes prompt before closing or switching folders.
 - 🖥️ **Terminal:** runs commands in the workspace with `bash`, streams output, accepts input for a running command, and can stop it. It is a command runner, not a full PTY, so full-screen programs such as `vim` or `htop` do not work yet.
 - 🧠 **Language servers:** **Connect LSP** starts a server for the active file: TypeScript/JavaScript (bundled), C/C++ (`clangd`), Rust (`rust-analyzer`), Python (`pyright-langserver`). Diagnostics, completion, hover, and go-to-definition. TypeScript is covered by automated tests; the others depend on the server being on `PATH`.
 - 🎨 **Themes:** 84 palettes, the 81 canonical Cybercore themes plus 3 DWCode ones, recolour the shell and editor together and are remembered between runs.
@@ -23,7 +23,7 @@ DWCode keeps a familiar application menu, project tree, tabs, splits, command pa
   terminal, command-palette, and preference actions. The active tab is clearly
   marked with the current theme's primary accent.
 
-Not yet: file watching, crash recovery, a New File command, a real PTY terminal, loading extension packs at runtime.
+Not yet: crash recovery, a real PTY terminal, loading extension packs at runtime.
 
 ## 🛠️ Build and run
 

@@ -6,6 +6,8 @@
 #include <QMap>
 #include <QSet>
 #include <QJsonObject>
+#include <QFileSystemWatcher>
+#include <QTimer>
 
 class WorkspaceBackend final : public QObject {
     Q_OBJECT
@@ -42,11 +44,13 @@ public:
     QVariantMap preferences() const { return m_preferences; }
     Q_INVOKABLE bool openWorkspace(const QString &path);
     Q_INVOKABLE void refreshFiles();
+    Q_INVOKABLE bool createFile(const QString &path);
     Q_INVOKABLE QVariantMap openFile(const QString &path);
     Q_INVOKABLE QVariantMap activeDocument() const;
     Q_INVOKABLE bool updateDocument(const QString &path,const QString &text);
     Q_INVOKABLE bool saveDocument(const QString &path);
     Q_INVOKABLE bool saveAs(const QString &url);
+    Q_INVOKABLE bool reloadDocument(const QString &path);
     Q_INVOKABLE bool hasUnsaved() const;
     Q_INVOKABLE void discardChanges();
     Q_INVOKABLE bool runCommand(const QString &command);
@@ -64,6 +68,7 @@ signals:
     void documentStateChanged();
     void documentActivated(const QVariantMap &document);
     void documentUpdated(const QVariantMap &document);
+    void documentExternalChange(const QVariantMap &document);
     void messageChanged();
     void terminalChanged();
     void lspChanged();
@@ -87,6 +92,9 @@ private:
     bool supports(const Document &doc) const;
     QString preparedForSave(const QString &text) const;
     void loadPreferences();
+    void watchWorkspace();
+    void checkExternalChange(const QString &path);
+    void scheduleRefresh();
     QString m_root,m_active,m_message="Open a folder to begin.",m_terminalOutput,m_lspStatus="Disconnected",m_lspFamily;
     QVariantList m_files,m_themes,m_problems;
     QVariantMap m_theme;
@@ -94,9 +102,12 @@ private:
     QMap<QString,Document> m_documents;
     QMap<QString,QVariantList> m_diagnostics;
     QProcess m_terminal,m_lsp;
+    QFileSystemWatcher m_watcher;
+    QTimer m_refreshTimer;
     QByteArray m_lspBuffer;
     bool m_lspReady=false;
     int m_requestId=100;
     QSet<QString> m_lspOpened;
     QSet<int> m_pending;
+    QMap<QString,QByteArray> m_externalChanges;
 };
