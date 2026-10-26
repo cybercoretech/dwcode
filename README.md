@@ -74,13 +74,16 @@ npm run validate:packs   # pack manifest, theme token sets, local SVG icons, sni
 npm run catalog:scan     # licence gate: every extension id in FOSS_EXTENSION_REPOSITORY.md
                          # re-checked against the live Open VSX registry; exits 1 while a
                          # licence is still pending (refusals/absent ids are recorded, not failures)
+npm run catalog:build    # gate + curated content -> site/data/catalog.json (network; 172 cards)
+npm run catalog:render   # paint that data into site/repository.html between the CATALOG markers
+npm run validate:catalog # offline: data <-> HTML <-> repository doc must agree, refused ids absent
 npm run grammar:test     # tools/tm2monarch.mjs --self-test: 16 TextMate → Monarch conversion
                          # cases, each emitted definition also compiled by Monaco's monarchCompile.js
 ```
 
 ## 🌐 Website
 
-The project site, **[dwcode.pages.dev](https://dwcode.pages.dev)**, lives in [`site/`](site/): features, real window captures, all 84 themes, the Railshift downloads, and a live panel running the app's Monaco bundle in the browser (sample files only; saving, the terminal and language servers need the desktop app). [`site/repository.html`](site/repository.html) is the second page — *Open DWCode Extension Repository*: what the licences allow, how the checksum-pinned catalog is built, the licence-gate table, the generated list of every accepted package, and the packages DWCode excludes. It shares the same `site.js`/`styles.css`, so both pages must stay error-free together.
+The project site, **[dwcode.pages.dev](https://dwcode.pages.dev)**, lives in [`site/`](site/): features, real window captures, all 84 themes, the Railshift downloads, and a live panel running the app's Monaco bundle in the browser (sample files only; saving, the terminal and language servers need the desktop app). [`site/repository.html`](site/repository.html) is the second page — *Open DWCode Extension Repository*. It opens with the **catalog itself**: 172 licence-checked cards in 17 families with a search field, a category rail and four sort orders, each card carrying name, publisher, version, licence chip (linking the publisher's repository), downloads, a copy-id button and a disabled `install · M5` button. Below it sit the policy sections — how the checksum-pinned index works, the licence-gate table, the excluded packages with reasons, how to submit a pack, and the attribution/credits section. The grid is static HTML painted by `npm run catalog:render` from `site/data/catalog.json`, so the page still reads correctly with JavaScript off; `site/catalog.js` only adds the filtering on top. It shares the same `site.js`/`styles.css`, so both pages must stay error-free together.
 
 ```sh
 ./tools/build-site.sh --shots   # recapture screenshots offscreen, build the demo, assemble site/

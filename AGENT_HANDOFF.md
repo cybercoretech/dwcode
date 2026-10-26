@@ -64,6 +64,8 @@ GitHub Actions on `main` currently validates:
 - native Qt build
 - backend tests
 - offscreen Qt WebEngine UI tests
+- licence gate + catalog page gate (`npm run catalog:scan`, `npm run validate:catalog`)
+- TextMate → Monarch converter self-test (`npm run grammar:test`)
 
 Run the focused local UI suite:
 
@@ -95,7 +97,24 @@ section (`extensionsSectionManagesPacks`), New File, and
 - `./tools/deploy-site.sh` publishes `site/` to dwcode.pages.dev. It drops a
   `$CLOUDFLARE_API_TOKEN` that lacks Pages permission (wrangler prefers env
   tokens over `wrangler login` and dies with `code: 10000`) unless `--use-token`
-  is passed, and exports `CLOUDFLARE_ACCOUNT_ID` as a fallback.
+  is passed, and exports `CLOUDFLARE_ACCOUNT_ID` as a fallback. `build-site.sh`
+  (which it calls) now also runs `node tools/catalog.mjs render` + `check`, so a
+  deploy fails rather than uploading a stale or half-rendered catalog.
+- **The catalog page.** `site/repository.html` opens with 172 cards in 17
+  families (static HTML between `<!-- CATALOG:BEGIN/END -->`), then the policy
+  sections: how it works, licence gate, excluded (19 rows), submit, credits.
+  Three files drive it — `tools/catalog-content.json` (hand-written: family +
+  original one-line description per id, plus the 7 withheld ids and why),
+  `site/data/catalog.json` (generated, committed), and the page itself. Commands:
+  `npm run catalog:build` (network: gate run + join, rewrites the data file),
+  `npm run catalog:render` (offline: repaints the grid), `npm run validate:catalog`
+  (offline: data ↔ HTML ↔ `FOSS_EXTENSION_REPOSITORY.md` must agree, refused and
+  omitted ids must be absent, every card must be credited). `site/catalog.js`
+  adds search / category filter / sort / copy-id on top of the static grid; all
+  styling comes from the token block in `site/styles.css` (classes `.catalog`,
+  `.rail`, `.cats`, `.toolbar`, `.xgrid`, `.xcard`, `.xglyph`, `.xc-chips`,
+  `.xc-actions`). Refresh the data only via `catalog:build` + `catalog:render`;
+  never hand-edit the rendered block.
 - The full backend suite passed **10/10 checks**, including `packLoader` (pack
   fixtures from `tests/fixtures/packs/`, bad-manifest rejection, `../` escape
   rejection, semver range table) and `sessionRestore`

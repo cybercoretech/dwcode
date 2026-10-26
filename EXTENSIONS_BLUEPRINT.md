@@ -278,7 +278,7 @@ the suite with executable extensions forced on.
 | M2 | `src/extensionbroker.{h,cpp}`, `tests/fixtures/host/*` | `src/main.cpp`, `tests/backend_test.cpp` |
 | M3 | `src/qml/ExtensionStatusDelegate.qml` (or equivalent) | `src/extensionbroker.cpp`, `src/qml/Main.qml`, `tests/{backend,ui}_test.cpp`, `tests/shots.cpp` |
 | M4 | `tests/threatmodel.md` | `src/extensionbroker.cpp`, `tests/backend_test.cpp` |
-| M5 | `tools/fetch-catalog.mjs`, `tools/openvsx-scan.mjs` ✅ + `tools/openvsx-verified.json` ✅ | `src/packloader.cpp`, docs |
+| M5 | `tools/fetch-catalog.mjs`, `tools/openvsx-scan.mjs` ✅ + `tools/openvsx-verified.json` ✅, `tools/catalog.mjs` ✅ (site catalog: `build`/`render`/`check`) + `tools/catalog-content.json` ✅ | `src/packloader.cpp`, docs, `site/repository.html` |
 
 Every phase keeps the three suites green: `./backend-tests` (currently 10/10),
 `./ui-tests` (currently 14/14), `npm run build && npm run validate:packs`.
