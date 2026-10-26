@@ -3,12 +3,19 @@
 **Verified:** 2026-10-25 against the live Open VSX registry API (`/api/<ns>/<name>` for license and
 presence, `/api/-/search?orderBy=downloadCount&sortOrder=desc` for a full popularity sweep of the
 registry's top 80 of 20,163 extensions) and the GitHub license API for packages whose registry
-license field was empty, a `SEE LICENSE IN …` pointer, or a placeholder. Extended 2026-10-26 with
-an AI-agent sweep — `codex`, `antigravity`, `gemini`, `opencode`, `copilot` (40 results each,
-licences re-checked upstream), and an ecosystem sweep covering **Python, Java/Maven/Gradle, Android,
-GitLab, Google/Dart, Rust, Markdown, lint & format, SQL/NoSQL, Docker, GraphQL, Lua, Bash, CMake,
-Julia and Kotlin** — see [Ecosystem sweep](#ecosystem-sweep--2026-10-26) below. Re-run
-`npm run catalog:scan` before each catalog release — licenses and availability change.
+license field was empty, a `SEE LICENSE IN …` pointer, or a placeholder. Extended 2026-10-26 in
+two passes: an AI-agent sweep — `codex`, `antigravity`, `gemini`, `opencode`, `copilot` (40 results
+each, licences re-checked upstream) — and an ecosystem sweep across **25 areas**: Python,
+Java/Maven/Gradle, Android, GitLab, Google/Dart/Flutter, Rust, Markdown, lint & format, SQL/NoSQL,
+Docker, GraphQL, Lua, Bash, CMake, Julia, Kotlin, YAML/JSON/XML, Terraform/Kubernetes/Helm,
+TypeScript/Vue/Svelte/React, PHP, Ruby, C#/.NET, Elixir, test runners and debug adapters — see
+[Ecosystem sweep](#ecosystem-sweep--2026-10-26) below.
+
+**Gate result (2026-10-26):** `npm run catalog:scan` reports **206 ids checked · 179
+catalog-eligible · 0 pending · 20 refused · 7 not on Open VSX**, exit 0. The 179 are listed in the
+[appendix](#appendix--every-catalog-eligible-package-179); the refused and delisted ones are in
+*Excluded*. Re-run `npm run catalog:scan` before each catalog release — licences and availability
+change.
 
 **Purpose:** decide which of the most-used free/open-source extensions DWCode should cover, and
 *how*: as a declarative pack (blueprint M1), as a built-in integration DWCode implements natively
@@ -369,10 +376,119 @@ are GPL but tied to one engine — excluded on usefulness, not licence.
 | Kotlin LSP (`JetBrains.kotlin-server` → `Kotlin/kotlin-lsp`) | **Apache-2.0 verified** | 50 K | JetBrains' official server — prefer it over `fwcd` once M4 resource limits exist |
 | ktfmt (`omBratteng.ktfmt-kotlin-formatter`) | BSD-3-Clause | 4 K | external `ktfmt` on format-on-save |
 
-**What this changes about scale:** the sweep adds ~70 FOSS packages across 16 ecosystems, all
-licence-checked and all on Open VSX. That is the backlog for the curated catalog — the reason
-EXTENSIONS.md no longer calls it "small", and the reason the licence gate is a script
-(`tools/openvsx-scan.mjs`) instead of a person reading 70 registry pages by hand.
+### Data formats — YAML, JSON, XML
+
+| Item | License | Downloads | DWCode path |
+| --- | --- | --- | --- |
+| YAML (`redhat.vscode-yaml`) | MIT | 8.88 M | schema-driven validation → problems panel (already Tier B2; schema fetch needs `network.connect`) |
+| XML (`redhat.vscode-xml`) | EPL-2.0 | 1.64 M | `lemminx` on `PATH` (already Tier B2) |
+| Schemastore (`remcohaszing.schemastore`) | MIT | 240 K | the schema catalogue behind both validators — one `network.connect` allowlist for `schemastore.org` |
+| XML Tools (`DotJoshJohnson.xml`) | MIT | 220 K | formatter/XPath → native or an `xmlstarlet` task profile |
+| Pretty XML (`PrateekMahendrakar.prettyxml`) | MIT | 120 K | format-on-save |
+| Fix JSON (`oliversturm.fix-json`), JSON Crack (`AykutSarac.jsoncrack-vscode`) | MIT | 30 K each | parse-error repair and visualisation — both fold into one built-in JSON tool |
+| YAML sort, JSON format, YAML doctor (`PascalReitermann93.vscode-yaml-sort`, `saltcoreyan.json-format-sortcore`, `darioajr.yaml-doctor`) | MIT / Apache-2.0 | 40 K each | external formatters on the format-on-save path |
+
+### Infrastructure — Terraform, Kubernetes, Helm
+
+| Item | License | Downloads | DWCode path |
+| --- | --- | --- | --- |
+| Terraform (`hashicorp.terraform`) | MPL-2.0 | 2.4 M | `terraform-ls` on `PATH` (already Tier B2) |
+| Kubernetes Tools (`ms-kubernetes-tools.vscode-kubernetes-tools`) | Apache-2.0 | 1.25 M | `kubectl`/`helm`/`docker` as external processes; the YAML navigation half is native Monaco |
+| helm-ls (`helm-ls.helm-ls`) | MIT | 20 K | `helm-ls` language server on `PATH` |
+| OpenShift Toolkit (`redhat.vscode-openshift-connector`) | MIT | 70 K | `oc` CLI as a task profile |
+| Kubernetes CRD snippets (`tumido.crd-snippets`) | GPL-3.0-or-later | 10 K | snippet pack → Tier A (copyleft data, fine) |
+| Terraform plan colours / graph (`lite2073.tfplan-colors`, `saramorillon.terraform-graph`) | MIT | 10 K each | `terraform show -json` parsing → one native plan viewer |
+
+### Web frameworks — TypeScript, JavaScript, Vue, Svelte, React
+
+| Item | License | Downloads | DWCode path |
+| --- | --- | --- | --- |
+| JavaScript Debugger (`ms-vscode.js-debug`) | MIT | 3.21 M | Node/Chrome DAP adapter (already Tier B2) |
+| Svelte (`svelte.svelte-vscode`) | MIT | 2.17 M | `svelte-language-server` on `PATH` |
+| JS Debugger Companion, Profile Table (`ms-vscode.js-debug-companion`, `ms-vscode.vscode-js-profile-table`) | MIT | 2.1–2.2 M | DAP extras; the flame/table visualiser is a native DWCode view, not a package |
+| ES7+ React/Redux snippets (`dsznajder.es7-react-js-snippets`) | MIT | 910 K | already Tier A |
+| JS/TS Nightly (`ms-vscode.vscode-typescript-next`) | MIT | 680 K | ships the TS nightly — DWCode already embeds Monaco's own TypeScript, so this is reference only |
+| Import Cost (`wix.vscode-import-cost`) | MIT | 110 K | native: bundle-size hints from the workspace module graph |
+| Total TypeScript / ts-error-translator (`mattpocock.ts-error-translator`) | MIT | 60 K | native: TS error rewording, no extension needed |
+| Vue (`znck.vue`) | MIT | 40 K | small Vue LS; `Vue.volar` (10.95 M, MIT upstream at `vuejs/language-tools`) is the one to adopt |
+| Vue 2/3, React, Svelte snippet packs (`NicholasHsiang.*`, `fivethree.vscode-svelte-snippets`) | MIT | 10–60 K | Tier A snippet packs |
+
+### PHP
+
+| Item | License | Downloads | DWCode path |
+| --- | --- | --- | --- |
+| PHP Debug (`xdebug.php-debug`) | MIT | 800 K | DAP adapter over Xdebug's `dbgp` protocol |
+| PHPUnit & Pest Test Explorer (`recca0120.vscode-phpunit`) | MIT | 70 K | test runner → after DWCode has one |
+| PHP Language Support (`AnessaEah.php-intelephense-language-support`) | MIT | 10 K | the FOSS stopgap while Intelephense stays non-FOSS |
+
+PHP is the weakest ecosystem on Open VSX: `bmewburn.vscode-intelephense-client` (2.2 M) is excluded
+(custom terms, no public repo), and no large FOSS PHP language server has taken its place. The DWCode
+route is `phpactor` / `phpstan` / `composer` as external processes, plus `xdebug` for debugging.
+
+### Ruby
+
+| Item | License | Downloads | DWCode path |
+| --- | --- | --- | --- |
+| Ruby LSP (`Shopify.ruby-lsp`) | MIT | 44.5 M | already Tier B2 — `ruby-lsp` on `PATH` |
+| Solargraph (`castwide.solargraph`) | MIT | 39 K | alternative Ruby language server |
+| Sorbet (`sorbet.sorbet-vscode-extension`) | Apache-2.0 | 60 K | `srb` type-checking as a task profile |
+| Standard Ruby (`testdouble.vscode-standard-ruby`) | MIT | 8 K | `standardrb` → format-on-save |
+| Ruby Test Explorer (`connorshea.vscode-ruby-test-adapter`) | MIT | 10 K | test adapter → after DWCode has one |
+
+### C# and .NET
+
+| Item | License | Downloads | DWCode path |
+| --- | --- | --- | --- |
+| .NET Install Tool (`ms-dotnettools.vscode-dotnet-runtime`) | MIT | 2.14 M | downloads a .NET runtime (`network.connect`); DWCode targets the `dotnet` already on `PATH` instead |
+| KIDE C# / Test Explorer (`kide.kide-csharp`, `kide.kide-test-explorer`) | MIT | 10–70 K | thin wrappers over `dotnet build` / `dotnet test` → task profiles |
+| .NET Meteor (`nromanov.dotnet-meteor`), dotnet-start (`pavel-purma.dotnet-start`) | MIT | 10–40 K | run/debug profiles over `dotnet run` |
+
+**`ms-dotnettools.csharp` and `ms-dotnettools.csdevkit` both return 404 from Open VSX** — Microsoft's
+C# tooling is Marketplace-only, so it is out of reach as a package whatever its licence says. DWCode's
+path is the .NET SDK itself (`dotnet build` / `test` / `run` as task profiles); re-check the licence of
+any Roslyn language server before adopting it, since that codebase mixes licences.
+
+### Elixir
+
+| Item | License | Downloads | DWCode path |
+| --- | --- | --- | --- |
+| ElixirLS (`elixir-lsp.elixir-ls`) | MIT | 234 K | `elixir-ls` on `PATH` (a Mix project — `mix deps.get` first) |
+| Lexical (`lexical-lsp.lexical`) | Apache-2.0 | 10 K | newer, pure-Elixir language server |
+| Expert (`ExpertLSP.expert`) | Apache-2.0 | 10 K | alternative |
+| hex.pm IntelliSense (`benvp.vscode-hex-pm-intellisense`) | MIT | 3 K | package metadata → needs `network.connect` |
+
+### Test runners
+
+| Item | License | Downloads | DWCode path |
+| --- | --- | --- | --- |
+| Vitest (`vitest.explorer`) | MIT | 870 K | official explorer → DWCode's test runner over `npx vitest` |
+| Jest / Vitest Runner (`firsttris.vscode-jest-runner`) | MIT | 914 K | same shape: parse runner output into the problems panel |
+| PHPUnit & Pest (`recca0120.vscode-phpunit`) | MIT | 70 K | |
+| Ruby Test Explorer (`connorshea.vscode-ruby-test-adapter`) | MIT | 10 K | |
+| Test Adapter Converter (`ms-vscode.test-adapter-converter`) | MIT | 160 K | a shim for VS Code's test API — no DWCode equivalent, reference only |
+
+Every row here wants the same prerequisite: a test-runner command in DWCode with output parsing
+(blueprint task 4). Then each is a binary plus a config, not a package.
+
+### Debug adapters (DAP)
+
+| Item | License | Downloads | DWCode path |
+| --- | --- | --- | --- |
+| JavaScript Debug (`ms-vscode.js-debug`) | MIT | 3.21 M | Node/Chrome adapter |
+| CDT GDB (`eclipse-cdt.cdt-gdb-vscode`) | EPL-2.0 | 1.0 M | the FOSS GDB adapter — pairs with DWCode's existing `clangd` path |
+| PHP Debug (`xdebug.php-debug`) | MIT | 800 K | Xdebug `dbgp` |
+| CodeLLDB (`vadimcn.vscode-lldb`) | MIT | 1.4 M | Rust/C/C++ (Tier B2) |
+| CDT WebSocket Adapter (`eclipse-cdt.websocket-adapter`) | EPL-2.0 | 2 K | remote DAP transport |
+
+DAP is one JSON-RPC protocol, so DWCode needs **one client** (blueprint M2/M3) and then every row
+above is a binary on `PATH` — exactly the relationship it already has with language servers.
+
+**What this changes about scale:** the sweep brings the catalog-eligible total to **179 packages
+across 25 ecosystems and capability areas** — every one licence-checked and present on Open VSX.
+That is the backlog for the curated catalog, the reason EXTENSIONS.md no longer calls it "small",
+and the reason the licence gate is a script (`tools/openvsx-scan.mjs`) instead of a person reading
+registry pages by hand. The complete list is in the [appendix](#appendix--every-catalog-eligible-package-179)
+at the end of this file, regenerated with `node tools/openvsx-scan.mjs --doc --appendix`.
 
 ## Tier C — requires the executable host (blueprint M2/M3+)
 
@@ -423,7 +539,6 @@ delisted, so it cannot be a catalog entry regardless of its licence.
 | Code Web Chat / gemini-coder (`robertpiosik.gemini-coder`, 595 K) | GitHub API reports `NONE` — no license file. Stop-and-verify rule applies; high downloads do not substitute for a grant. |
 | Copilot bridges (`adguard.tokenguard-copilot`, `statiolake.vscode-copilot-lsp`, `allansantos-dv.copilot-delegate`) | MIT, but each needs GitHub Copilot or the Copilot CLI — proprietary and 404 on Open VSX. FOSS code depending on an out-of-reach product is out of reach as a package. |
 | Codex / ChatGPT account switchers (`woozy-masta.codex-switch`, `devhakeem5.codex-hub`, `zixfel.codex-account-swapper`) | Multi-account rotation has no DWCode capability to map to; excluded on usefulness, not licence (`codex-switch` is MIT, verified — the others were not taken further once that failed). |
-| Vue - Official (`Vue.volar`) | Registry lists **no license**; upstream `vuejs/language-tools` is MIT — verify at catalog time rather than trusting the registry field. |
 | SQLite Viewer (`qwtel.sqlite-viewer`, 1.02 M) | Registry `license` reads `LICENSE.md`, but that file is an *"Activate SQLite Viewer PRO"* notice — a paywall, no OSS grant. Free ≠ FOSS, and a plausible-looking license *filename* is not a license. |
 | Redis for VS Code (`Redis.redis-for-vscode`, 19 K) | **SSPL-1.0** (`redis/Redis-for-VS-Code`) — source-available but not OSI-approved, so it fails the FOSS rule. The registry pointer hid this; reading the upstream `LICENSE` is what found it. |
 | Google Cloud Code (`googlecloudtools.cloudcode`, 430 K) | `SEE LICENSE IN LICENSE` → the *Google Cloud Code Plugin Software License Agreement*. Proprietary service terms, not a grant. |
@@ -436,6 +551,11 @@ delisted, so it cannot be a catalog entry regardless of its licence.
 "Excluded" applies to *sourcing the package*. A compatible DWCode-native implementation of the
 capability (e.g. an AI completion provider with a user-supplied endpoint) is a separate decision
 governed by the capability table in [EXTENSIONS.md](EXTENSIONS.md).
+
+**Cleared on 2026-10-26:** `Vue.volar` (registry licence empty) was the last pending row —
+upstream `vuejs/language-tools` reads MIT, so it is catalog-eligible and lives in the appendix
+now, not above. With it cleared, `npm run catalog:scan` exits **0**: **206 ids checked, 179
+catalog-eligible, 0 pending, 20 refused, 7 not on Open VSX**.
 
 ## How this drives DWCode's sequence
 
@@ -469,3 +589,197 @@ curl -s https://api.github.com/repos/<owner>/<repo> | jq '.license.spdx_id'
 
 A registry `license` value that is empty, a NUL placeholder (GitLens's `%gitlens.license%`), or a
 `NOASSERTION` result means **stop and verify upstream** before the package enters the catalog.
+
+---
+
+## Appendix — every catalog-eligible package (179)
+
+Generated, not written: `node tools/openvsx-scan.mjs --doc --appendix` on 2026-10-26. Re-run it
+and replace this table rather than editing rows by hand, so the published list cannot drift from
+the gate above. Every row cleared the licence gate — either the registry states an accepted
+licence (`accept`) or the upstream `LICENSE` was read and recorded in
+[`tools/openvsx-verified.json`](tools/openvsx-verified.json) (`verified`) — and every row is
+present on Open VSX right now. Downloads are registry counts at the time of generation; they are
+popularity signals, not quality signals.
+
+| Package | Licence | Downloads | Upstream |
+| --- | --- | --- | --- |
+| Pyrefly - Python Language Tooling (`meta.pyrefly`) | MIT | 92.47 M | [upstream](https://github.com/facebook/pyrefly) |
+| Python Debugger (`ms-python.debugpy`) | MIT | 62.65 M | [upstream](https://github.com/microsoft/vscode-python-debugger) |
+| Python (`ms-python.python`) | MIT | 61.56 M | [upstream](https://github.com/Microsoft/vscode-python) |
+| Language Support for Java(TM) by Red Hat (`redhat.java`) | EPL-2.0 | 46.88 M | [upstream](https://github.com/redhat-developer/vscode-java) |
+| Python Environments (`ms-python.vscode-python-envs`) | MIT | 45.22 M | [upstream](https://github.com/microsoft/vscode-python-environments) |
+| Ruby LSP (`Shopify.ruby-lsp`) | MIT | 44.52 M | [upstream](https://github.com/Shopify/ruby-lsp) |
+| Go (`golang.Go`) | MIT | 42.94 M | [upstream](https://github.com/golang/vscode-go) |
+| Project Manager for Java (`vscjava.vscode-java-dependency`) | MIT | 41.49 M | [upstream](https://github.com/Microsoft/vscode-java-dependency) |
+| clangd (`llvm-vs-code-extensions.vscode-clangd`) | MIT | 31.55 M | [upstream](https://github.com/clangd/vscode-clangd) |
+| Maven for Java (`vscjava.vscode-maven`) | MIT | 28.57 M | [upstream](https://github.com/Microsoft/vscode-maven) |
+| Debugger for Java (`vscjava.vscode-java-debug`) | MIT | 27.93 M | [upstream](https://github.com/Microsoft/vscode-java-debug) |
+| Gradle for Java (`vscjava.vscode-gradle`) | MIT | 27.9 M | [upstream](https://github.com/microsoft/vscode-gradle) |
+| Test Runner for Java (`vscjava.vscode-java-test`) | MIT | 27.84 M | [upstream](https://github.com/Microsoft/vscode-java-test) |
+| Extension Pack for Java (`vscjava.vscode-java-pack`) | MIT | 23.77 M | [upstream](https://github.com/Microsoft/vscode-java-pack) |
+| Container Tools (`ms-azuretools.vscode-containers`) | MIT | 14.8 M | [upstream](https://github.com/microsoft/vscode-containers) |
+| Jupyter (`ms-toolsai.jupyter`) | MIT | 11.08 M | [upstream](https://github.com/Microsoft/vscode-jupyter) |
+| Vue (Official) (`Vue.volar`) | MIT | 10.95 M | [upstream](https://github.com/vuejs/language-tools) |
+| Prettier - Code formatter (`esbenp.prettier-vscode`) | MIT | 9.65 M | [upstream](https://github.com/prettier/prettier-vscode) |
+| YAML (`redhat.vscode-yaml`) | MIT | 8.88 M | [upstream](https://github.com/redhat-developer/vscode-yaml) |
+| rust-analyzer (`rust-lang.rust-analyzer`) | MIT OR Apache-2.0 | 7.44 M | [upstream](https://github.com/rust-lang/rust-analyzer) |
+| Cline (`saoudrizwan.claude-dev`) | Apache-2.0 | 7.24 M | [upstream](https://github.com/cline/cline) |
+| Docker (`ms-azuretools.vscode-docker`) | MIT | 7.13 M | [upstream](https://github.com/microsoft/vscode-docker) |
+| Material Icon Theme (`PKief.material-icon-theme`) | MIT | 6.55 M | [upstream](https://github.com/material-extensions/vscode-material-icon-theme) |
+| ESLint (`dbaeumer.vscode-eslint`) | MIT | 6.42 M | [upstream](https://github.com/Microsoft/vscode-eslint) |
+| Dart (`Dart-Code.Dart-Code`) | MIT | 5.97 M | [upstream](https://github.com/Dart-Code/Dart-Code) |
+| Antigravity Cockpit (`jlcodes.antigravity-cockpit`) | MIT | 5.01 M | [upstream](https://github.com/jlcodes99/vscode-antigravity-cockpit) |
+| Kilo Code: AI Coding Agent, Copilot, and Autocomplete (`kilocode.kilo-code`) | MIT | 4.62 M | [upstream](https://github.com/Kilo-Org/kilocode) |
+| Ruff (`charliermarsh.ruff`) | MIT | 3.91 M | [upstream](https://github.com/astral-sh/ruff-vscode) |
+| Rainbow CSV (`mechatroner.rainbow-csv`) | MIT | 3.36 M | [upstream](https://github.com/mechatroner/vscode_rainbow_csv) |
+| JavaScript Debugger (`ms-vscode.js-debug`) | MIT | 3.21 M | [upstream](https://github.com/Microsoft/vscode-pwa) |
+| Live Server (`ritwickdey.LiveServer`) | MIT | 3.09 M | [upstream](https://github.com/ritwickdey/vscode-live-server) |
+| GitLab (`GitLab.gitlab-workflow`) | MIT | 2.9 M | [upstream](https://gitlab.com/gitlab-org/gitlab-vscode-extension) |
+| BasedPyright (`detachhead.basedpyright`) | MIT | 2.86 M | [upstream](https://github.com/detachhead/basedpyright) |
+| Markdown Preview Enhanced (`shd101wyy.markdown-preview-enhanced`) | NCSA | 2.49 M | [upstream](https://github.com/shd101wyy/vscode-markdown-preview-enhanced) |
+| HashiCorp Terraform (`hashicorp.terraform`) | MPL-2.0 | 2.4 M | [upstream](https://github.com/hashicorp/vscode-terraform) |
+| EditorConfig (`EditorConfig.EditorConfig`) | MIT | 2.31 M | [upstream](https://github.com/editorconfig/editorconfig-vscode) |
+| CMake Tools (`ms-vscode.cmake-tools`) | MIT | 2.25 M | [upstream](https://github.com/microsoft/vscode-cmake-tools) |
+| Amazon Q (`amazonwebservices.amazon-q-vscode`) | Apache-2.0 | 2.22 M | [upstream](https://github.com/aws/amazon-q-vscode) |
+| Svelte for VS Code (`svelte.svelte-vscode`) | MIT | 2.17 M | [upstream](https://github.com/sveltejs/language-tools) |
+| Code Spell Checker (`streetsidesoftware.code-spell-checker`) | GPL-3.0-or-later | 2.17 M | [upstream](https://github.com/streetsidesoftware/vscode-spell-checker) |
+| JavaScript Debugger Companion Extension (`ms-vscode.js-debug-companion`) | MIT | 2.16 M | [upstream](https://github.com/microsoft/vscode-js-debug-companion) |
+| .NET Install Tool (`ms-dotnettools.vscode-dotnet-runtime`) | MIT | 2.14 M | [upstream](https://github.com/dotnet/vscode-dotnet-runtime) |
+| SonarQube for IDE (`SonarSource.sonarlint-vscode`) | LGPL-3.0 | 2.13 M | [upstream](https://github.com/SonarSource/sonarlint-vscode) |
+| Table Visualizer for JavaScript Profiles (`ms-vscode.vscode-js-profile-table`) | MIT | 2.1 M | [upstream](https://github.com/microsoft/vscode-js-profile-visualizer) |
+| Vim (`vscodevim.vim`) | MIT | 1.98 M | [upstream](https://github.com/VSCodeVim/Vim) |
+| markdownlint (`DavidAnson.vscode-markdownlint`) | MIT | 1.84 M | [upstream](https://github.com/DavidAnson/vscode-markdownlint) |
+| XML (`redhat.vscode-xml`) | EPL-2.0 | 1.64 M | [upstream](https://github.com/redhat-developer/vscode-xml) |
+| Gemini CLI Companion (`Google.gemini-cli-vscode-ide-companion`) | Apache-2.0 | 1.59 M | [upstream](https://github.com/google-gemini/gemini-cli) |
+| vscode-icons (`vscode-icons-team.vscode-icons`) | MIT | 1.59 M | [upstream](https://github.com/vscode-icons/vscode-icons) |
+| Prisma (`prisma.prisma`) | Apache-2.0 | 1.56 M | [upstream](https://github.com/prisma/language-tools) |
+| Black Formatter (`ms-python.black-formatter`) | MIT | 1.53 M | [upstream](https://github.com/microsoft/vscode-black-formatter) |
+| MySQL (`cweijan.vscode-mysql-client2`) | MIT | 1.38 M | [upstream](https://github.com/cweijan/vscode-database-client) |
+| CodeLLDB (`vadimcn.vscode-lldb`) | MIT | 1.37 M | [upstream](https://github.com/vadimcn/codelldb) |
+| Error Lens (`usernamehw.errorlens`) | MIT | 1.36 M | [upstream](https://github.com/usernamehw/vscode-error-lens) |
+| Kubernetes (`ms-kubernetes-tools.vscode-kubernetes-tools`) | Apache-2.0 | 1.25 M | [upstream](https://github.com/vscode-kubernetes-tools/vscode-kubernetes-tools) |
+| SQLTools (`mtxr.sqltools`) | MIT | 1.13 M | [upstream](https://github.com/mtxr/vscode-sqltools) |
+| Code Runner (`formulahendry.code-runner`) | MIT | 1.05 M | [upstream](https://github.com/formulahendry/vscode-code-runner) |
+| GraphQL: Syntax Highlighting (`GraphQL.vscode-graphql-syntax`) | MIT | 1.02 M | [upstream](https://github.com/graphql/graphiql) |
+| CDT GDB Debug Adapter Extension (`eclipse-cdt.cdt-gdb-vscode`) | EPL-2.0 | 999 K | [upstream](https://github.com/eclipse-cdt-cloud/cdt-gdb-vscode) |
+| One Dark Pro (`zhuangtongfa.material-theme`) | MIT | 962 K | [upstream](https://github.com/Binaryify/OneDark-Pro) |
+| Jest / Vitest Runner (`firsttris.vscode-jest-runner`) | MIT | 914 K | [upstream](https://github.com/firsttris/vscode-jest-runner) |
+| ES7+ React/Redux/React-Native snippets (`dsznajder.es7-react-js-snippets`) | MIT | 908 K | [upstream](https://github.com/dsznajder/vscode-es7-javascript-react-snippets) |
+| Markdown Preview Mermaid Support (`bierner.markdown-mermaid`) | MIT | 876 K | [upstream](https://github.com/mjbvz/vscode-markdown-mermaid) |
+| Vitest (`vitest.explorer`) | MIT | 869 K | [upstream](https://github.com/vitest-dev/vscode) |
+| PHP Debug (`xdebug.php-debug`) | MIT | 796 K | [upstream](https://github.com/xdebug/vscode-php-debug) |
+| ShellCheck (`timonwong.shellcheck`) | MIT | 790 K | [upstream](https://github.com/vscode-shellcheck/vscode-shellcheck) |
+| HTML CSS Support (`ecmel.vscode-html-css`) | MIT | 790 K | [upstream](https://github.com/ecmel/vscode-html-css) |
+| Stylelint (`stylelint.vscode-stylelint`) | MIT | 747 K | [upstream](https://github.com/stylelint/vscode-stylelint) |
+| Kotlin (`fwcd.kotlin`) | MIT | 734 K | [upstream](https://github.com/fwcd/vscode-kotlin) |
+| Markdown All in One (`yzhang.markdown-all-in-one`) | MIT | 714 K | [upstream](https://github.com/yzhang-gh/vscode-markdown) |
+| Even Better TOML (`tamasfe.even-better-toml`) | MIT | 693 K | [upstream](https://github.com/tamasfe/taplo) |
+| opencode (`sst-dev.opencode`) | MIT | 678 K | [upstream](https://github.com/sst/opencode) |
+| JavaScript and TypeScript Nightly (`ms-vscode.vscode-typescript-next`) | MIT | 677 K | [upstream](https://github.com/microsoft/vscode-typescript-next) |
+| Git History (`donjayamanne.githistory`) | MIT | 668 K | [upstream](https://github.com/DonJayamanne/gitHistoryVSCode) |
+| Git Blame (`waderyan.gitblame`) | MIT | 614 K | [upstream](https://github.com/Sertion/vscode-gitblame) |
+| indent-rainbow (`oderwat.indent-rainbow`) | MIT | 587 K | [upstream](https://github.com/oderwat/vscode-indent-rainbow) |
+| GraphQL: Language Feature Support (`GraphQL.vscode-graphql`) | MIT | 584 K | [upstream](https://github.com/graphql/graphiql) |
+| Path Intellisense (`christian-kohler.path-intellisense`) | MIT | 572 K | [upstream](https://github.com/ChristianKohler/PathIntellisense) |
+| Tombi (`tombi-toml.tombi`) | MIT | 548 K | [upstream](https://github.com/tombi-toml/tombi) |
+| SQLTools PostgreSQL/Cockroach Driver (`mtxr.sqltools-driver-pg`) | MIT | 546 K | [upstream](https://github.com/mtxr/vscode-sqltools) |
+| Lua (`sumneko.lua`) | MIT | 498 K | [upstream](https://github.com/LuaLS/lua-language-server) |
+| MongoDB for VS Code (`mongodb.mongodb-vscode`) | Apache-2.0 | 493 K | [upstream](https://github.com/mongodb-js/vscode) |
+| Todo Tree (`gruntfuggly.todo-tree`) | MIT | 491 K | [upstream](https://github.com/Gruntfuggly/todo-tree) |
+| C/C++ Debug (`KylinIdeTeam.cppdebug`) | MIT | 482 K | [upstream](https://github.com/quanzhuo/cpp-debug) |
+| Antigravity Panel (`n2ns.antigravity-panel`) | Apache-2.0 | 468 K | [upstream](https://github.com/n2ns/antigravity-panel) |
+| Dracula Theme Official (`dracula-theme.theme-dracula`) | MIT | 444 K | [upstream](https://github.com/dracula/visual-studio-code) |
+| CMake (`twxs.cmake`) | MIT | 431 K | [upstream](https://github.com/twxs/vs.language.cmake) |
+| GitHub Theme (`GitHub.github-vscode-theme`) | MIT | 428 K | [upstream](https://github.com/primer/github-vscode-theme) |
+| JavaScript (ES6) code snippets (`xabikos.JavaScriptSnippets`) | MIT | 379 K | [upstream](https://github.com/xabikos/vscode-javascript) |
+| HTML-validate (`html-validate.vscode-html-validate`) | MIT | 370 K | [upstream](https://gitlab.com/html-validate/vscode-html-validate) |
+| autoDocstring - Python Docstring Generator (`njpwerner.autodocstring`) | MIT | 346 K | [upstream](https://github.com/NilsJPWerner/autoDocstring) |
+| SQL Server (mssql) (`ms-mssql.mssql`) | MIT | 340 K | [upstream](https://github.com/Microsoft/vscode-mssql) |
+| Python Indent (`KevinRose.vsc-python-indent`) | MIT | 338 K | [upstream](https://github.com/kbrose/vsc-python-indent) |
+| C/C++ Runner (`franneck94.c-cpp-runner`) | MIT | 333 K | [upstream](https://github.com/franneck94/vscode-c-cpp-runner) |
+| Docker DX (`docker.docker`) | Apache-2.0 | 269 K | [upstream](https://github.com/docker/vscode-extension) |
+| Julia (`julialang.language-julia`) | MIT | 261 K | [upstream](https://github.com/julia-vscode/julia-vscode) |
+| JSON Schema Store Catalog (`remcohaszing.schemastore`) | MIT | 239 K | [upstream](https://github.com/remcohaszing/vscode-schemastore) |
+| ElixirLS: Elixir support and debugger (`elixir-lsp.elixir-ls`) | MIT | 234 K | [upstream](https://github.com/elixir-lsp/vscode-elixir-ls) |
+| Bash IDE (`mads-hartmann.bash-ide-vscode`) | MIT | 199 K | [upstream](https://github.com/bash-lsp/bash-language-server) |
+| CSS Peek (`pranaygp.vscode-css-peek`) | MIT | 180 K | [upstream](https://github.com/pranaygp/vscode-css-peek) |
+| SQLite (`alexcvzz.vscode-sqlite`) | Apache-2.0 | 175 K | [upstream](https://github.com/AlexCovizzi/vscode-sqlite) |
+| Tools for MicroProfile (`redhat.vscode-microprofile`) | Apache-2.0 | 167 K | [upstream](https://github.com/redhat-developer/vscode-microprofile) |
+| Test Adapter Converter (`ms-vscode.test-adapter-converter`) | MIT | 159 K | [upstream](https://github.com/microsoft/vscode-test-adapter-converter) |
+| crates (`serayuzgur.crates`) | MIT | 155 K | [upstream](https://github.com/serayuzgur/crates) |
+| cmake-format (`cheshirekow.cmake-format`) | GPL-3.0-or-later | 147 K | [upstream](https://github.com/cheshirekow/cmakelang) |
+| shell-format (`foxundermoon.shell-format`) | MIT | 143 K | [upstream](https://github.com/foxundermoon/vs-shell-format) |
+| Pretty XML (`PrateekMahendrakar.prettyxml`) | MIT | 119 K | [upstream](https://github.com/pmahend1/prettyxml) |
+| Google Workspace MCP (`mercurial.google-workspace-mcp`) | MIT | 118 K | [upstream](https://renzojohnson.com/contributions/google-workspace-mcp) |
+| OpenCode Panel (`haoyangzeng.opencui`) | MIT | 113 K | [upstream](https://github.com/arthurzengg/opencui) |
+| Import Cost (`wix.vscode-import-cost`) | MIT | 110 K | [upstream](https://github.com/wix/import-cost) |
+| Harper - Grammar / Spell Checking (`elijah-potter.harper`) | Apache-2.0 | 110 K | [upstream](https://github.com/automattic/harper) |
+| C/C++ Compile Run (`danielpinto8zz6.c-cpp-compile-run`) | GPL-3.0 | 109 K | [upstream](https://github.com/danielpinto8zz6/c-cpp-compile-run) |
+| Live Sass Compiler (`glenn2223.live-sass`) | MIT | 108 K | [upstream](https://github.com/glenn2223/vscode-live-sass-compiler) |
+| Typos spell checker (`tekumara.typos-vscode`) | MIT | 93 K | [upstream](https://github.com/tekumara/typos-lsp) |
+| PostgreSQL (`ckolkman.vscode-postgres`) | MIT | 86 K | [upstream](https://github.com/Borvik/vscode-postgres) |
+| Bash Debug (`rogalmic.bash-debug`) | MIT | 84 K | [upstream](https://github.com/rogalmic/vscode-bash-debug) |
+| Clang-Format (`xaver.clang-format`) | MIT | 81 K | [upstream](https://github.com/xaverh/vscode-clang-format-provider) |
+| OpenShift Toolkit (`redhat.vscode-openshift-connector`) | MIT | 74 K | [upstream](https://github.com/redhat-developer/vscode-openshift-tools) |
+| Kotlin Language (`mathiasfrohlich.Kotlin`) | Apache-2.0 | 72 K | [upstream](https://github.com/mathiasfrohlich/vscode-kotlin) |
+| PHPUnit &amp; Pest Test Explorer (`recca0120.vscode-phpunit`) | MIT | 69 K | [upstream](https://github.com/recca0120/vscode-phpunit) |
+| KIDE Test Explorer &amp; Debug (`kide.kide-test-explorer`) | MIT | 66 K | — |
+| Total TypeScript (`mattpocock.ts-error-translator`) | MIT | 56 K | [upstream](https://github.com/mattpocock/ts-error-translator) |
+| Ruby Sorbet (`sorbet.sorbet-vscode-extension`) | Apache-2.0 | 55 K | [upstream](https://github.com/sorbet/sorbet) |
+| Gruvbox Material (`sainnhe.gruvbox-material`) | MIT | 54 K | [upstream](https://github.com/sainnhe/gruvbox-material-vscode) |
+| CSS Navigation (`pucelle.vscode-css-navigation`) | MIT | 53 K | [upstream](https://github.com/pucelle/vscode-css-navigation) |
+| Varro: OpenCode Workbench (`koltyakov.varro`) | MIT | 53 K | [upstream](https://github.com/koltyakov/varro) |
+| Kotlin by JetBrains (`JetBrains.kotlin-server`) | Apache-2.0 | 50 K | [upstream](https://github.com/Kotlin/kotlin-lsp) |
+| Vue (`znck.vue`) | MIT | 42 K | [upstream](https://github.com/znck/vue-developer-experience) |
+| .NET Meteor (`nromanov.dotnet-meteor`) | MIT | 40 K | [upstream](https://github.com/JaneySprings/DotNet.Meteor) |
+| MySQL (`formulahendry.vscode-mysql`) | MIT | 39 K | [upstream](https://github.com/formulahendry/vscode-mysql) |
+| Android (`adelphes.android-dev-ext`) | MIT | 39 K | [upstream](https://github.com/adelphes/android-dev-ext) |
+| Ruby Solargraph (`castwide.solargraph`) | MIT | 39 K | [upstream](https://github.com/castwide/vscode-solargraph) |
+| Cherry Markdown (`cherryMarkdownPublisher.cherry-markdown`) | Apache-2.0 | 38 K | [upstream](https://github.com/Tencent/cherry-markdown) |
+| JSON Format (SaltcoreYan) (`saltcoreyan.json-format-sortcore`) | Apache-2.0 | 37 K | [upstream](https://github.com/SaltcoreYan/vscode-json-format) |
+| Apollo GraphQL (`apollographql.vscode-apollo`) | MIT | 37 K | [upstream](https://github.com/apollographql/vscode-graphql) |
+| YAML Sort (`PascalReitermann93.vscode-yaml-sort`) | MIT | 36 K | [upstream](https://github.com/pascalre/vscode-yaml-sort) |
+| OpenCode (`ZiShuo.opencode`) | MIT | 35 K | [upstream](https://github.com/anomalyco/opencode) |
+| Git Web Links for VS Code (`reduckted.vscode-gitweblinks`) | MIT | 34 K | [upstream](https://github.com/reduckted/GitWebLinks) |
+| JSON Crack (`AykutSarac.jsoncrack-vscode`) | MIT | 33 K | [upstream](https://github.com/AykutSarac/jsoncrack.com) |
+| LanguageTool Linter (`davidlday.languagetool-linter`) | Apache-2.0 | 24 K | [upstream](https://github.com/davidlday/vscode-languagetool-linter) |
+| Highlight (`fabiospampinato.vscode-highlight`) | MIT | 22 K | [upstream](https://github.com/fabiospampinato/vscode-highlight) |
+| Antigravity+ (`iml1s.antigravity-plus`) | MIT | 21 K | [upstream](https://github.com/ImL1s/antigravity-plus) |
+| LTeX+ – grammar/spell checking using LanguageTool (`ltex-plus.vscode-ltex-plus`) | MPL-2.0 | 21 K | [upstream](https://github.com/ltex-plus/vscode-ltex-plus) |
+| Codex History Viewer - Codex and Claude Code (`HizTam.codex-history-viewer`) | MIT | 19 K | [upstream](https://github.com/hiztam/codex-history-viewer) |
+| helm-ls (`helm-ls.helm-ls`) | MIT | 19 K | [upstream](https://github.com/qvalentin/helm-ls-vscode) |
+| GraphQL: Inline Operation Execution (`GraphQL.vscode-graphql-execution`) | MIT | 18 K | [upstream](https://github.com/graphql/graphiql) |
+| Copilot Delegate (`allansantos-dv.copilot-delegate`) | MIT | 18 K | [upstream](https://github.com/AllanSantos-DV/copilot-delegate) |
+| Android ADB WLAN — Wireless Debugging (`HanWang.android-adb-wlan`) | MIT | 15 K | [upstream](https://github.com/deskbtm/android-adb-wlan) |
+| KIDE C# (`kide.kide-csharp`) | MIT | 14 K | — |
+| Rainbow HTML (`wumbl3.rainbow-html`) | MIT | 14 K | [upstream](https://github.com/realwumbl3/rainbowHTML) |
+| Svelte 3 Snippets (`fivethree.vscode-svelte-snippets`) | MIT | 14 K | [upstream](https://github.com/fivethree-team/vscode-svelte-snippets) |
+| CMake Test Explorer (`fredericbonnet.cmake-test-adapter`) | BSD-3-Clause | 12 K | [upstream](https://github.com/fredericbonnet/cmake-test-explorer) |
+| Codex Switch (`woozy-masta.codex-switch`) | MIT | 11 K | [upstream](https://github.com/WoozyMasta/codex-switch) |
+| Android Emulator (`duchuynguyen.android-emulator`) | MIT | 11 K | [upstream](https://github.com/duchuyctlk/vscode-android-emulator) |
+| TokenGuard Copilot (`adguard.tokenguard-copilot`) | MIT | 11 K | [upstream](https://github.com/ameshkov/tokenguard-copilot) |
+| dotnet-start (`pavel-purma.dotnet-start`) | MIT | 10 K | [upstream](https://github.com/pavel-purma/vscode-dotnet-start) |
+| PHP Language Support (`AnessaEah.php-intelephense-language-support`) | MIT | 10 K | [upstream](https://github.com/AnessaEah/vscode-intelephense-extension) |
+| Lexical (Elixir Language Server) (`lexical-lsp.lexical`) | Apache-2.0 | 9 K | [upstream](https://github.com/lexical-lsp/vscode-lexical) |
+| Bats (Bash Automated Testing System) (`jetmartin.bats`) | MIT | 9 K | [upstream](https://github.com/jetmartin/bats) |
+| Julia Formatter (`singularitti.vscode-julia-formatter`) | MIT | 8 K | [upstream](https://github.com/singularitti/vscode-julia-formatter) |
+| OpenRA Lua Language Extension (`openra.vscode-openra-lua`) | GPL-3.0 | 7 K | [upstream](https://github.com/OpenRA/vscode-openra-lua) |
+| Terraform Plan Colors (`lite2073.tfplan-colors`) | MIT | 6 K | [upstream](https://github.com/litebitus/vscode-tfplan-colors) |
+| Kubernetes CRD snippets (`tumido.crd-snippets`) | GPL-3.0-or-later | 6 K | [upstream](https://github.com/tumido/crd-snippets) |
+| Ruby Test Explorer (`connorshea.vscode-ruby-test-adapter`) | MIT | 6 K | [upstream](https://github.com/connorshea/vscode-ruby-test-adapter) |
+| Android DevKit (`pavi2410.android-devkit`) | MIT | 5 K | [upstream](https://github.com/pavi2410/android-devkit) |
+| Expert LSP (`ExpertLSP.expert`) | Apache-2.0 | 5 K | [upstream](https://github.com/expert-lsp/vscode-expert) |
+| WoW Lua Language Server (`TradeSkillMaster.wowlua-ls`) | GPL-3.0 | 5 K | [upstream](https://github.com/TradeSkillMaster/wowlua-ls) |
+| YAML Doctor (`darioajr.yaml-doctor`) | Apache-2.0 | 4 K | [upstream](https://github.com/darioajr/yaml-doctor-vscode) |
+| Qbox Lua - CfxLua &amp; FiveM (`qbox.qbx-lua`) | GPL-3.0-or-later | 4 K | [upstream](https://github.com/Qbox-project/qbx-editor) |
+| WebSocket Debug Adapter (`eclipse-cdt.websocket-adapter`) | EPL-2.0 | 4 K | [upstream](https://github.com/eclipse-cdt-cloud/vscode-websocket-adapter) |
+| Fix JSON (`oliversturm.fix-json`) | MIT | 4 K | [upstream](https://github.com/oliversturm/vscode-fix-json) |
+| Copilot LSP (`statiolake.vscode-copilot-lsp`) | MIT | 4 K | [upstream](https://github.com/statiolake/vscode-copilot-lsp) |
+| hex.pm IntelliSense (`benvp.vscode-hex-pm-intellisense`) | MIT | 2 K | [upstream](https://github.com/benlime/vscode-hex-pm-intellisense) |
+| Standard Ruby (`testdouble.vscode-standard-ruby`) | MIT | 2 K | [upstream](https://github.com/testdouble/vscode-standard-ruby) |
+| gitlab-ci-ls (`alesbrelih.gitlab-ci-ls`) | MIT | 2 K | [upstream](https://github.com/alesbrelih/gitlab-ci-ls) |
+| Shellscript LS (`juandiazan.bash-lsp`) | MIT | 1 K | [upstream](https://github.com/juandiazan/shell-language-server) |
+| ktfmt - Kotlin Formatter (`omBratteng.ktfmt-kotlin-formatter`) | BSD-3-Clause | 1 K | [upstream](https://github.com/ombratteng/vscode-ktfmt) |
+| Android Emulator Viewer (`D0Tech.vs-avd`) | MIT | 788 | [upstream](https://github.com/dzero1/vs-avd) |
+| Terraform Graph (`saramorillon.terraform-graph`) | MIT | 744 | [upstream](https://github.com/saramorillon/terraform-graph) |

@@ -75,7 +75,7 @@ npm run validate:packs
 
 ## 🌐 Website
 
-The project site, **[dwcode.pages.dev](https://dwcode.pages.dev)**, lives in [`site/`](site/): features, real window captures, all 84 themes, the Railshift downloads, and a live panel running the app's Monaco bundle in the browser (sample files only; saving, the terminal and language servers need the desktop app). [`site/repository.html`](site/repository.html) is the second page — *Open DWCode Extension Repository*: what the licences allow, how the checksum-pinned catalog is built, the licence-gate table and the packages DWCode excludes. It shares the same `site.js`/`styles.css`, so both pages must stay error-free together.
+The project site, **[dwcode.pages.dev](https://dwcode.pages.dev)**, lives in [`site/`](site/): features, real window captures, all 84 themes, the Railshift downloads, and a live panel running the app's Monaco bundle in the browser (sample files only; saving, the terminal and language servers need the desktop app). [`site/repository.html`](site/repository.html) is the second page — *Open DWCode Extension Repository*: what the licences allow, how the checksum-pinned catalog is built, the licence-gate table, the generated list of every accepted package, and the packages DWCode excludes. It shares the same `site.js`/`styles.css`, so both pages must stay error-free together.
 
 ```sh
 ./tools/build-site.sh --shots   # recapture screenshots offscreen, build the demo, assemble site/

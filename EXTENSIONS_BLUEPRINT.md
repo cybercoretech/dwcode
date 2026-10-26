@@ -252,9 +252,11 @@ the suite with executable extensions forced on.
 - Curated catalog at scale: signed/checksum-pinned JSON index on GitHub Releases; exact-version
   installs with origin + sha256 written to a lock record (mirrors the session journal's versioned,
   fail-closed reads). Updates are opt-in and show the capability diff before re-consent. Scope is
-  the whole reviewed backlog in `FOSS_EXTENSION_REPOSITORY.md` (~70 FOSS packages across 16
-  ecosystems), gated by `npm run catalog:scan` — a catalogue that grows needs an automated licence
-  gate, not a human re-reading registry pages. Publish ecosystem by ecosystem as rows clear review.
+  the whole reviewed backlog in `FOSS_EXTENSION_REPOSITORY.md` (179 catalogue-eligible packages
+  across 25 ecosystems and capability areas), gated by `npm run catalog:scan` — a catalogue that
+  grows needs an automated licence gate, not a human re-reading registry pages. Publish ecosystem
+  by ecosystem as rows clear review; provenance per entry: id, version, origin URL, sha256, SPDX,
+  upstream repository, so a licence change is a re-review instead of a silent bump.
 - No URL-based installs by default; local VSIX/file import, if added, runs the identical
   manifest + license + integrity + compatibility checks.
 - Compatibility report per package: `declarative-only` / `needs language server` / `requires
