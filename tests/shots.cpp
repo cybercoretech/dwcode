@@ -106,6 +106,30 @@ private slots:
   }
   theme("cyberpunk-chrome");
  }
+ // Real-display layout pass: the settings dialog and the right-side Explorer.
+ void layout(){
+  // The command palette is the highest-traffic input; its prompt must read.
+  app.window->setProperty("paletteVisible",true);
+  QTRY_VERIFY(app.window->property("paletteVisible").toBool());
+  save("command-palette");
+  QTest::keyClick(app.window,Qt::Key_Escape);
+  QTRY_VERIFY(!app.window->property("paletteVisible").toBool());
+  auto *dialog=app.window->findChild<QObject*>("settingsDialog");QVERIFY(dialog);
+  QVERIFY(QMetaObject::invokeMethod(dialog,"open"));QTRY_VERIFY(dialog->property("visible").toBool());
+  save("settings");
+  QQuickItem *search=nullptr;
+  for(auto *i:items())if(i->inherits("QQuickTextField")&&i->property("placeholderText").toString().startsWith("Search settings"))search=i;
+  QVERIFY(search);click(search);typeText("session");
+  QTRY_COMPARE(dialog->property("query").toString(),QString("session"));
+  save("settings-search");
+  for(int i=0;i<7;++i)QTest::keyClick(app.window,Qt::Key_Backspace);
+  QTRY_COMPARE(dialog->property("query").toString(),QString(""));
+  app.backend->setPreference("appearance/sidebarPosition","right");
+  QVERIFY(QMetaObject::invokeMethod(dialog,"close"));QTRY_VERIFY(!dialog->property("visible").toBool());
+  QTRY_VERIFY(app.window->property("sidebarRight").toBool());
+  save("sidebar-right");
+  app.backend->setPreference("appearance/sidebarPosition","left");
+ }
  void cleanupTestCase(){shutdown(app);}
 };
 

@@ -40,6 +40,7 @@ ApplicationWindow {
  palette.window: theme.background; palette.windowText: theme.foreground; palette.base: theme.canvas
  palette.text: theme.foreground; palette.button: theme.elevated; palette.buttonText: theme.foreground
  palette.highlight: theme.cyan; palette.highlightedText: theme.background
+ palette.placeholderText: theme.mutedText
  function save(){editor.runJavaScript("window.dwcodeSave && window.dwcodeSave()")}
  function chooseFolder(){if(workspaceBackend.hasUnsaved()){pendingAction="folder";unsaved.open()}else folderDialog.open()}
  function activate(action){
@@ -83,9 +84,17 @@ ApplicationWindow {
   Label { width: 420; wrapMode: Text.WordWrap; text: "DWCode detected a command that can modify or remove data:\n\n"+win.pendingCommand+"\n\nReview it before continuing."; color: theme.foreground }
   footer: DialogButtonBox { Button { text: "Cancel"; onClicked: riskyCommand.close() } Button { text: "Run command"; highlighted: true; onClicked: { riskyCommand.close(); workspaceBackend.runCommand(win.pendingCommand) } } }
  }
- Dialog {id:unsaved;title:"Unsaved files";anchors.centerIn:parent;modal:true;standardButtons:Dialog.Discard|Dialog.Cancel
-  Label{text:"You have unsaved changes. Discard them to continue?";color:theme.foreground}
-  onDiscarded:{workspaceBackend.discardChanges();if(pendingAction==="close"){closingApproved=true;win.close()}else folderDialog.open()}
+ Dialog {id:unsaved;objectName:"unsavedDialog";title:"Unsaved files";anchors.centerIn:parent;modal:true;width:520
+  Label {width:470;wrapMode:Text.WordWrap;color:theme.foreground
+   text:win.pendingAction==="close"
+    ? "You have unsaved changes. Keep them to reopen this session next time DWCode starts, or discard them."
+    : "You have unsaved changes. Discard them to open a different folder."}
+  footer: DialogButtonBox {
+   Button {text:"Discard";onClicked:{unsaved.close();workspaceBackend.discardChanges();if(pendingAction==="close"){closingApproved=true;win.close()}else folderDialog.open()}}
+   Button {visible:win.pendingAction==="close";text:"Keep Changes";highlighted:true
+    onClicked:{unsaved.close();closingApproved=true;win.close()}}
+   Button {text:"Cancel";onClicked:unsaved.close()}
+  }
  }
  property var externalDocument: ({})
  Dialog { id: externalChangeDialog; objectName: "externalChangeDialog"; title: "File changed outside DWCode"; anchors.centerIn: parent; modal: true; width: 510
@@ -96,7 +105,7 @@ ApplicationWindow {
  onClosing:function(event){if(!closingApproved&&workspaceBackend.hasUnsaved()){event.accepted=false;pendingAction="close";unsaved.open()}}
  WebChannel {id:channel;Component.onCompleted:registerObject("native",workspaceBackend)}
  WebChannel {id:splitChannel;Component.onCompleted:registerObject("native",workspaceBackend)}
- Component.onCompleted:{modalMode=workspaceBackend.preferences["keyboard/modalDefault"];if(workspaceBackend.files.length>0){for(let i=0;i<workspaceBackend.files.length;i++){let f=workspaceBackend.files[i];if(f.kind==="file"){workspaceBackend.openFile(f.path);break}}}}
+ Component.onCompleted:{modalMode=workspaceBackend.preferences["keyboard/modalDefault"];if(!workspaceBackend.restoreSession()&&workspaceBackend.files.length>0){for(let i=0;i<workspaceBackend.files.length;i++){let f=workspaceBackend.files[i];if(f.kind==="file"){workspaceBackend.openFile(f.path);break}}}}
  onModalModeChanged:{editor.runJavaScript("window.dwcodeSetMode && window.dwcodeSetMode("+modalMode+")");splitEditor.runJavaScript("window.dwcodeSetMode && window.dwcodeSetMode("+modalMode+")")}
  Shortcut {sequence:"Ctrl+O";onActivated:chooseFolder()}
  Shortcut {sequence:"Ctrl+N";onActivated:newFileDialog.open()}

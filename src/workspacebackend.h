@@ -6,6 +6,7 @@
 #include <QMap>
 #include <QSet>
 #include <QJsonObject>
+#include <QJsonArray>
 #include <QFileSystemWatcher>
 #include <QTimer>
 
@@ -53,6 +54,8 @@ public:
     Q_INVOKABLE bool reloadDocument(const QString &path);
     Q_INVOKABLE bool hasUnsaved() const;
     Q_INVOKABLE void discardChanges();
+    Q_INVOKABLE bool restoreSession();
+    Q_INVOKABLE void flushSession();
     Q_INVOKABLE bool runCommand(const QString &command);
     Q_INVOKABLE void sendInput(const QString &text);
     Q_INVOKABLE void stopCommand();
@@ -78,7 +81,7 @@ signals:
     void languageReply(int id,const QVariant &result,const QString &error);
     void diagnosticsReceived(const QString &uri,const QVariantList &diagnostics);
 private:
-    struct Document { QString path,text,language; QByteArray diskHash; int version=1; bool dirty=false; };
+    struct Document { QString path,text,language; QByteArray diskHash; int version=1; bool dirty=false; QString journaled; };
     QString resolve(const QString &path,bool newFile=false) const;
     QVariantMap describe(const Document &doc) const;
     void report(const QString &message);
@@ -95,19 +98,31 @@ private:
     void watchWorkspace();
     void checkExternalChange(const QString &path);
     void scheduleRefresh();
+    static QString sessionDirectory();
+    void loadSession();
+    QStringList orderedPaths() const;
+    void scheduleSessionWrite();
+    void writeSession();
     QString m_root,m_active,m_message="Open a folder to begin.",m_terminalOutput,m_lspStatus="Disconnected",m_lspFamily;
     QVariantList m_files,m_themes,m_problems;
     QVariantMap m_theme;
     QVariantMap m_preferences;
     QMap<QString,Document> m_documents;
+    QStringList m_order;
     QMap<QString,QVariantList> m_diagnostics;
     QProcess m_terminal,m_lsp;
     QFileSystemWatcher m_watcher;
-    QTimer m_refreshTimer;
+    QTimer m_refreshTimer,m_sessionTimer;
     QByteArray m_lspBuffer;
     bool m_lspReady=false;
     int m_requestId=100;
     QSet<QString> m_lspOpened;
     QSet<int> m_pending;
     QMap<QString,QByteArray> m_externalChanges;
+    // Journal of the last run, read once at startup so nothing that rewrites
+    // the on-disk journal can take the pending restore with it.
+    bool m_pendingSession=false;
+    QString m_pendingRoot,m_pendingActive;
+    QJsonArray m_pendingTabs;
+    QMap<QString,QString> m_pendingBuffers;
 };

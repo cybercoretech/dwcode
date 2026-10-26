@@ -10,6 +10,7 @@
 #include <QSettings>
 #include <QStandardPaths>
 #include <QStringDecoder>
+#include <QStringList>
 #include <QTimer>
 #include <QCoreApplication>
 #include <QRegularExpression>
@@ -19,7 +20,10 @@
 
 namespace {
 constexpr qint64 MaxFile=8*1024*1024;
+constexpr int SessionVersion=1;
 QByteArray digest(const QByteArray &data){return QCryptographicHash::hash(data,QCryptographicHash::Sha256);}
+// Buffer files are named from the path so a restart can find them again.
+QString bufferName(const QString &path){return QString::fromLatin1(QCryptographicHash::hash(path.toUtf8(),QCryptographicHash::Sha1).toHex().left(24));}
 QString localPath(const QString &path){return path.startsWith("file:")?QUrl(path).toLocalFile():path;}
 QString language(const QString &path){
  const auto ext=QFileInfo(path).suffix().toLower();
@@ -30,7 +34,7 @@ QVariantMap preferenceDefaults(){return {
  {"appearance/uiScale",100},{"appearance/density","comfortable"},{"appearance/sidebarPosition","left"},{"appearance/statusBar",true},
  {"editor/fontFamily","JetBrains Mono, Cascadia Code, monospace"},{"editor/fontSize",14},{"editor/fontLigatures",true},{"editor/lineHeight",23},{"editor/wordWrap","off"},{"editor/minimap",true},{"editor/lineNumbers","on"},{"editor/rulers",""},{"editor/renderWhitespace","none"},{"editor/bracketGuides",true},{"editor/currentLineHighlight",true},{"editor/smoothScrolling",true},
  {"editing/tabSize",2},{"editing/insertSpaces",true},{"editing/autoIndent",true},{"editing/autoClosingBrackets",true},{"editing/trimTrailingWhitespace",false},{"editing/insertFinalNewline",false},{"editing/lineEnding","auto"},
- {"files/autoSave","off"},{"files/autoSaveDelay",1000},{"files/excludes",""},
+ {"files/autoSave","off"},{"files/autoSaveDelay",1000},{"files/excludes",""},{"files/restoreSession",true},
  {"terminal/shell","/bin/bash"},{"terminal/workingDirectory","workspace"},{"terminal/fontFamily","monospace"},{"terminal/fontSize",11},{"terminal/scrollback",200000},{"terminal/copyOnSelect",true},{"terminal/clearOnRun",false},{"terminal/environment",""},{"terminal/warnRisky",true},
  {"keyboard/modalDefault",false},{"keyboard/modalCursor","block"}
 };}
@@ -45,6 +49,10 @@ WorkspaceBackend::WorkspaceBackend(QObject *parent):QObject(parent){
  loadPreferences();
  m_refreshTimer.setSingleShot(true);m_refreshTimer.setInterval(150);
  connect(&m_refreshTimer,&QTimer::timeout,this,&WorkspaceBackend::refreshFiles);
+ // Unsaved buffers are journaled a beat after each edit, so a crash loses at
+ // most the tail of the last few hundred milliseconds of typing.
+ m_sessionTimer.setSingleShot(true);m_sessionTimer.setInterval(400);
+ connect(&m_sessionTimer,&QTimer::timeout,this,&WorkspaceBackend::writeSession);
  connect(&m_watcher,&QFileSystemWatcher::directoryChanged,this,[this](const QString &){scheduleRefresh();});
  connect(&m_watcher,&QFileSystemWatcher::fileChanged,this,[this](const QString &path){checkExternalChange(path);scheduleRefresh();});
  m_terminal.setChildProcessModifier([]{::setsid();});
@@ -61,8 +69,9 @@ WorkspaceBackend::WorkspaceBackend(QObject *parent):QObject(parent){
  QFile themesFile(":/data/themes.json");
  if(themesFile.open(QIODevice::ReadOnly))m_themes=QJsonDocument::fromJson(themesFile.readAll()).array().toVariantList();
  setTheme(QSettings().value("theme","cyberpunk-chrome").toString());
+ loadSession();
 }
-WorkspaceBackend::~WorkspaceBackend(){terminateGroup(m_terminal);terminateGroup(m_lsp);}
+WorkspaceBackend::~WorkspaceBackend(){flushSession();terminateGroup(m_terminal);terminateGroup(m_lsp);}
 void WorkspaceBackend::loadPreferences(){
  m_preferences=preferenceDefaults();QSettings settings;
  for(auto it=m_preferences.begin();it!=m_preferences.end();++it)it.value()=settings.value("settings/"+it.key(),it.value());
@@ -70,8 +79,14 @@ void WorkspaceBackend::loadPreferences(){
 void WorkspaceBackend::report(const QString &text){m_message=text;emit messageChanged();}
 bool WorkspaceBackend::dirty() const{return m_documents.contains(m_active)&&m_documents.value(m_active).dirty;}
 bool WorkspaceBackend::hasUnsaved() const{for(const auto &d:m_documents)if(d.dirty)return true;return false;}
-void WorkspaceBackend::discardChanges(){m_documents.clear();m_active.clear();m_externalChanges.clear();watchWorkspace();emit documentStateChanged();}
-QVariantList WorkspaceBackend::documents() const{QVariantList out;for(const auto &doc:m_documents)out.append(describe(doc));return out;}
+void WorkspaceBackend::discardChanges(){m_documents.clear();m_order.clear();m_active.clear();m_externalChanges.clear();watchWorkspace();emit documentStateChanged();flushSession();}
+QVariantList WorkspaceBackend::documents() const{QVariantList out;for(const auto &path:orderedPaths())out.append(describe(m_documents.value(path)));return out;}
+QStringList WorkspaceBackend::orderedPaths() const{
+ QStringList out;QSet<QString> seen;
+ for(const auto &path:m_order)if(m_documents.contains(path)&&!seen.contains(path)){out.append(path);seen.insert(path);}
+ for(auto it=m_documents.cbegin();it!=m_documents.cend();++it)if(!seen.contains(it.key())){out.append(it.key());seen.insert(it.key());}
+ return out;
+}
 QVariantMap WorkspaceBackend::describe(const Document &doc)const{return {{"path",doc.path},{"name",QFileInfo(doc.path).fileName()},{"text",doc.text},{"language",doc.language},{"uri",QUrl::fromLocalFile(doc.path).toString()},{"version",doc.version},{"dirty",doc.dirty}};}
 QVariantMap WorkspaceBackend::activeDocument()const{return m_documents.contains(m_active)?describe(m_documents.value(m_active)):QVariantMap();}
 QString WorkspaceBackend::resolve(const QString &input,bool newFile)const{
@@ -86,7 +101,7 @@ bool WorkspaceBackend::openWorkspace(const QString &input){
  if(hasUnsaved()){report("Save or discard unsaved files before changing folders.");return false;}
  const auto path=QFileInfo(localPath(input)).canonicalFilePath();
  if(path.isEmpty()||!QFileInfo(path).isDir()){report("Choose an existing project folder.");return false;}
- stopCommand();stopLanguageServer();m_documents.clear();m_active.clear();m_externalChanges.clear();m_root=path;refreshFiles();emit documentStateChanged();report("Workspace: "+path);return true;
+ stopCommand();stopLanguageServer();m_documents.clear();m_order.clear();m_active.clear();m_externalChanges.clear();m_root=path;refreshFiles();emit documentStateChanged();report("Workspace: "+path);flushSession();return true;
 }
 void WorkspaceBackend::refreshFiles(){
  m_files.clear();int count=0;
@@ -135,8 +150,8 @@ bool WorkspaceBackend::createFile(const QString &input){
  const auto path=resolve(input,true);
  if(path.isEmpty()||QFileInfo(path).fileName().isEmpty()){report("Choose a new file name inside the workspace.");return false;}
  if(QFileInfo::exists(path)||m_documents.contains(path)){report("A file with that name already exists.");return false;}
- m_documents.insert(path,Document{path,"",language(path),digest({}),1,true});m_externalChanges.remove(path);m_active=path;
- report("New unsaved file: "+QDir(m_root).relativeFilePath(path));emit documentStateChanged();emit documentActivated(activeDocument());return true;
+ m_documents.insert(path,Document{path,"",language(path),digest({}),1,true,QString()});m_order.append(path);m_externalChanges.remove(path);m_active=path;
+ report("New unsaved file: "+QDir(m_root).relativeFilePath(path));emit documentStateChanged();emit documentActivated(activeDocument());flushSession();return true;
 }
 QVariantMap WorkspaceBackend::openFile(const QString &input){
  const auto path=resolve(input);QFile file(path);
@@ -145,13 +160,14 @@ QVariantMap WorkspaceBackend::openFile(const QString &input){
   if(file.size()>MaxFile||!file.open(QIODevice::ReadOnly)){report("Unable to read file (8 MiB text limit).");return {};}
   const auto bytes=file.readAll();QStringDecoder decoder(QStringDecoder::Utf8);QString text=decoder(bytes);
   if(decoder.hasError()||bytes.contains('\0')){report("This file is not UTF-8 text.");return {};}
-  m_documents.insert(path,Document{path,text,language(path),digest(bytes),1,false});
+  m_documents.insert(path,Document{path,text,language(path),digest(bytes),1,false,QString()});m_order.append(path);
  }
- m_externalChanges.remove(path);watchWorkspace();m_active=path;openInLsp(m_documents[path]);emit documentStateChanged();const auto doc=activeDocument();emit documentActivated(doc);return doc;
+ m_externalChanges.remove(path);watchWorkspace();m_active=path;openInLsp(m_documents[path]);emit documentStateChanged();const auto doc=activeDocument();emit documentActivated(doc);flushSession();return doc;
 }
 bool WorkspaceBackend::updateDocument(const QString &path,const QString &text){
  if(!m_documents.contains(path)||text.toUtf8().size()>MaxFile)return false;
  auto &doc=m_documents[path];if(doc.text==text)return true;doc.text=text;++doc.version;doc.dirty=digest(text.toUtf8())!=doc.diskHash;
+ scheduleSessionWrite();
  if(m_lspReady&&supports(doc)){
   if(!m_lspOpened.contains(path))openInLsp(doc);
   else notifyLsp("textDocument/didChange",{{"textDocument",QJsonObject{{"uri",QUrl::fromLocalFile(path).toString()},{"version",doc.version}}},{"contentChanges",QJsonArray{QJsonObject{{"text",text}}}}});
@@ -168,7 +184,7 @@ bool WorkspaceBackend::writeDocument(Document &doc,const QString &target,bool ov
  if(doc.text!=before){++doc.version;if(m_lspReady&&supports(doc))notifyLsp("textDocument/didChange",{{"textDocument",QJsonObject{{"uri",QUrl::fromLocalFile(doc.path).toString()},{"version",doc.version}}},{"contentChanges",QJsonArray{QJsonObject{{"text",doc.text}}}}});}
  QSaveFile out(target);const auto bytes=doc.text.toUtf8();
  if(!out.open(QIODevice::WriteOnly)||out.write(bytes)!=bytes.size()||!out.commit()){report("Save failed: "+out.errorString());return false;}
- doc.diskHash=digest(bytes);doc.dirty=false;report("Saved "+QDir(m_root).relativeFilePath(target));emit documentStateChanged();return true;
+ doc.diskHash=digest(bytes);doc.dirty=false;report("Saved "+QDir(m_root).relativeFilePath(target));emit documentStateChanged();flushSession();return true;
 }
 bool WorkspaceBackend::saveDocument(const QString &path){
  if(!m_documents.contains(path)){report("Open a workspace file before saving.");return false;}
@@ -186,13 +202,17 @@ bool WorkspaceBackend::reloadDocument(const QString &input){
  if(decoder.hasError()||bytes.contains('\0')||bytes.size()>MaxFile){report("The changed file is not supported UTF-8 text.");return false;}
  auto &doc=m_documents[path];doc.text=text;doc.diskHash=digest(bytes);++doc.version;doc.dirty=false;m_externalChanges.remove(path);
  if(m_lspReady&&supports(doc))notifyLsp("textDocument/didChange",{{"textDocument",QJsonObject{{"uri",QUrl::fromLocalFile(path).toString()},{"version",doc.version}}},{"contentChanges",QJsonArray{QJsonObject{{"text",doc.text}}}}});
- report("Reloaded "+QDir(m_root).relativeFilePath(path));emit documentStateChanged();emit documentUpdated(describe(doc));return true;
+ report("Reloaded "+QDir(m_root).relativeFilePath(path));emit documentStateChanged();emit documentUpdated(describe(doc));flushSession();return true;
 }
 bool WorkspaceBackend::saveAs(const QString &url){
  if(!m_documents.contains(m_active)){report("Open a file first.");return false;}
  const auto target=resolve(url,true);if(target==m_active)return saveDocument(m_active);
- auto doc=m_documents[m_active];if(!writeDocument(doc,target,false))return false;
- doc.path=target;doc.language=language(target);m_documents.insert(target,doc);m_externalChanges.remove(target);m_active=target;refreshFiles();emit documentStateChanged();emit documentActivated(describe(doc));openInLsp(doc);return true;
+ const auto previous=m_active;
+ auto doc=m_documents[previous];if(!writeDocument(doc,target,false))return false;
+ doc.path=target;doc.language=language(target);m_documents.remove(previous);m_documents.insert(target,doc);
+ const int at=m_order.indexOf(previous);if(at>=0)m_order.replace(at,target);else m_order.append(target);
+ if(m_lspReady&&m_lspOpened.remove(previous))notifyLsp("textDocument/didClose",{{"textDocument",QJsonObject{{"uri",QUrl::fromLocalFile(previous).toString()}}}});
+ m_externalChanges.remove(previous);m_externalChanges.remove(target);m_active=target;refreshFiles();emit documentStateChanged();emit documentActivated(describe(doc));openInLsp(doc);flushSession();return true;
 }
 void WorkspaceBackend::appendTerminal(const QString &text){m_terminalOutput+=text;m_terminalOutput=m_terminalOutput.right(m_preferences.value("terminal/scrollback",200000).toInt());emit terminalChanged();}
 bool WorkspaceBackend::runCommand(const QString &command){
@@ -238,6 +258,121 @@ void WorkspaceBackend::setPreference(const QString &key,const QVariant &value){
 void WorkspaceBackend::resetPreferences(){
  const auto defaults=preferenceDefaults();QSettings settings;for(auto it=defaults.cbegin();it!=defaults.cend();++it)settings.remove("settings/"+it.key());
  loadPreferences();setTheme("cyberpunk-chrome");emit preferencesChanged(m_preferences);
+}
+// The journal lives beside the QSettings file, so it follows the same
+// per-user location (and the same isolation the test suites rely on).
+QString WorkspaceBackend::sessionDirectory(){
+ const QFileInfo info(QSettings().fileName());
+ return info.absolutePath()+"/"+info.completeBaseName()+".session";
+}
+void WorkspaceBackend::scheduleSessionWrite(){if(!m_sessionTimer.isActive())m_sessionTimer.start();}
+void WorkspaceBackend::flushSession(){m_sessionTimer.stop();writeSession();}
+void WorkspaceBackend::writeSession(){
+ if(m_sessionTimer.isActive())m_sessionTimer.stop();
+ const QString directory=sessionDirectory();
+ if(m_root.isEmpty()){QDir(directory).removeRecursively();return;}
+ QDir().mkpath(directory+"/buffers");
+ QJsonArray tabs;QSet<QString> referenced;
+ for(const auto &path:orderedPaths()){
+  Document &doc=m_documents[path];
+  QJsonObject tab{{"path",doc.path},{"language",doc.language},{"dirty",doc.dirty},{"version",doc.version},
+                  {"existed",QFileInfo::exists(doc.path)},{"diskHash",QString::fromLatin1(doc.diskHash.toHex())}};
+  if(doc.dirty){
+   const QString name=bufferName(doc.path);
+   const bool alreadyJournaled=!doc.journaled.isNull()&&doc.journaled==doc.text;
+   if(!alreadyJournaled){
+    QSaveFile out(directory+"/buffers/"+name);
+    const QByteArray bytes=doc.text.toUtf8();
+    if(out.open(QIODevice::WriteOnly)&&out.write(bytes)==bytes.size()&&out.commit())doc.journaled=doc.text;
+   }
+   tab["buffer"]=name;referenced.insert(name);
+  }
+  tabs.append(tab);
+ }
+ const QDir buffers(directory+"/buffers");
+ for(const auto &file:buffers.entryInfoList(QDir::Files))
+  if(!referenced.contains(file.fileName()))QFile::remove(file.filePath());
+ QJsonObject meta{{"version",SessionVersion},{"root",m_root},{"active",m_active},{"tabs",tabs}};
+ QSaveFile out(directory+"/session.json");
+ const QByteArray bytes=QJsonDocument(meta).toJson(QJsonDocument::Compact);
+ if(out.open(QIODevice::WriteOnly)&&out.write(bytes)==bytes.size())out.commit();
+}
+// Reads the previous run's journal once, up front. Buffer files are pulled into
+// memory here because opening a workspace rewrites the journal on disk.
+void WorkspaceBackend::loadSession(){
+ if(!m_preferences.value("files/restoreSession",true).toBool())return;
+ QFile stored(sessionDirectory()+"/session.json");
+ if(!stored.open(QIODevice::ReadOnly))return;
+ const QJsonObject meta=QJsonDocument::fromJson(stored.readAll()).object();
+ if(meta.value("version").toInt()!=SessionVersion)return;
+ const QString root=meta.value("root").toString();
+ if(root.isEmpty()||!QFileInfo(root).isDir())return;
+ m_pendingRoot=root;
+ m_pendingActive=meta.value("active").toString();
+ m_pendingTabs=meta.value("tabs").toArray();
+ qint64 budget=32*1024*1024;
+ for(const auto &value:std::as_const(m_pendingTabs)){
+  const QJsonObject tab=value.toObject();
+  if(!tab.value("dirty").toBool())continue;
+  const QString name=tab.value("buffer").toString();
+  if(name.isEmpty())continue;
+  QFile file(sessionDirectory()+"/buffers/"+name);
+  if(!file.open(QIODevice::ReadOnly))continue;
+  const QByteArray bytes=file.readAll();
+  if(bytes.size()>budget)continue;
+  budget-=bytes.size();
+  m_pendingBuffers.insert(tab.value("path").toString(),QString::fromUtf8(bytes));
+ }
+ m_pendingSession=true;
+}
+bool WorkspaceBackend::restoreSession(){
+ if(!m_pendingSession)return false;
+ m_pendingSession=false;
+ const QJsonArray tabs=m_pendingTabs;
+ const QMap<QString,QString> buffers=m_pendingBuffers;
+ const QString sessionRoot=m_pendingRoot,active=m_pendingActive;
+ m_pendingTabs=QJsonArray();m_pendingBuffers.clear();m_pendingRoot.clear();m_pendingActive.clear();
+ if(!m_preferences.value("files/restoreSession",true).toBool())return false;
+ if(!m_documents.isEmpty())return false;
+ if(m_root!=sessionRoot){
+  // A folder opened explicitly (command line or Open Folder) wins over the journal.
+  if(!m_root.isEmpty())return false;
+  if(!openWorkspace(sessionRoot))return false;
+ }
+ QStringList changed;
+ for(const auto &value:tabs){
+  if(m_documents.size()>=60)break;
+  const QJsonObject tab=value.toObject();
+  const QString path=tab.value("path").toString();
+  if(path.isEmpty()||m_documents.contains(path))continue;
+  const bool dirty=tab.value("dirty").toBool(),existed=tab.value("existed").toBool();
+  QFile file(path);
+  const bool onDisk=file.open(QIODevice::ReadOnly);
+  const QByteArray bytes=onDisk?file.readAll():QByteArray();
+  QStringDecoder decoder(QStringDecoder::Utf8);
+  const QString text=onDisk?QString(decoder(bytes)):QString();
+  const bool readable=onDisk&&bytes.size()<=MaxFile&&!bytes.contains('\0')&&!decoder.hasError();
+  if(dirty&&buffers.contains(path)){
+   // The journaled disk hash stays authoritative, so a save against a file that
+   // moved on while DWCode was closed is refused instead of overwriting it.
+   const QByteArray hash=existed?QByteArray::fromHex(tab.value("diskHash").toString().toLatin1()):digest({});
+   m_documents.insert(path,Document{path,buffers.value(path),language(path),hash,qMax(1,tab.value("version").toInt(1)),true,QString()});
+   m_order.append(path);
+   if(existed&&digest(bytes)!=hash)changed.append(path);
+   continue;
+  }
+  if(!readable)continue;
+  m_documents.insert(path,Document{path,text,language(path),digest(bytes),1,false,QString()});
+  m_order.append(path);
+ }
+ m_active=m_documents.contains(active)?active:(m_order.isEmpty()?QString():m_order.first());
+ watchWorkspace();emit documentStateChanged();
+ if(!m_active.isEmpty())emit documentActivated(activeDocument());
+ flushSession();
+ for(const auto &path:changed)QTimer::singleShot(0,this,[this,path]{checkExternalChange(path);});
+ const int count=m_documents.size();
+ if(count>0)report(QString("Restored %1 file%2 from your last session.").arg(count).arg(count==1?"":"s"));
+ return true;
 }
 void WorkspaceBackend::sendLsp(const QJsonObject &object){
  if(m_lsp.state()!=QProcess::Running)return;

@@ -2,6 +2,7 @@
 #include <QtTest>
 #include <QTemporaryDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QSettings>
 #include <QUrl>
 class BackendTest:public QObject{
@@ -52,6 +53,53 @@ private slots:
   params["position"]=QVariantMap{{"line",0},{"character",7}};const int hover=b.languageRequest("textDocument/hover",params);QTRY_VERIFY_WITH_TIMEOUT(!replies.isEmpty(),10000);reply=replies.takeFirst();QCOMPARE(reply[0].toInt(),hover);QVERIFY(!reply[1].toMap().isEmpty());
   QVERIFY(b.updateDocument(doc["path"].toString(),"const message: string = 'hello';\nmessage.toUpperCase();\n"));QTRY_VERIFY_WITH_TIMEOUT(b.problems().isEmpty(),20000);b.stopLanguageServer();QVERIFY(!b.lspReady());
  }
+  void sessionRestore(){
+   QTemporaryDir root;put(root.filePath("alpha.ts"),"const alpha = 1;\n");put(root.filePath("beta.ts"),"const beta = 2;\n");
+   const QString alpha=QFileInfo(root.filePath("alpha.ts")).canonicalFilePath();
+   const QString beta=QFileInfo(root.filePath("beta.ts")).canonicalFilePath();
+   {
+    WorkspaceBackend b;QVERIFY(b.openWorkspace(root.path()));
+    QVERIFY(!b.openFile("alpha.ts").isEmpty());QVERIFY(!b.openFile("beta.ts").isEmpty());
+    QVERIFY(b.updateDocument(alpha,"const alpha = 99;\n"));
+   }
+   { // tab order, the active file and the unsaved buffer all come back
+    WorkspaceBackend b;QVERIFY(b.restoreSession());
+    QCOMPARE(b.documents().size(),2);
+    QCOMPARE(b.documents().at(0).toMap().value("name").toString(),QString("alpha.ts"));
+    QCOMPARE(b.documents().at(1).toMap().value("name").toString(),QString("beta.ts"));
+    QCOMPARE(b.activePath(),beta);
+    QVERIFY(!b.dirty());
+    const auto restored=b.documents().at(0).toMap();
+    QVERIFY(restored.value("dirty").toBool());
+    QCOMPARE(restored.value("text").toString(),QString("const alpha = 99;\n"));
+   }
+   put(alpha,"const alpha = 42;\n"); // the file moved on while DWCode was closed
+   {
+    WorkspaceBackend b;QVERIFY(b.restoreSession());
+    QSignalSpy changes(&b,&WorkspaceBackend::documentExternalChange);
+    QTRY_VERIFY_WITH_TIMEOUT(!changes.isEmpty(),3000);
+    QVERIFY(changes.takeFirst().at(0).toMap().value("dirty").toBool());
+    QCOMPARE(b.documents().at(0).toMap().value("text").toString(),QString("const alpha = 99;\n"));
+    QVERIFY(!b.saveDocument(alpha)); // never overwrites a version it did not read
+    QCOMPARE(get(alpha),QByteArray("const alpha = 42;\n"));
+   }
+   QVERIFY(QFile::remove(alpha));
+   { // a file deleted outside DWCode keeps its unsaved buffer
+    WorkspaceBackend b;QVERIFY(b.restoreSession());
+    QCOMPARE(b.documents().size(),2);
+    const auto restored=b.documents().at(0).toMap();
+    QVERIFY(restored.value("dirty").toBool());
+    QCOMPARE(restored.value("text").toString(),QString("const alpha = 99;\n"));
+   }
+   {
+    WorkspaceBackend b;QVERIFY(b.restoreSession());QVERIFY(b.hasUnsaved());b.discardChanges();
+   }
+   { // discarded work stays discarded, but the folder still reopens
+    WorkspaceBackend b;QVERIFY(b.restoreSession());
+    QVERIFY(!b.hasUnsaved());QCOMPARE(b.documents().size(),0);
+    QCOMPARE(b.root(),QFileInfo(root.path()).canonicalFilePath());
+   }
+  }
 };
 QTEST_GUILESS_MAIN(BackendTest)
 #include "backend_test.moc"

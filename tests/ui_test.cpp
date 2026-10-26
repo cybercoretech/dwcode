@@ -182,6 +182,36 @@ private slots:
   QVERIFY(waitJs(editor(),"window.dwcodeNativeReady===true"));
   QTRY_COMPARE(editorBackground(editor()),rgb(themeById("tokyo-night")["surfaces"].toMap()["editor"].toString()));
  }
+ void unsavedWorkSurvivesRestart(){
+  // A second file, edited but never saved.
+  QVERIFY(!app.backend->openFile("notes.md").isEmpty());
+  QVERIFY(waitJs(editor(),"window.dwcodeEditor.getModel().uri.path.endsWith('/notes.md')"));
+  js(editor(),"(window.dwcodeEditor.setPosition({lineNumber:1,column:1}),window.dwcodeEditor.trigger('keyboard','type',{text:'draft notes\\n'}),true)");
+  QTRY_VERIFY(app.backend->dirty());
+  QVERIFY(withText("● notes.md"));
+  // Closing offers to keep the work for the next launch rather than only discard it.
+  app.window->close();
+  auto *dialog=app.window->findChild<QObject*>("unsavedDialog");QVERIFY(dialog);
+  QTRY_VERIFY(dialog->property("visible").toBool());
+  QVERIFY(withText("Keep Changes","QQuickButton"));QVERIFY(withText("Discard","QQuickButton"));
+  click(withText("Cancel","QQuickButton"));
+  QTRY_VERIFY(!dialog->property("visible").toBool());
+  QVERIFY(app.window->isVisible());
+
+  shutdown(app);
+  launch(app,true); // keep the journal the last instance wrote
+  QCOMPARE(app.backend->documents().size(),2);
+  QCOMPARE(app.backend->documents().at(0).toMap().value("name").toString(),QString("main.ts"));
+  QCOMPARE(app.backend->documents().at(1).toMap().value("name").toString(),QString("notes.md"));
+  QCOMPARE(app.backend->activePath(),QFileInfo(root.filePath("notes.md")).canonicalFilePath());
+  QVERIFY(app.backend->dirty());
+  QVERIFY(waitJs(editor(),"window.dwcodeEditor.getModel().uri.path.endsWith('/notes.md')"));
+  QVERIFY2(waitJs(editor(),"window.dwcodeEditor.getValue().startsWith('draft notes')"),"unsaved buffer never reached the editor");
+  QVERIFY(withText("● notes.md"));
+  QVERIFY(app.backend->saveDocument(app.backend->activePath()));
+  QTRY_VERIFY(!app.backend->dirty());
+  QVERIFY(get(root.filePath("notes.md")).startsWith("draft notes"));
+ }
  void cleanupTestCase(){shutdown(app);}
 };
 

@@ -14,6 +14,8 @@
 #include <QJsonObject>
 #include <QTemporaryDir>
 #include <QSettings>
+#include <QDir>
+#include <QFileInfo>
 #include <QWheelEvent>
 #include <QtWebEngineQuick/qtwebenginequickglobal.h>
 #include <memory>
@@ -46,7 +48,14 @@ protected:
  static void put(const QString &path,const QByteArray &text){QFile f(path);QVERIFY(f.open(QIODevice::WriteOnly));QCOMPARE(f.write(text),text.size());}
  static QByteArray get(const QString &path){QFile f(path);if(!f.open(QIODevice::ReadOnly))return {};return f.readAll();}
 
- void launch(App &a){
+ // Drops the journal from a previous run so suites start from a clean window.
+ void clearSession(){
+  const QSettings settings;const QFileInfo info(settings.fileName());
+  QDir(info.absolutePath()+"/"+info.completeBaseName()+".session").removeRecursively();
+ }
+ // keepSession leaves the previous run's journal in place for restore tests.
+ void launch(App &a,bool keepSession=false){
+  if(!keepSession)clearSession();
   a.backend=std::make_unique<WorkspaceBackend>();
   QVERIFY(a.backend->openWorkspace(workspace.isEmpty()?root.path():workspace));
   a.engine=std::make_unique<QQmlApplicationEngine>();

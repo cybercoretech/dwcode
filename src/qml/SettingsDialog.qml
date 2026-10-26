@@ -40,7 +40,9 @@ Dialog {
  contentItem: ColumnLayout {
   spacing: 0
   Rectangle { Layout.fillWidth: true; Layout.preferredHeight: 56; color: theme.background
-   TextField { id: search; anchors.fill: parent; anchors.margins: 12; placeholderText: "Search settings…"; text: root.query; onTextChanged: root.query=text; Accessible.name: "Search settings" }
+   TextField { id: search; anchors.fill: parent; anchors.margins: 12; placeholderText: "Search settings…"; text: root.query; onTextChanged: root.query=text; Accessible.name: "Search settings"
+    background: Rectangle { color: theme.canvas; border.color: search.activeFocus ? theme.cyan : theme.border; radius: 4 }
+   }
   }
   ScrollView { Layout.fillWidth: true; Layout.fillHeight: true; clip: true
    ColumnLayout { width: parent.width; spacing: 0
@@ -90,11 +92,12 @@ Dialog {
       RowLayout { Layout.fillWidth: true; Label { text: "Line endings when saving"; Layout.preferredWidth: 235; color: theme.foreground } ComboBox { Layout.fillWidth: true; model: ["auto","lf","crlf"]; currentIndex: root.indexOf(model,root.value("editing/lineEnding","auto")); onActivated: root.setValue("editing/lineEnding",currentText) } }
      }
     }
-    Rectangle { visible: root.matches("files workspace auto save delay exclude explorer"); Layout.fillWidth: true; implicitHeight: filesColumn.implicitHeight + 28; color: theme.background
+    Rectangle { visible: root.matches("files workspace auto save delay exclude explorer restore reopen session"); Layout.fillWidth: true; implicitHeight: filesColumn.implicitHeight + 28; color: theme.background
      ColumnLayout { id: filesColumn; anchors.left: parent.left; anchors.right: parent.right; anchors.margins: 14; spacing: 10
       Label { text: "FILES & WORKSPACE"; color: theme.cyan; font.bold: true; font.pixelSize: 11; font.letterSpacing: 1 }
       RowLayout { Layout.fillWidth: true; Label { text: "Auto save"; Layout.preferredWidth: 235; color: theme.foreground } ComboBox { Layout.fillWidth: true; model: ["off","after delay"]; currentIndex: root.value("files/autoSave","off")==="after delay" ? 1 : 0; onActivated: root.setValue("files/autoSave",currentText) } }
       RowLayout { Layout.fillWidth: true; Label { text: "Auto-save delay"; Layout.preferredWidth: 235; color: theme.foreground } SpinBox { from: 250; to: 10000; stepSize: 250; editable: true; value: root.value("files/autoSaveDelay",1000); onValueModified: root.setValue("files/autoSaveDelay",value) } Label { text: "milliseconds"; color: theme.mutedText; Layout.fillWidth: true } }
+      RowLayout { Layout.fillWidth: true; Label { text: "Reopen files from the last session"; Layout.preferredWidth: 235; color: theme.foreground } Switch { checked: root.value("files/restoreSession",true); onToggled: root.setValue("files/restoreSession",checked) } }
       RowLayout { Layout.fillWidth: true; Label { text: "Explorer exclude patterns"; Layout.preferredWidth: 235; color: theme.foreground } TextField { Layout.fillWidth: true; placeholderText: "e.g. *.log; coverage; generated/*"; text: root.value("files/excludes",""); onEditingFinished: root.setValue("files/excludes",text) } }
       Label { text: "Separate patterns with semicolons. Core build and dependency folders remain excluded for responsiveness."; color: theme.mutedText; font.pixelSize: 10; wrapMode: Text.WordWrap; Layout.fillWidth: true }
      }
@@ -124,7 +127,7 @@ Dialog {
       Label { text: "Built-in commands keep their documented shortcuts. Custom keymaps will arrive with the reviewed keymap-pack system."; color: theme.mutedText; font.pixelSize: 10; wrapMode: Text.WordWrap; Layout.fillWidth: true }
      }
     }
-    Label { visible: root.query && !root.matches("appearance theme scale density sidebar status bar editor font ligatures line height wrap minimap lines rulers whitespace guides highlight scrolling editing indent tabs spaces brackets save newline endings files workspace auto delay exclude explorer terminal shell directory scrollback selection clear environment dangerous warning keyboard modal helix cursor"); text: "No settings match ‘"+root.query+"’."; color: theme.mutedText; Layout.margins: 24 }
+    Label { visible: root.query && !root.matches("appearance theme scale density sidebar status bar editor font ligatures line height wrap minimap lines rulers whitespace guides highlight scrolling editing indent tabs spaces brackets save newline endings files workspace auto delay exclude explorer restore reopen session terminal shell directory scrollback selection clear environment dangerous warning keyboard modal helix cursor"); text: "No settings match ‘"+root.query+"’."; color: theme.mutedText; Layout.margins: 24 }
    }
   }
  }
