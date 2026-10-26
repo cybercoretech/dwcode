@@ -152,4 +152,5 @@ Every pack must look and behave like DWCode: the Cybercore shell remains consist
 - [Declarative pack format](PACK_FORMAT.md)
 - [VS Code profile and integration shortlist](USER_EXTENSION_PROFILE.md)
 - [FOSS extension repository — licence-verified catalog list on Open VSX](FOSS_EXTENSION_REPOSITORY.md)
+- [Phased report — Install (M5), the DWCode API recommendation, and the agentforge/ferraxis/diagprint assessments](docs/report-m5-api-roadmap.md)
 - [Project checklist](TASKS.md)

@@ -18,6 +18,17 @@
   current state until `v0.1.0` is tagged (GitHub has no tags or releases yet).
   `packaging/arch/PKGBUILD` stays the local-only build and points at
   `packaging/aur/`; docs: `packaging/aur/README.md`, README, install-arch.
+- 📋 **Phased roadmap report:** [`docs/report-m5-api-roadmap.md`](docs/report-m5-api-roadmap.md)
+  answers what the `install · M5` buttons need (index → fetch/verify/lock → consent →
+  lifecycle), whether DWCode needs an API (yes — JSON-RPC 2.0 over a loopback-only
+  `/v1` plus a static checksummed catalog index; reuse the existing LSP JSON-RPC
+  plumbing), and gives verdicts on actix.rs (no — wrong language/layer), Bruno
+  (yes — commit request files in-repo) and Swagger Editor (yes — author
+  `docs/openapi.yaml`, lint in CI). Honest assessments of the sibling repos:
+  **agentforge** ⭐ adopt its permission/audit *model* for the M2/M4 extension host,
+  **diagprint** 🛠️ medium value only if its diagnostics schema is adopted in C++ too,
+  **ferraxis** 🛑 has **no licence file** and no usable output for years. Phases 0–5
+  are checklist-linked from `TASKS.md`.
 
 - 🐧 **Arch / Omarchy alpha:** DWCode has a reproducible Arch package, desktop
   launcher, Railshift icon, bundled Monaco assets, clean uninstall path, CI,
