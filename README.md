@@ -74,6 +74,25 @@ unverifiable package cannot reach the AUR by accident. Full flow, SSH setup,
 and the `-bin` asset recipe are in
 [`packaging/aur/README.md`](packaging/aur/README.md).
 
+### Cutting a release
+
+One command performs Phase 0 in order — refuse a dirty or stale tree, run the
+offline gates (`validate:packs`, `validate:catalog` including the install
+index, `grammar:test`), rebuild the `.dwpack` artifacts, tag `v<version>` from
+`dwcode.pro`, build the Arch package and `-bin` asset, then
+`gh release create` with the assets **and a snapshot of `index.json` +
+`index.json.sha256`**, so the release always carries the exact index that
+installs against that version were verified with:
+
+```sh
+tools/release.sh --dry-run     # show every step, change nothing
+tools/release.sh               # tag + gates + assets + GitHub release
+tools/release.sh --with-aur    # …then hand over to tools/aur-release.sh
+```
+
+Tags are append-only: a tag that already exists, or a tree with uncommitted
+changes, is refused rather than moved.
+
 ## 🧪 Tests
 
 ```sh
