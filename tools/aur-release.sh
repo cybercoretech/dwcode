@@ -238,17 +238,22 @@ step "AUR checkouts"
 if (( dry_run )); then
   info "dry run — skipping the SSH preflight and the pushes"
 else
-  ssh_out="$(ssh -o BatchMode=yes -o ConnectTimeout=10 aur@aur.archlinux.org 2>&1 || true)"
-  if [[ "$ssh_out" != *"Welcome to the AUR"* ]]; then
-    die "cannot reach the AUR over SSH:
-  $(printf '%s' "$ssh_out" | tr -d '\r' | head -2 | tail -1)
+  # Key on the exit status, not the greeting text: ssh uses 255 for every
+  # transport and authentication failure, so any other status means the key
+  # was accepted — and a literal match on the AUR's banner would break the
+  # moment they reword it.
+  ssh_status=0
+  ssh_out="$(ssh -o BatchMode=yes -o ConnectTimeout=10 aur@aur.archlinux.org 2>&1)" || ssh_status=$?
+  if (( ssh_status == 255 )); then
+    die "cannot authenticate to the AUR over SSH:
+  $(printf '%s' "$ssh_out" | tr -d '\r' | grep -v '^$' | tail -1)
 Register this public key with your AUR account
 (https://aur.archlinux.org/account/darkstardevx/), then re-run:
-    ssh-keygen -t ed25519 -C 'aur@darkstardevx'
-    ssh-copy-id aur@aur.archlinux.org
+    cat ~/.ssh/aur_darkstardevx.pub   # copy the whole line
+    ssh-copy-id -i ~/.ssh/aur_darkstardevx.pub aur@aur.archlinux.org
 Use --dry-run to practise without pushing."
   fi
-  info "$(printf '%s' "$ssh_out" | tr -d '\r' | head -1)"
+  info "$(printf '%s' "$ssh_out" | tr -d '\r' | grep -v '^$' | head -1)"
 fi
 
 for name in dwcode dwcode-bin; do

@@ -63,9 +63,25 @@ git fetch --quiet origin main || die "cannot reach $repo"
 # compare the number, not the emptiness of the string.
 ahead="$(git rev-list --count origin/main..HEAD)"
 [[ "$ahead" == "0" ]] || die "HEAD is $ahead commit(s) ahead of origin/main — push first"
-git ls-remote --exit-code --tags "$repo" "refs/tags/$tag" >/dev/null 2>&1 \
-  && die "$tag already exists on GitHub. Bump VERSION in dwcode.pro (and package.json) to release again — a tag is never moved."
-info "main == origin/main at $(git rev-parse --short HEAD), no $tag yet"
+
+# A tag is never moved. But a release that died halfway (a failed asset build,
+# say) must be resumable, so the only question is whether the tag that already
+# exists points at *this* commit — then finishing the job changes nothing that
+# was published.
+resume=0
+remote_peeled="$(git ls-remote --tags "$repo" "refs/tags/$tag" | awk '$2 ~ /\^\{\}$/ { print $1 }')"
+if [[ -n "$remote_peeled" ]]; then
+  git fetch --quiet origin "refs/tags/$tag:refs/tags/$tag" 2>/dev/null || true
+  local_commit="$(git rev-parse --verify --quiet "refs/tags/$tag^{commit}" || true)"
+  [[ -n "$local_commit" ]] || die "$tag exists on GitHub but could not be fetched locally"
+  [[ "$local_commit" == "$(git rev-parse HEAD)" ]] \
+    || die "$tag already exists and points at ${local_commit:0:7}, not HEAD ($(git rev-parse --short HEAD)).
+A tag is never moved. Bump VERSION in dwcode.pro (and package.json) to release again."
+  resume=1
+  info "$tag already points at HEAD — resuming this release"
+else
+  info "main == origin/main at $(git rev-parse --short HEAD), no $tag yet"
+fi
 
 # ---------------------------------------------------------------- 2. gates
 step "offline gates"
@@ -90,11 +106,15 @@ fi
 
 # ---------------------------------------------------------------- 4. tag
 step "tag"
-info "git tag -a $tag -m 'DWCode $version' && git push origin main $tag"
-if (( ! dry_run )); then
-  git tag -a "$tag" -m "DWCode $version"
-  git push --quiet origin main "$tag"
-  info "pushed main and $tag"
+if (( resume )); then
+  info "$tag already exists at HEAD — not re-tagging"
+else
+  info "git tag -a $tag -m 'DWCode $version' && git push origin main $tag"
+  if (( ! dry_run )); then
+    git tag -a "$tag" -m "DWCode $version"
+    git push --quiet origin main "$tag"
+    info "pushed main and $tag"
+  fi
 fi
 
 # ---------------------------------------------------------------- 5. assets
@@ -108,13 +128,18 @@ elif (( dry_run )); then
 else
   step "building the Arch package (makepkg: npm ci + vite + qmake6 + make)"
   ./packaging/arch/build-package.sh
-  step "repacking the -bin asset"
-  # make-bin-tarball.sh prints three lines: the path, then the sha256 line,
-  # then an upload hint. The path is the first one.
-  bin_asset="$(packaging/aur/make-bin-tarball.sh | head -1)"
-  [[ -f "$bin_asset" ]] || die "make-bin-tarball.sh did not produce $bin_asset"
-  info "$bin_asset"
 fi
+
+# The -bin asset is a repack of whatever makepkg just produced (or of the
+# package already sitting there when resuming). Capture the script's whole
+# output instead of piping into `head`: with `pipefail` the writer dies of
+# SIGPIPE when head exits early, and that 141 aborts the release — which is
+# exactly how the first attempt stopped here.
+step "repacking the -bin asset"
+bin_output="$(packaging/aur/make-bin-tarball.sh)"
+bin_asset="${bin_output%%$'\n'*}"
+[[ -f "$bin_asset" ]] || die "make-bin-tarball.sh did not produce $bin_asset"
+info "$bin_asset"
 
 # ---------------------------------------------------------------- 6. release
 assets=()
