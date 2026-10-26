@@ -109,7 +109,10 @@ else
   step "building the Arch package (makepkg: npm ci + vite + qmake6 + make)"
   ./packaging/arch/build-package.sh
   step "repacking the -bin asset"
-  bin_asset="$(packaging/aur/make-bin-tarball.sh | tail -2 | head -1)"
+  # make-bin-tarball.sh prints three lines: the path, then the sha256 line,
+  # then an upload hint. The path is the first one.
+  bin_asset="$(packaging/aur/make-bin-tarball.sh | head -1)"
+  [[ -f "$bin_asset" ]] || die "make-bin-tarball.sh did not produce $bin_asset"
   info "$bin_asset"
 fi
 
