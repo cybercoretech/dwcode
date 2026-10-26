@@ -59,7 +59,10 @@ so the tag describes exactly what was tested:
 $(git status --porcelain | grep -v '^?? site/screenshots/')"
 [[ "$(git branch --show-current)" == "main" ]] || die "releases are cut from main, not $(git branch --show-current)"
 git fetch --quiet origin main || die "cannot reach $repo"
-[[ -z "$(git rev-list --count origin/main..HEAD)" ]] || die "HEAD is ahead of origin/main — push first"
+# `rev-list --count` prints 0 when level, and `[[ -z "0" ]]` would be false —
+# compare the number, not the emptiness of the string.
+ahead="$(git rev-list --count origin/main..HEAD)"
+[[ "$ahead" == "0" ]] || die "HEAD is $ahead commit(s) ahead of origin/main — push first"
 git ls-remote --exit-code --tags "$repo" "refs/tags/$tag" >/dev/null 2>&1 \
   && die "$tag already exists on GitHub. Bump VERSION in dwcode.pro (and package.json) to release again — a tag is never moved."
 info "main == origin/main at $(git rev-parse --short HEAD), no $tag yet"
