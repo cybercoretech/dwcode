@@ -27,7 +27,8 @@
 - [x] Define the DWCode extension API, contribution points, permission model, and package format before loading third-party code (`EXTENSIONS.md` policy + `EXTENSIONS_BLUEPRINT.md` implementation design).
 - [x] Implement blueprint phase M0: turn commands into the `CommandRegistry` the palette and `activate()` share (menu-bar and status-bar models, plus the keybinding conflict compiler, stay open for M3).
 - [x] Implement blueprint phase M1: load validated declarative packs at runtime with an enable/disable switch in Settings → EXTENSIONS.
-- [x] Research the FOSS shortlist on Open VSX and publish [`FOSS_EXTENSION_SHORTLIST.md`](FOSS_EXTENSION_SHORTLIST.md) (tiered candidates plus per-area coverage for needs, Rust, C++, Git, syntax highlighting, HTML/CSS, with licence and download verification).
+- [x] Research the FOSS catalog list on Open VSX and publish [`FOSS_EXTENSION_REPOSITORY.md`](FOSS_EXTENSION_REPOSITORY.md) (tiered candidates plus per-area coverage for Rust, C++, Git, syntax highlighting, HTML/CSS, and a 16-ecosystem sweep — Python, Java/Maven/Gradle, Android, GitLab, Google/Dart, Markdown, lint & format, SQL/NoSQL, Docker, GraphQL, Lua, Bash, CMake, Julia, Kotlin — with licence and download verification).
+- [x] Turn the licence gate into a script: `npm run catalog:scan` (`tools/openvsx-scan.mjs` + `tools/openvsx-verified.json`) re-checks every id in the repository doc against the live registry and exits non-zero while a licence is still pending, so the curated catalog can grow without a human re-reading registry pages.
 - [ ] Connect the validated first-party pack to a DWCode theme/icon/snippet preview and selection UI.
 - [x] License DWCode and first-party packs under MIT.
 - [x] Add Language Server Protocol support: diagnostics, completion, hover, definition (TypeScript bundled; clangd, rust-analyzer, pyright from `PATH`).

@@ -75,7 +75,7 @@ npm run validate:packs
 
 ## 🌐 Website
 
-The project site, **[dwcode.pages.dev](https://dwcode.pages.dev)**, lives in [`site/`](site/): features, real window captures, all 84 themes, the Railshift downloads, and a live panel running the app's Monaco bundle in the browser (sample files only; saving, the terminal and language servers need the desktop app).
+The project site, **[dwcode.pages.dev](https://dwcode.pages.dev)**, lives in [`site/`](site/): features, real window captures, all 84 themes, the Railshift downloads, and a live panel running the app's Monaco bundle in the browser (sample files only; saving, the terminal and language servers need the desktop app). [`site/repository.html`](site/repository.html) is the second page — *Open DWCode Extension Repository*: what the licences allow, how the checksum-pinned catalog is built, the licence-gate table and the packages DWCode excludes. It shares the same `site.js`/`styles.css`, so both pages must stay error-free together.
 
 ```sh
 ./tools/build-site.sh --shots   # recapture screenshots offscreen, build the demo, assemble site/
@@ -113,7 +113,7 @@ DWCode will own its workspace model, command system, settings, theme schema, and
 
 The first pack at [`packs/dwcode-core`](packs/dwcode-core) is an original DWCode contribution set with Dark, Frost, and Clear Signal palettes, muted file icons, and JavaScript/TypeScript/Markdown starter snippets. It loads in-process as data: the backend re-validates it with the same rules as the Node validator, its three themes merge into the 84-theme catalog, its snippets reach Monaco, and Settings → EXTENSIONS can switch the whole pack off. The validator confirms that it contains no executable entry point and that its local resources and theme tokens are valid.
 
-Open VSX is a discovery and package source, not a compatibility guarantee. DWCode will begin with reviewed declarative data such as theme, icon, snippet, keymap, and grammar contributions. Executable VSIX extensions wait for a DWCode-native isolated host and a versioned permission broker. Read [`EXTENSIONS.md`](EXTENSIONS.md) for the policy, [`EXTENSIONS_BLUEPRINT.md`](EXTENSIONS_BLUEPRINT.md) for the phased implementation design (contribution registries → declarative loader → out-of-process host and capability broker), [`USER_EXTENSION_PROFILE.md`](USER_EXTENSION_PROFILE.md) for the selection decisions, [`FOSS_EXTENSION_SHORTLIST.md`](FOSS_EXTENSION_SHORTLIST.md) for the verified FOSS candidates on Open VSX, and [`PACK_FORMAT.md`](PACK_FORMAT.md) for the pack schema.
+Open VSX is a discovery and package source, not a compatibility guarantee. DWCode will begin with reviewed declarative data such as theme, icon, snippet, keymap, and grammar contributions. Executable VSIX extensions wait for a DWCode-native isolated host and a versioned permission broker. Read [`EXTENSIONS.md`](EXTENSIONS.md) for the policy, [`EXTENSIONS_BLUEPRINT.md`](EXTENSIONS_BLUEPRINT.md) for the phased implementation design (contribution registries → declarative loader → out-of-process host and capability broker), [`USER_EXTENSION_PROFILE.md`](USER_EXTENSION_PROFILE.md) for the selection decisions, [`FOSS_EXTENSION_REPOSITORY.md`](FOSS_EXTENSION_REPOSITORY.md) for the verified FOSS candidates on Open VSX, and [`PACK_FORMAT.md`](PACK_FORMAT.md) for the pack schema.
 
 Every pack must look and behave like DWCode: the Cybercore shell remains consistent, palettes map into DWCode tokens, icons use the app's restrained sizing and contrast, and upstream license and attribution terms are retained. The first-party starter pack is MIT-licensed with the project; third-party packs still require independent license and attribution review before distribution.
 
@@ -124,5 +124,5 @@ Every pack must look and behave like DWCode: the Cybercore shell remains consist
 - [Extensions implementation blueprint](EXTENSIONS_BLUEPRINT.md)
 - [Declarative pack format](PACK_FORMAT.md)
 - [VS Code profile and integration shortlist](USER_EXTENSION_PROFILE.md)
-- [FOSS extension shortlist on Open VSX](FOSS_EXTENSION_SHORTLIST.md)
+- [FOSS extension repository — licence-verified catalog list on Open VSX](FOSS_EXTENSION_REPOSITORY.md)
 - [Project checklist](TASKS.md)

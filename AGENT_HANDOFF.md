@@ -205,7 +205,7 @@ Follow this product sequence; the reliability items are complete.
    from the Qt app, Monaco page, filesystem, terminal, and network behind
    explicit RPC-granted permissions; distribution/registry work is M5. The
    candidate set to evaluate first is in
-   [`FOSS_EXTENSION_SHORTLIST.md`](FOSS_EXTENSION_SHORTLIST.md).
+   [`FOSS_EXTENSION_REPOSITORY.md`](FOSS_EXTENSION_REPOSITORY.md).
 
 Separate release verification remains worthwhile: test-install the newest Arch
 package locally and verify launcher, window icon, bundled assets, and uninstall

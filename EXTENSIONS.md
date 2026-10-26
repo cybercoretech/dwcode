@@ -6,7 +6,7 @@ DWCode will have its own extension contract. Open VSX is an optional discovery a
 
 The Visual Studio Marketplace is not a source for DWCode. Microsoft documents it as intended for Visual Studio-family products, and marketplace packages can have separate licenses and use conditions.
 
-The first DWCode-authored data-only reference pack is `packs/dwcode-core`. It demonstrates the visual and contribution rules, is MIT-licensed with DWCode, and loads in-process as data: the backend re-validates it, its themes merge into the catalog, its snippets reach the editor, and Settings → EXTENSIONS can switch it off. See [PACK_FORMAT.md](PACK_FORMAT.md) for its contents and validation limits, and [FOSS_EXTENSION_SHORTLIST.md](FOSS_EXTENSION_SHORTLIST.md) for which third-party packages are candidates for the same treatment.
+The first DWCode-authored data-only reference pack is `packs/dwcode-core`. It demonstrates the visual and contribution rules, is MIT-licensed with DWCode, and loads in-process as data: the backend re-validates it, its themes merge into the catalog, its snippets reach the editor, and Settings → EXTENSIONS can switch it off. See [PACK_FORMAT.md](PACK_FORMAT.md) for its contents and validation limits, and [FOSS_EXTENSION_REPOSITORY.md](FOSS_EXTENSION_REPOSITORY.md) for which third-party packages are candidates for the same treatment.
 
 ## Release stages
 
@@ -36,7 +36,7 @@ Define a versioned DWCode API and package manifest before executing third-party 
 
 Executable extensions require explicit installation and workspace/user trust, a separate host process, capability-scoped RPC, resource limits, cancellation, clear permissions, and an uninstall/disable path. No extension receives arbitrary filesystem or process access by default. Do not silently load code from an Open VSX VSIX as a native DWCode extension.
 
-For the first native packages, publish a small curated catalog using GitHub Releases and a signed or checksum-pinned JSON index. Revisit a hosted registry only when there are enough independent extensions to justify operating one.
+For the first native packages, publish a curated catalog — reviewed package by package, but at real scale rather than a handful of packs: the FOSS acceptance backlog in [FOSS_EXTENSION_REPOSITORY.md](FOSS_EXTENSION_REPOSITORY.md) already lists roughly 70 licence-checked packages across 16 ecosystems (Python, Java/Maven/Gradle, Android, GitLab, Google/Dart, Rust, Markdown, lint and format, SQL/NoSQL, Docker, GraphQL, Lua, Bash, CMake, Julia, Kotlin), and `npm run catalog:scan` re-gates every id in that file against the live registry before each release (`tools/openvsx-scan.mjs`, with hand-verified upstream licences in `tools/openvsx-verified.json`). Publish the index on GitHub Releases as a signed or checksum-pinned JSON document, grow it ecosystem by ecosystem behind the same licence gate, and revisit a hosted registry only when there are enough independent extensions to justify operating one.
 
 ## Compatibility and trust rules
 

@@ -1,17 +1,20 @@
-# DWCode FOSS extension shortlist
+# DWCode FOSS extension repository
 
 **Verified:** 2026-10-25 against the live Open VSX registry API (`/api/<ns>/<name>` for license and
 presence, `/api/-/search?orderBy=downloadCount&sortOrder=desc` for a full popularity sweep of the
 registry's top 80 of 20,163 extensions) and the GitHub license API for packages whose registry
 license field was empty, a `SEE LICENSE IN …` pointer, or a placeholder. Extended 2026-10-26 with
 an AI-agent sweep — `codex`, `antigravity`, `gemini`, `opencode`, `copilot` (40 results each,
-licences re-checked upstream). Re-run these lookups
-before each catalog release — licenses and availability change.
+licences re-checked upstream), and an ecosystem sweep covering **Python, Java/Maven/Gradle, Android,
+GitLab, Google/Dart, Rust, Markdown, lint & format, SQL/NoSQL, Docker, GraphQL, Lua, Bash, CMake,
+Julia and Kotlin** — see [Ecosystem sweep](#ecosystem-sweep--2026-10-26) below. Re-run
+`npm run catalog:scan` before each catalog release — licenses and availability change.
 
 **Purpose:** decide which of the most-used free/open-source extensions DWCode should cover, and
 *how*: as a declarative pack (blueprint M1), as a built-in integration DWCode implements natively
 (EXTENSIONS.md Stage 1), or as a future executable extension behind the capability broker
-(blueprint M2/M3+). It narrows and supersedes the raw inventory in
+(blueprint M2/M3+). It is also the review queue for the curated catalog (EXTENSIONS.md — every
+package that enters the index is a row here first). It narrows and supersedes the raw inventory in
 [USER_EXTENSION_PROFILE.md](USER_EXTENSION_PROFILE.md).
 
 Selection rules applied:
@@ -94,7 +97,7 @@ package — DWCode already runs `typescript-language-server`, `clangd`, `rust-an
 | Pyrefly (`meta.pyrefly`) | MIT | 92.5 M | alternative Python LSP; offer beside `pyright-langserver` in the language-server picker |
 | Ruby LSP (`Shopify.ruby-lsp`) | MIT | 44.5 M | add `ruby-lsp` to the known-server table |
 | Go (`golang.Go`) | MIT | 42.9 M | `gopls` on `PATH` (already documented pattern) |
-| Project Manager/Maven/Gradle/Test for Java (`vscjava.*`) | MIT on the packs; **debug/test report `SEE LICENSE IN` / empty — verify each** | 23–41 M | only the Java language server itself is needed; DWCode consumes `jdtls` output directly |
+| Project Manager/Maven/Gradle/Test for Java (`vscjava.*`) | **MIT on all four — verified**: registry says `SEE LICENSE IN` / empty for debug, gradle and test, so each upstream `LICENSE` was read (`microsoft/vscode-{java-debug,gradle,java-test}`, all MIT). `vscjava.vscode-java-pack` is a metapackage with no code of its own | 23–41 M | only the Java language server itself is needed; DWCode consumes `jdtls` output directly |
 | clangd (`llvm-vs-code-extensions.vscode-clangd`) | MIT | 31.5 M | DWCode already launches `clangd`; no package needed |
 | rust-analyzer | MIT OR Apache-2.0 | 7.4 M | already the documented Rust path |
 | Python (`ms-python.python`) | MIT (repo) | 61.6 M | `pyright-langserver` already bundled-adjacent; **Pylance stays excluded** |
@@ -103,7 +106,7 @@ package — DWCode already runs `typescript-language-server`, `clangd`, `rust-an
 | YAML (`redhat.vscode-yaml`) | MIT | 8.9 M | schema-driven validation → problems panel (schema fetch needs `network.connect`) |
 | XML (`redhat.vscode-xml`) | EPL-2.0 | 1.6 M | `lemminx` language server on `PATH` |
 | markdownlint | MIT | 1.8 M | (Tier B) rule config reused natively |
-| Markdown Preview Enhanced (`shd101wyy.markdown-preview-enhanced`) | **NCSA claimed on registry; repo reports `NOASSERTION` — verify before catalog** | 2.5 M | candidate for DWCode's single built-in preview instead of N preview extensions |
+| Markdown Preview Enhanced (`shd101wyy.markdown-preview-enhanced`) | **NCSA confirmed** — registry `NCSA`, upstream `LICENSE.md` carries the University of Illinois/NCSA text (re-checked 2026-10-26) | 2.49 M | candidate for DWCode's single built-in preview instead of N preview extensions |
 | SonarLint (`SonarSource.sonarlint-vscode`) | **LGPL-3.0** (repo) | 2.1 M | copyleft: run as an external process with its own config, never link statically |
 | CMake Tools (`ms-vscode.cmake-tools`) | MIT | 2.3 M | task/run profiles (blueprint task 4) |
 | Terraform (`hashicorp.terraform`) | MPL-2.0 | 2.4 M | `terraform-ls` on `PATH`; MPL file-level copyleft is fine for an external server |
@@ -112,7 +115,7 @@ package — DWCode already runs `typescript-language-server`, `clangd`, `rust-an
 | JavaScript Debugger (`ms-vscode.js-debug`) | MIT | 3.2 M | DAP adapter for Node; the DAP client is DWCode's own |
 | Jupyter (`ms-toolsai.jupyter` + renderers) | MIT | 11.1 M / 10.5 M | notebook UI is a large DWCode feature — decide before committing |
 | GitHub Pull Requests / GitHub Actions (`GitHub.*`) | MIT | 6.6 M / 4.5 M | need `network.connect` + auth storage; belongs to the Git milestone, likely built in |
-| Container Tools (`ms-azuretools.vscode-containers`) | **registry `SEE LICENSE IN`; upstream repo reports `NOASSERTION` — verify** | 14.8 M | deferred; Docker interaction is `process.exec` territory |
+| Container Tools (`ms-azuretools.vscode-containers`) | **MIT confirmed** — registry `SEE LICENSE IN`, upstream `microsoft/vscode-containers` `LICENSE.md` is MIT (re-checked 2026-10-26). The older Docker extension `ms-azuretools.vscode-docker` (7.13 M) is MIT on the same evidence | 14.8 M | Docker interaction is `process.exec` territory — one native container panel instead of two extensions |
 | Intelephense (`bmewburn.vscode-intelephense-client`) | **custom `SEE LICENSE IN` with no public repo — treat as non-FOSS** | 2.2 M | excluded |
 
 ## Coverage by area — Rust, C/C++, Git, syntax highlighting, HTML/CSS
@@ -126,7 +129,7 @@ Swept per keyword on the registry (top results by downloads with license lookup)
 | --- | --- | --- | --- |
 | rust-analyzer (`rust-lang.rust-analyzer`) | MIT OR Apache-2.0 | 7.4 M | already the documented Rust path — `rust-analyzer` on `PATH` |
 | `rustfmt` / `clippy` via `cargo` | MIT/Apache-2.0 (toolchain) | — | format-on-save and diagnostics through the same external-binary pattern as Prettier/Ruff |
-| Even Better TOML (`tamasfe.even-better-toml`) | registry `SEE LICENSE IN LICENSE.md`; upstream repo lookup failed — **verify** | 693 K | `cargo.toml`/`Cargo.lock` parsing; Tombi (`tombi-toml.tombi`, MIT, 548 K) is the FOSS language-server alternative |
+| Even Better TOML (`tamasfe.even-better-toml`) | **MIT confirmed** — registry `SEE LICENSE IN LICENSE.md`, upstream `tamasfe/taplo` root `LICENSE` is MIT (re-checked 2026-10-26) | 693 K | `cargo.toml`/`Cargo.lock` parsing; Tombi (`tombi-toml.tombi`, MIT, 548 K) is the FOSS language-server alternative |
 | Rust Language Basics (`vscode.rust`) | VS Code package license | 316 K | TextMate grammar — see *syntax highlighting* below; Monaco already ships Rust highlighting via `basic-languages` |
 
 ### C and C++
@@ -184,6 +187,193 @@ Swept per keyword on the registry (top results by downloads with license lookup)
 | HTML/CSS Language Basics (`vscode.html`, `vscode.css`) | VS Code package license | 407 K / 402 K | already bundled with Monaco |
 | Black Formatter (`ms-python.black-formatter`), isort | MIT | 1.5 M / 908 K | external binaries on the format-on-save path (cross-language, worth listing here) |
 
+## Ecosystem sweep — 2026-10-26
+
+Requested areas checked one keyword and one package id at a time against the live registry, then
+upstream wherever the `license` field was a pointer. **Every row is FOSS and on Open VSX** — the
+packages that failed the gate are in *Excluded* below or in the per-ecosystem note. Hand-checked
+upstream readings are recorded in [`tools/openvsx-verified.json`](tools/openvsx-verified.json) so
+`npm run catalog:scan` can re-check this whole section in one command.
+
+### Python
+
+| Item | License | Downloads | DWCode path |
+| --- | --- | --- | --- |
+| Python Debugger (`ms-python.debugpy`) | MIT | 62.6 M | `debugpy` is the DAP adapter — wire it up when DAP lands (M3); DWCode owns the client |
+| Python Environments (`ms-python.vscode-python-envs`) | MIT (registry field **empty**; upstream `microsoft/vscode-python-environments` read and confirmed) | 45.2 M | interpreter/venv discovery → DWCode's language-server picker and an "interpreter" setting |
+| Python Indent (`KevinRose.vsc-python-indent`) | MIT | 0.34 M | continuation-indent behaviour → Monaco indentation rules, a preference not a package |
+| autoDocstring (`njpwerner.autodocstring`) | MIT | 0.35 M | docstring template → Tier A snippet pack, or one native command |
+
+Already covered above: Pyrefly, `ms-python.python`, Ruff, BasedPyright, Black, isort, Jupyter.
+**Pylance stays excluded** — proprietary.
+
+### Java, Maven, Gradle
+
+| Item | License | Downloads | DWCode path |
+| --- | --- | --- | --- |
+| Language Support for Java (Red Hat) (`redhat.java`) | EPL-2.0 | 46.9 M | `jdtls` on `PATH` — the one Java server DWCode needs |
+| Project Manager for Java (`vscjava.vscode-java-dependency`) | MIT | 41.5 M | project tree → DWCode explorer "project views" |
+| Maven for Java (`vscjava.vscode-maven`) | MIT | 28.6 M | task profiles over `mvn` (blueprint task 4) + `network.connect` only for dependency fetch |
+| Java Debug (`vscjava.vscode-java-debug`) | **MIT verified** (registry `SEE LICENSE IN` → upstream `LICENSE.txt`) | 27.9 M | the `java-debug` agent DWCode's DAP client would launch |
+| Gradle (`vscjava.vscode-gradle`) | **MIT verified** (registry `SEE LICENSE IN` → upstream `LICENSE.md`) | 27.9 M | task profiles over `gradle` |
+| Java Test (`vscjava.vscode-java-test`) | **MIT verified** (registry empty → upstream `LICENSE.txt`) | 27.8 M | JUnit runs → problems panel, same shape as the ESLint path |
+| Extension Pack for Java (`vscjava.vscode-java-pack`) | MIT | 23.8 M | metapackage, no code of its own — reference only |
+| MicroProfile (`redhat.vscode-microprofile`) | Apache-2.0 | 0.17 M | niche; skip unless asked |
+
+### Android
+
+| Item | License | Downloads | DWCode path |
+| --- | --- | --- | --- |
+| Android (`adelphes.android-dev-ext`) | MIT | 39 K | `adb`/`logcat`/`am start` behind `process.exec` — a task/run profile, not a hosted package |
+| Android Emulator (`duchuynguyen.android-emulator`), DevKit (`pavi2410.android-devkit`), ADB WLAN (`HanWang.android-adb-wlan`), AVD Viewer (`D0Tech.vs-avd`) | MIT | 1–10 K each | the same adb helpers; DWCode's task profiles cover them natively |
+| Layout XML (`*.xml` for `res/layout`) | — | — | Monaco already opens them; `aapt`/`apkanalyzer` from the SDK (Apache-2.0) as external processes |
+
+Note: there is **no high-download Android extension on Open VSX** — Android Studio's tooling ships
+inside the IDE, not the registry. The top hits by downloads (`DiemasMichiels.emulate`,
+`android-ios-layoutcodegen.*`, `krishna-kudari.android-studio-lite`) all report `SEE LICENSE IN` or
+an empty field and are excluded on the gate, not on usefulness.
+
+### GitLab
+
+| Item | License | Downloads | DWCode path |
+| --- | --- | --- | --- |
+| GitLab Workflow (`GitLab.gitlab-workflow`) | MIT | 2.9 M | `network.connect` with a `gitlab.com` allowlist + token storage — Tier C, or built into the Git milestone |
+| gitlab-ci-ls (`alesbrelih.gitlab-ci-ls`) | MIT | 1.7 K | `gitlab-ci-ls` on `PATH` → YAML diagnostics for `.gitlab-ci.yml` |
+| Git Web Links (`reduckted.vscode-gitweblinks`) | MIT | 30 K | permalink/permalink-to-line builder — trivially native in the Git milestone |
+| Git Blame (`waderyan.gitblame`) | MIT | 0.61 M | status-bar blame line fed by `git blame` (Tier B) |
+
+### Google, Dart, Flutter, Go
+
+| Item | License | Downloads | DWCode path |
+| --- | --- | --- | --- |
+| Go (`golang.Go`) | MIT | 42.9 M | `gopls` on `PATH` (Tier B2) |
+| Dart / Flutter (`Dart-Code.Dart-Code`) | **MIT verified** (registry `SEE LICENSE IN LICENSE` → upstream `LICENSE`) | 5.97 M | `dart language-server` on `PATH`; `flutter` CLI as a task profile |
+| Container Tools (`ms-azuretools.vscode-containers`) | **MIT verified** | 14.8 M | docker/podman CLI → one native container panel |
+| Docker (`ms-azuretools.vscode-docker`) | **MIT verified** (upstream `microsoft/vscode-docker`) | 7.13 M | same — see Docker below |
+| Docker DX (`docker.docker`, official `docker` publisher) | Apache-2.0 | 269 K | same; `docker/vscode-extension` upstream |
+| Google Workspace MCP (`mercurial.google-workspace-mcp`) | MIT | 0.12 M | MCP server as an external process → needs `network.connect` + explicit consent (Tier C) |
+
+### Rust
+
+| Item | License | Downloads | DWCode path |
+| --- | --- | --- | --- |
+| rust-analyzer (`rust-lang.rust-analyzer`) | MIT OR Apache-2.0 | 7.4 M | already the documented Rust path — `rust-analyzer` on `PATH` |
+| crates (`serayuzgur.crates`) | **MIT verified** (registry `SEE LICENSE IN` → upstream `LICENSE`) | 155 K | crates.io version completion — needs `network.connect`, so Tier C |
+| Even Better TOML (`tamasfe.even-better-toml`) | **MIT verified** | 693 K | `cargo.toml`/`Cargo.lock`; Tombi (MIT, 548 K) is the LS alternative |
+| CodeLLDB (`vadimcn.vscode-lldb`) | MIT | 1.4 M | DAP adapter once DAP lands |
+| `rustfmt` / `clippy` via `cargo` | MIT/Apache-2.0 (toolchain) | — | format-on-save and diagnostics through the Prettier/Ruff external-binary pattern |
+
+### Markdown
+
+| Item | License | Downloads | DWCode path |
+| --- | --- | --- | --- |
+| Markdown Preview Enhanced (`shd101wyy.markdown-preview-enhanced`) | **NCSA confirmed** upstream | 2.49 M | front-runner for DWCode's single built-in preview |
+| Markdown Preview Mermaid (`bierner.markdown-mermaid`) | MIT | 0.88 M | Mermaid rendering inside the preview — in a sandboxed webview, never `process.exec` |
+| Cherry Markdown (`cherryMarkdownPublisher.cherry-markdown`) | Apache-2.0 | 40 K | full WYSIWYG editor; a large feature decision, not a quick add |
+| Markdown All in One, markdownlint | MIT | 0.9–1.8 M | already Tier B — preview + TOC and rule config, built in |
+
+### Lint, format, spell
+
+| Item | License | Downloads | DWCode path |
+| --- | --- | --- | --- |
+| ShellCheck (`timonwong.shellcheck`) | MIT | 789 K | external `shellcheck` → problems panel (same pattern as ESLint) |
+| todo-tree (`gruntfuggly.todo-tree`) | MIT | 491 K | native: DWCode's own workspace TODO/NOTE scan, no package |
+| shell-format (`foxundermoon.shell-format`) | **MIT verified** (registry field empty → upstream `LICENSE`) | 143 K | `shfmt` on the format-on-save path |
+| cmake-format (`cheshirekow.cmake-format`) | GPL-3.0-or-later | 152 K | external process only — copyleft kept at arm's length, never linked |
+| typos (`tekumara.typos-vscode`) | MIT | 93 K | the Rust `typos` binary → problems panel; fast and offline |
+| Bats (`jetmartin.bats`) | MIT | 5 K | shell test runner as a task profile |
+
+Already Tier B: Prettier, ESLint, stylelint, EditorConfig, markdownlint, errorlens, indent-rainbow,
+cSpell (GPL — external process), Harper (Apache-2.0).
+
+### SQL and NoSQL
+
+Database access is `process.exec` plus an explicit host allowlist, so all of these are Tier C — but
+they are the *FOSS* set, which is what the catalog needs.
+
+| Item | License | Downloads | DWCode path |
+| --- | --- | --- | --- |
+| SQL Tools (`mtxr.sqltools`) | MIT (registry **and** upstream `mtxr/vscode-sqltools` `LICENSE`) | 1.13 M | client host for the drivers below |
+| SQLTools drivers: PostgreSQL (`mtxr.sqltools-driver-pg`), MySQL (`-mysql`), SQLite (`-sqlite`) | MIT | 550 K / 110 K / 90 K | same host; each driver is a separate licensed package |
+| MySQL Client (`cweijan.vscode-mysql-client2`) | **MIT verified** (registry empty → upstream `cweijan/vscode-database-client`) | 1.38 M | same capability, independent implementation |
+| MongoDB (`mongodb.mongodb-vscode`) | **Apache-2.0 verified** (registry `SEE LICENSE IN` → upstream `LICENSE.txt`) | 493 K | `mongosh` as the process, not a bundled driver |
+| SQL Server (`ms-mssql.mssql`) | **MIT verified** (registry `SEE LICENSE IN` → upstream `LICENSE.txt`) | 340 K | `sqlcmd` on `PATH` |
+| SQLite (`alexevzz`/`alexcvzz.vscode-sqlite`) | Apache-2.0 | 170 K | `sqlite3` CLI |
+| PostgreSQL (`ckolkman.vscode-postgres`) | MIT | 90 K | `psql` |
+| MySQL (`formulahendry.vscode-mysql`) | MIT | 40 K | same |
+| Prisma (`prisma.prisma`) | Apache-2.0 | 1.56 M | `prisma` CLI as a task profile |
+
+Excluded here: SQLite Viewer (`qwtel.sqlite-viewer`, 1.02 M — PRO paywall), Redis for VS Code
+(`Redis.redis-for-vscode` — SSPL-1.0), DBCode (`dbcode.dbcode` — `SEE LICENSE IN`).
+
+### Docker and containers
+
+| Item | License | Downloads | DWCode path |
+| --- | --- | --- | --- |
+| Container Tools (`ms-azuretools.vscode-containers`) | **MIT verified** | 14.8 M | images/containers/logs via `docker`/`podman` on `PATH` |
+| Docker (`ms-azuretools.vscode-docker`) | **MIT verified** | 7.13 M | same; fold both into one native panel |
+| Docker DX (`docker.docker`) | Apache-2.0 | 269 K | official Docker publisher, same integration |
+| Dev Containers / Remote (`ms-vscode.remote-containers`) | — | — | **not on Open VSX** — out of reach as a package; the *image* side is what DWCode can do |
+
+### GraphQL
+
+| Item | License | Downloads | DWCode path |
+| --- | --- | --- | --- |
+| GraphQL: Syntax Highlighting (`GraphQL.vscode-graphql-syntax`) | MIT | 1.02 M | TextMate grammar → Tier A once the tmLanguage→Monarch converter exists |
+| GraphQL: Language Feature Support (`GraphQL.vscode-graphql`) | MIT | 584 K | `graphql-language-service` on `PATH` |
+| Apollo (`apollographql.vscode-apollo`) | MIT | 40 K | schema checks as an external process |
+| Inline Operation Execution (`GraphQL.vscode-graphql-execution`) | MIT | 20 K | needs `network.connect` → Tier C |
+
+### Lua
+
+| Item | License | Downloads | DWCode path |
+| --- | --- | --- | --- |
+| Lua Language Server (`sumneko.lua` → `LuaLS/lua-language-server`) | MIT | 498 K | `lua-language-server` on `PATH` — the one Lua server worth having |
+
+Game-specific Lua packages (`openra.vscode-openra-lua`, `TradeSkillMaster.wowlua-ls`, `qbox.qbx-lua`)
+are GPL but tied to one engine — excluded on usefulness, not licence.
+
+### Bash and shell
+
+| Item | License | Downloads | DWCode path |
+| --- | --- | --- | --- |
+| Bash IDE (`mads-hartmann.bash-ide-vscode`) | MIT | 199 K | it wraps `bash-language-server` — run the server directly |
+| ShellCheck (`timonwong.shellcheck`) | MIT | 789 K | external binary → problems panel |
+| shell-format (`foxundermoon.shell-format`) | **MIT verified** | 143 K | `shfmt` on format-on-save |
+| Bash Debug (`rogalmic.bash-debug`) | MIT | 80 K | DAP adapter later |
+| Shellscript LS (`juandiazan.bash-lsp`) | MIT | 4 K | alternative Bash server, same `PATH` pattern |
+
+### CMake
+
+| Item | License | Downloads | DWCode path |
+| --- | --- | --- | --- |
+| CMake Tools (`ms-vscode.cmake-tools`) | MIT | 2.25 M | configure/build/test task profiles (already Tier B2) |
+| CMake (`twxs.cmake`) | MIT | 431 K | grammar + commands → Tier A grammar, plus a task profile |
+| cmake-format (`cheshirekow.cmake-format`) | GPL-3.0-or-later | 152 K | external process |
+| CMake Test Explorer (`fredericbonnet.cmake-test-adapter`) | BSD-3-Clause | 10 K | test adapter → after DWCode has a test runner |
+
+### Julia
+
+| Item | License | Downloads | DWCode path |
+| --- | --- | --- | --- |
+| Julia (`julialang.language-julia`) | **MIT verified** (registry `SEE LICENSE IN LICENSE` → upstream `LICENSE`) | 261 K | the Julia language server runs inside `julia` — start it as a process, JVM-free but slow to boot |
+| Julia Formatter (`singularitti.vscode-julia-formatter`) | MIT | 10 K | `JuliaFormatter.jl` as a format-on-save target |
+| Jupyter (`ms-toolsai.jupyter`) | MIT | 11.1 M | notebook UI is a big DWCode feature — decide before committing |
+
+### Kotlin
+
+| Item | License | Downloads | DWCode path |
+| --- | --- | --- | --- |
+| Kotlin (`fwcd.kotlin`) | MIT | 734 K | `kotlin-language-server` on `PATH` (JVM — needs the M4 resource limits) |
+| Kotlin Language (`mathiasfrohlich.Kotlin`) | Apache-2.0 | 70 K | TextMate grammar → Tier A after the tmLanguage→Monarch converter |
+| Kotlin LSP (`JetBrains.kotlin-server` → `Kotlin/kotlin-lsp`) | **Apache-2.0 verified** | 50 K | JetBrains' official server — prefer it over `fwcd` once M4 resource limits exist |
+| ktfmt (`omBratteng.ktfmt-kotlin-formatter`) | BSD-3-Clause | 4 K | external `ktfmt` on format-on-save |
+
+**What this changes about scale:** the sweep adds ~70 FOSS packages across 16 ecosystems, all
+licence-checked and all on Open VSX. That is the backlog for the curated catalog — the reason
+EXTENSIONS.md no longer calls it "small", and the reason the licence gate is a script
+(`tools/openvsx-scan.mjs`) instead of a person reading 70 registry pages by hand.
+
 ## Tier C — requires the executable host (blueprint M2/M3+)
 
 FOSS, but they execute code and/or spawn processes, so they wait for the capability broker.
@@ -212,9 +402,10 @@ Apache-2.0 (131 K★), `sst/opencode` MIT (221 K★), `google-gemini/gemini-cli`
 Claude Code `NONE`. That is the useful signal: DWCode's agent story should be one panel that
 drives a *user-supplied* CLI (`codex`, `opencode`, `gemini`, …) with a `process.exec` grant,
 rather than packaging any vendor's editor extension. Third-party OpenCode clients also exist
-under other publisher ids (`ZiShuo.opencode` points at the same upstream as `sst-dev.opencode`;
-`haoyangzeng.opencui` "OpenCode Panel", MIT, 113 K, and `K-Arthur.opencode-harness`, MIT, 11 K)
-— prefer the official publisher.
+under other publisher ids (`ZiShuo.opencode` points at the same upstream as `sst-dev.opencode`, and
+`haoyangzeng.opencui` "OpenCode Panel", MIT, 113 K) — prefer the official publisher. A third,
+`K-Arthur.opencode-harness` (MIT, 11 K when it was listed), now returns **404 from Open VSX**:
+delisted, so it cannot be a catalog entry regardless of its licence.
 
 ## Excluded — free but not FOSS, or not on Open VSX
 
@@ -233,7 +424,11 @@ under other publisher ids (`ZiShuo.opencode` points at the same upstream as `sst
 | Copilot bridges (`adguard.tokenguard-copilot`, `statiolake.vscode-copilot-lsp`, `allansantos-dv.copilot-delegate`) | MIT, but each needs GitHub Copilot or the Copilot CLI — proprietary and 404 on Open VSX. FOSS code depending on an out-of-reach product is out of reach as a package. |
 | Codex / ChatGPT account switchers (`woozy-masta.codex-switch`, `devhakeem5.codex-hub`, `zixfel.codex-account-swapper`) | Multi-account rotation has no DWCode capability to map to; excluded on usefulness, not licence (`codex-switch` is MIT, verified — the others were not taken further once that failed). |
 | Vue - Official (`Vue.volar`) | Registry lists **no license**; upstream `vuejs/language-tools` is MIT — verify at catalog time rather than trusting the registry field. |
-| Python Environments (`ms-python.vscode-python-envs`) | Registry lists **no license**; same verify-before-catalog rule as every `NONE` entry. |
+| SQLite Viewer (`qwtel.sqlite-viewer`, 1.02 M) | Registry `license` reads `LICENSE.md`, but that file is an *"Activate SQLite Viewer PRO"* notice — a paywall, no OSS grant. Free ≠ FOSS, and a plausible-looking license *filename* is not a license. |
+| Redis for VS Code (`Redis.redis-for-vscode`, 19 K) | **SSPL-1.0** (`redis/Redis-for-VS-Code`) — source-available but not OSI-approved, so it fails the FOSS rule. The registry pointer hid this; reading the upstream `LICENSE` is what found it. |
+| Google Cloud Code (`googlecloudtools.cloudcode`, 430 K) | `SEE LICENSE IN LICENSE` → the *Google Cloud Code Plugin Software License Agreement*. Proprietary service terms, not a grant. |
+| DBCode (`dbcode.dbcode`, 875 K) | `SEE LICENSE IN LICENSE` — no SPDX grant; a database service client. |
+| Android launcher/emulator helpers (`DiemasMichiels.emulate`, `android-ios-layoutcodegen.*`, `krishna-kudari.android-studio-lite`) | `SEE LICENSE IN` or an empty registry field. Excluded on the gate, not on usefulness — the FOSS Android set is in the sweep above. |
 | Devsense PHP / Composer / PHP Profiler (`devsense.*`) | `LicenseRef-LICENSE` — a custom license reference, not an SPDX grant. |
 | Live Preview (`ms-vscode.live-server`), Mermaid Chart, Office Viewer, Posit Shiny | Registry license `NONE` or a service EULA. |
 | Catppuccin, Tokyo Night theme packages | Marketplace-only (404 on Open VSX); recreation from license-clean sources only. |
@@ -260,16 +455,16 @@ governed by the capability table in [EXTENSIONS.md](EXTENSIONS.md).
 ## Verification recipe
 
 ```sh
+# the licence gate for the whole document: re-checks every extension id in this file
+npm run catalog:scan                       # exit 1 while anything needs a human look
+node tools/openvsx-scan.mjs --keywords kotlin,julia --size 15   # a fresh per-topic sweep
 # the full popularity sweep used above (top 80 of the registry)
 curl -s 'https://open-vsx.org/api/-/search?query=&size=40&offset=0&orderBy=downloadCount&sortOrder=desc' \
   | jq -r '.extensions[] | [.downloadCount, (.namespace.id + "." + .name), .displayName] | @tsv'
 # license + presence for one package
-curl -s https://open-vsx.org/api/<namespace>/<name> | jq '{version, license}'
+curl -s https://open-vsx.org/api/<namespace>/<name> | jq '{version, license, repository}'
 # upstream license when the registry field is empty or a placeholder
 curl -s https://api.github.com/repos/<owner>/<repo> | jq '.license.spdx_id'
-# a per-topic sweep (how the AI-agent list above was built); repeat per keyword
-curl -s 'https://open-vsx.org/api/-/search?query=opencode&size=40&orderBy=downloadCount&sortOrder=desc' \
-  | jq -r '.extensions[] | [.downloadCount, (.namespace.id + "." + .name), .displayName] | @tsv'
 ```
 
 A registry `license` value that is empty, a NUL placeholder (GitLens's `%gitlens.license%`), or a

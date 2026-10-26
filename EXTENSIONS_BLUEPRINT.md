@@ -4,7 +4,7 @@
 [EXTENSIONS.md](EXTENSIONS.md) (policy),
 [PACK_FORMAT.md](PACK_FORMAT.md) (declarative pack schema),
 [USER_EXTENSION_PROFILE.md](USER_EXTENSION_PROFILE.md) (target-workload inventory),
-[FOSS_EXTENSION_SHORTLIST.md](FOSS_EXTENSION_SHORTLIST.md) (verified FOSS candidates on Open VSX)
+[FOSS_EXTENSION_REPOSITORY.md](FOSS_EXTENSION_REPOSITORY.md) (verified FOSS candidates on Open VSX)
 
 EXTENSIONS.md decides *what* DWCode will and will not accept. This document says *how* to build it
 against the code that exists today, seam by seam, with milestones that each land green.
@@ -249,9 +249,12 @@ the suite with executable extensions forced on.
 
 ## 8. Phase M5 — distribution
 
-- Curated catalog: signed/checksum-pinned JSON index on GitHub Releases; exact-version installs
-  with origin + sha256 written to a lock record (mirrors the session journal's versioned,
-  fail-closed reads). Updates are opt-in and show the capability diff before re-consent.
+- Curated catalog at scale: signed/checksum-pinned JSON index on GitHub Releases; exact-version
+  installs with origin + sha256 written to a lock record (mirrors the session journal's versioned,
+  fail-closed reads). Updates are opt-in and show the capability diff before re-consent. Scope is
+  the whole reviewed backlog in `FOSS_EXTENSION_REPOSITORY.md` (~70 FOSS packages across 16
+  ecosystems), gated by `npm run catalog:scan` — a catalogue that grows needs an automated licence
+  gate, not a human re-reading registry pages. Publish ecosystem by ecosystem as rows clear review.
 - No URL-based installs by default; local VSIX/file import, if added, runs the identical
   manifest + license + integrity + compatibility checks.
 - Compatibility report per package: `declarative-only` / `needs language server` / `requires
@@ -268,7 +271,7 @@ the suite with executable extensions forced on.
 | M2 | `src/extensionbroker.{h,cpp}`, `tests/fixtures/host/*` | `src/main.cpp`, `tests/backend_test.cpp` |
 | M3 | `src/qml/ExtensionStatusDelegate.qml` (or equivalent) | `src/extensionbroker.cpp`, `src/qml/Main.qml`, `tests/{backend,ui}_test.cpp`, `tests/shots.cpp` |
 | M4 | `tests/threatmodel.md` | `src/extensionbroker.cpp`, `tests/backend_test.cpp` |
-| M5 | `tools/fetch-catalog.mjs` | `src/packloader.cpp`, docs |
+| M5 | `tools/fetch-catalog.mjs`, `tools/openvsx-scan.mjs` ✅ + `tools/openvsx-verified.json` ✅ | `src/packloader.cpp`, docs |
 
 Every phase keeps the three suites green: `./backend-tests` (currently 10/10),
 `./ui-tests` (currently 14/14), `npm run build && npm run validate:packs`.

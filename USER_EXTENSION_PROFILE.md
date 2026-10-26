@@ -2,7 +2,7 @@
 
 This inventory was read from the installed VS Code CLI and local VS Code profile on 2026-10-21. It describes extensions installed for the profile; the available session did not expose which specific window is on desktop workspace 18, so it cannot prove that every listed extension is active in that window.
 
-> **Superseded for planning:** [`FOSS_EXTENSION_SHORTLIST.md`](FOSS_EXTENSION_SHORTLIST.md) narrows
+> **Superseded for planning:** [`FOSS_EXTENSION_REPOSITORY.md`](FOSS_EXTENSION_REPOSITORY.md) narrows
 > this raw inventory with a popularity sweep of the top of the Open VSX registry, verified FOSS
 > licences, per-area coverage (needs, Rust, C/C++, Git, syntax highlighting, HTML/CSS), and a tier
 > per package saying whether it ships as a declarative pack, a native integration, or a future

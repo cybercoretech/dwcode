@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
-    "validate:packs": "node tools/validate-packs.mjs"
+    "validate:packs": "node tools/validate-packs.mjs",
+    "catalog:scan": "node tools/openvsx-scan.mjs --doc"
   },
   "dependencies": {
     "monaco-editor": "^0.52.2"
