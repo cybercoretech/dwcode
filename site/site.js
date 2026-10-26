@@ -34,12 +34,12 @@ const NAV = [
     { ico: '05', text: 'build from source', href: '#build' },
   ] : [
     { ico: '#', text: 'top', href: '#top' },
-    { ico: '01', text: 'the question', href: '#question' },
+    { ico: '01', text: 'the catalog', href: '#catalog' },
     { ico: '02', text: 'how it works', href: '#design' },
     { ico: '03', text: 'license gate', href: '#gate' },
-    { ico: '04', text: 'accepted list', href: '#accepted' },
-    { ico: '05', text: 'excluded list', href: '#excluded' },
-    { ico: '06', text: 'submit a pack', href: '#submit' },
+    { ico: '04', text: 'excluded list', href: '#excluded' },
+    { ico: '05', text: 'submit a pack', href: '#submit' },
+    { ico: '06', text: 'allowed & credited', href: '#credits' },
   ]) },
   { label: 'pages', items: [
     { ico: '~', text: 'home', href: '/', current: onHome },
