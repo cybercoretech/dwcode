@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DWCode extension repository — your own pack catalog</title>
+  <meta name="description" content="How a custom DWCode extension repository works: what the licences allow, how the curated checksum-pinned catalog is built, and which packages DWCode excludes and why.">
+  <meta name="theme-color" content="#05070b">
+  <meta name="color-scheme" content="dark">
+  <link rel="canonical" href="https://dwcode.pages.dev/repository.html">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="DWCode extension repository">
+  <meta property="og:description" content="Your own curated catalog of data-only packs: licence gate, checksum-pinned index, and the packages DWCode excludes.">
+  <meta property="og:url" content="https://dwcode.pages.dev/repository.html">
+  <meta property="og:image" content="https://dwcode.pages.dev/assets/social.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="bar">
+    <a class="wordmark" href="/" aria-label="DWCode home">
+      <span class="wm-fallback"><span class="wm-d">D</span><span class="wm-w">W</span><span class="wm-rest">CODE</span></span>
+    </a>
+    <span class="bar-path" aria-hidden="true">~/cybercore/dwcode/extensions <b>main</b></span>
+    <a class="bar-gh" href="https://github.com/cybercoretech/dwcode" target="_blank" rel="noopener">GitHub <span aria-hidden="true">↗</span><span class="sr"> (opens in a new tab)</span></a>
+    <button class="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <nav class="drawer" id="drawer" aria-label="Site" hidden>
+    <div class="drawer-head"><span class="comment">// navigate</span><button class="drawer-close" type="button" aria-label="Close menu">✕</button></div>
+    <div class="drawer-body" id="drawer-body"></div>
+    <p class="drawer-foot"><kbd>Esc</kbd> to close</p>
+  <a data-cybercore-master-docs href="https://cybercoretech.github.io/cybercore/docs.html" style="color:#22e6ff;border:1px solid #263454;border-radius:999px;padding:7px 12px;text-decoration:none;font:600 .7rem ui-monospace,monospace;letter-spacing:.08em;white-space:nowrap">MASTER DOCS ↗</a></nav>
+  <div class="scrim" hidden></div>
+
+  <main id="main">
+    <!-- Intro -->
+    <section class="section" id="top" aria-labelledby="repo-h">
+      <header class="section-head">
+        <p class="eyebrow"><span class="dot"></span>cybercore / dwcode · extensions</p>
+        <h1 id="repo-h" data-scramble>Your own <em>extension repository.</em></h1>
+        <p class="lede">DWCode can host its own catalog of packs — curated, licence-checked and checksum-pinned — without borrowing anyone's marketplace. This page answers the licence question, shows how the catalog is built, and lists exactly which packages stay out and why.</p>
+        <div class="cta">
+          <a class="btn btn-primary" href="#question">§ is it allowed?</a>
+          <a class="btn btn-ghost" href="https://github.com/cybercoretech/dwcode/blob/main/FOSS_EXTENSION_REPOSITORY.md" target="_blank" rel="noopener">the shortlist ↗</a>
+        </div>
+      </header>
+    </section>
+
+    <!-- 01 The question -->
+    <section class="section" id="question" aria-labelledby="question-h">
+      <header class="section-head">
+        <p class="kicker">// 01 · the question</p>
+        <h2 id="question-h" data-scramble>Allowed — on three conditions.</h2>
+        <p>Nothing about running your own catalog conflicts with DWCode's MIT licence or with the licences of the packages it points at. The rules are the ones any distributor already has.</p>
+      </header>
+      <div class="features">
+        <div class="card">
+          <div class="card-top"><span class="glyph" aria-hidden="true">§</span><h3>Licence-wise</h3></div>
+          <p>DWCode is MIT, so it can publish any index it likes — that index is your work. Every pack it lists keeps its own licence: you redistribute the files exactly as upstream licensed them, with the licence text, notices and attribution intact. You never relicense a pack, and you never need permission to <em>link to</em> one.</p>
+          <div class="card-foot"><span class="status">allowed</span><span class="open">index = yours</span></div>
+        </div>
+        <div class="card">
+          <div class="card-top"><span class="glyph" aria-hidden="true">⎇</span><h3>Open-source-wise</h3></div>
+          <p>A repository is only an index plus files — no new policy to invent. The implementation is already specified as blueprint <b>M5</b>: a curated catalog published on GitHub Releases with a signed or checksum-pinned JSON index, exact-version installs, and origin + sha256 recorded in a lock record.</p>
+          <div class="card-foot"><span class="status">planned · M5</span><span class="open">blueprint §8</span></div>
+        </div>
+        <div class="card">
+          <div class="card-top"><span class="glyph" aria-hidden="true">!</span><h3>The three limits</h3></div>
+          <p>Don't rehost proprietary packages — only index FOSS ones you were allowed to receive. Don't strip, alter or bury a licence or notice. And don't imply affiliation: this is not Open VSX, not the Visual Studio Marketplace, and not endorsed by Microsoft, the Eclipse Foundation or any upstream publisher.</p>
+          <div class="card-foot"><span class="status partial">read twice</span><span class="open">no mirroring</span></div>
+        </div>
+      </div>
+      <p class="honest"><b>// status</b> M0 and M1 already shipped: the command registry and the declarative pack loader, with themes, snippets and an enable switch in Settings → EXTENSIONS. The repository itself is <b>M5 — not live yet</b>. Today packs load from local directories only, so this page describes how the catalog will work, not a service you can call. What already exists is the <b>licence gate</b>: <code>npm run catalog:scan</code> re-checks every reviewed package against the live registry, and the review queue it feeds — roughly 70 FOSS packages across 16 ecosystems (Python, JVM, Android, GitLab, Google/Dart, Rust, Markdown, lint, SQL/NoSQL, Docker, GraphQL, Lua, Bash, CMake, Julia, Kotlin) — lives in FOSS_EXTENSION_REPOSITORY.md.</p>
+    </section>
+
+    <!-- 02 Design -->
+    <section class="section" id="design" aria-labelledby="design-h">
+      <header class="section-head">
+        <p class="kicker">// 02 · how it works</p>
+        <h2 id="design-h" data-scramble>An index you can verify offline.</h2>
+        <p>No search API, no account, no telemetry: a static JSON index pinned by hash, fetched over HTTPS, re-validated in C++ before anything is enabled. The same rules the app already applies to <code>packs/dwcode-core</code>.</p>
+      </header>
+      <div class="code">
+        <div class="code-bar"><span>catalog/index.json</span><button class="copy btn btn-ghost btn-sm" type="button" data-copy="catalog-json">copy</button></div>
+<pre id="catalog-json"><code><span class="ln">1</span>{
+<span class="ln">2</span>  "catalogVersion": 1,
+<span class="ln">3</span>  "generated": "2026-10-26T00:00:00Z",
+<span class="ln">4</span>  "packs": [
+<span class="ln">5</span>    {
+<span class="ln">6</span>      "id": "publisher.pack-name",
+<span class="ln">7</span>      "version": "1.2.3",
+<span class="ln">8</span>      "origin": "https://github.com/…/releases/download/v1.2.3/pack.dwcodepack",
+<span class="ln">9</span>      "sha256": "9f2c…",
+<span class="ln">10</span>      "license": "MIT",
+<span class="ln">11</span>      "contributes": { "themes": 3, "snippets": 2, "icons": 7 }
+<span class="ln">12</span>    }
+<span class="ln">13</span>  ]
+<span class="ln">14</span>}</code></pre>
+      </div>
+      <div class="features spaced">
+        <div class="card">
+          <div class="card-top"><span class="glyph" aria-hidden="true">1</span><h3>Publish</h3></div>
+          <p>Run the pack through <code>npm run validate:packs</code>, tag a release, upload the pack archive, and append its id, version, origin, sha256 and licence to the index. Recompute the index hash and sign or pin it.</p>
+        </div>
+        <div class="card">
+          <div class="card-top"><span class="glyph" aria-hidden="true">2</span><h3>Fetch and pin</h3></div>
+          <p>DWCode downloads the index, checks it against the pinned hash, downloads one exact version of one pack, and writes origin + sha256 into the local lock record before anything is unpacked.</p>
+        </div>
+        <div class="card">
+          <div class="card-top"><span class="glyph" aria-hidden="true">3</span><h3>Re-validate, then enable</h3></div>
+          <p>The C++ loader re-runs every rule — manifest version, engines range, path containment, token schema — regardless of what CI said. A pack only appears as <b>enabled</b> once you switch it on, licence and hash shown first.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 Licence gate -->
+    <section class="section" id="gate" aria-labelledby="gate-h">
+      <header class="section-head">
+        <p class="kicker">// 03 · the licence gate</p>
+        <h2 id="gate-h" data-scramble>What the catalog accepts.</h2>
+        <p>A licence field that is empty, a <code>NOASSERTION</code>, a <code>SEE LICENSE IN …</code> pointer at proprietary terms, or a custom <code>LicenseRef</code> means <b>stop</b>. Everything else is judged by what DWCode does with it: data it loads, or a process it launches.</p>
+      </header>
+      <div class="table-wrap">
+        <table class="ext">
+          <thead><tr><th scope="col">Class</th><th scope="col">Examples</th><th scope="col">Verdict</th><th scope="col">Why</th></tr></thead>
+          <tbody>
+            <tr><td>Permissive</td><td>MIT · Apache-2.0 · BSD · ISC · Unlicense</td><td><span class="ok">accept</span></td><td>Redistribute with the licence and notices intact; no further obligation.</td></tr>
+            <tr><td>Weak copyleft</td><td>MPL-2.0 · EPL-2.0 · LGPL (separate files)</td><td><span class="ok">accept</span></td><td>File-level or dynamic-link obligations stay with the pack; record them in the pack record.</td></tr>
+            <tr><td>Strong copyleft</td><td>GPL-3.0 (e.g. cSpell)</td><td><span class="warn">data only</span></td><td>Themes, snippets and grammars are <em>data</em> DWCode reads — fine to host. DWCode's binaries never link GPL code; GPL tools run as external processes with their own config.</td></tr>
+            <tr><td>Source-available</td><td>freemium, "free tier", NOASSERTION (GitLens)</td><td><span class="no">refuse</span></td><td>Free ≠ FOSS. No open-source grant means no redistribution right.</td></tr>
+            <tr><td>Proprietary</td><td><code>SEE LICENSE IN</code> → EULA, <code>LicenseRef-…</code>, licence NONE</td><td><span class="no">refuse</span></td><td>No grant to copy, host or index the binaries. Linking to the publisher's own page is the most DWCode may do.</td></tr>
+            <tr><td>Not on Open VSX</td><td>Marketplace-only packages</td><td><span class="no">out of reach</span></td><td>DWCode's policy sources only from Open VSX or reviewed first-party packs. If the licence permits it, an <em>original</em> DWCode pack may be written from the source material — recreation, never bundling.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 04 Excluded -->
+    <section class="section" id="excluded" aria-labelledby="excluded-h">
+      <header class="section-head">
+        <p class="kicker">// 04 · excluded</p>
+        <h2 id="excluded-h" data-scramble>Free, but not ours to ship.</h2>
+        <p>Every high-download package DWCode checked and turned down, with the reason. Listing them is how a curated catalog stays honest about what it does and does not offer.</p>
+      </header>
+      <div class="table-wrap">
+        <table class="ext">
+          <thead><tr><th scope="col">Package</th><th scope="col">Status</th><th scope="col">Why it is excluded</th></tr></thead>
+          <tbody>
+            <tr><td>GitLens<br><code>eamodio.gitlens</code></td><td><span class="no">not FOSS</span></td><td>GitHub reports <code>NOASSERTION</code> — freemium / source-available terms. Free is not open source.</td></tr>
+            <tr><td>Claude Code<br><code>Anthropic.claude-code</code></td><td><span class="no">proprietary</span></td><td>The registry licence field is the publisher's own legal notice, not a grant; upstream repo reports no licence.</td></tr>
+            <tr><td>Codex / ChatGPT agent<br><code>openai.chatgpt</code></td><td><span class="no">proprietary</span></td><td><code>SEE LICENSE IN LICENSE.md</code> points at proprietary terms. (The separate <code>codex</code> CLI core is Apache-2.0 — reachable as an external process, never as a package.)</td></tr>
+            <tr><td>Gemini Code Assist<br><code>Google.geminicodeassist</code></td><td><span class="no">proprietary</span></td><td>Service EULA, not an open-source grant. The FOSS route is Google's Apache-2.0 Gemini CLI, driven as a process.</td></tr>
+            <tr><td>GitHub Copilot</td><td><span class="no">out of reach</span></td><td>Proprietary, and 404 on Open VSX. Its MIT-licensed bridges are excluded too — open code depending on a closed product inherits the wall.</td></tr>
+            <tr><td>Google Antigravity<br><code>Google.google-antigravity</code></td><td><span class="no">proprietary</span></td><td><code>SEE LICENSE IN LICENSE.txt</code>, no public repository.</td></tr>
+            <tr><td>Antigravity quota monitors<br><code>jlcodes.antigravity-cockpit</code> · <code>n2ns.antigravity-panel</code></td><td><span class="warn">no target</span></td><td>Actually MIT / Apache-2.0 upstream — but they read a Google IDE's quotas, and DWCode is not that IDE. A capability with no host to hook is not a pack.</td></tr>
+            <tr><td>Code Web Chat<br><code>robertpiosik.gemini-coder</code></td><td><span class="no">no licence</span></td><td>Registry field empty; GitHub reports <code>NONE</code>. 595 K downloads do not substitute for a grant.</td></tr>
+            <tr><td>Pylance · IntelliCode · C/C++ pack extras</td><td><span class="no">proprietary</span></td><td>Microsoft components; <code>ms-vscode.cpptools</code> is 404 on Open VSX. DWCode's path is clangd, not the pack.</td></tr>
+            <tr><td>Thunder Client</td><td><span class="no">proprietary</span></td><td>Freemium; repository carries no OSS licence.</td></tr>
+            <tr><td>Vue — Official</td><td><span class="warn">verify first</span></td><td>Registry lists no licence. Upstream <code>vuejs/language-tools</code> is MIT, but the rule is verify-before-catalog, never trust the registry field.</td></tr>
+            <tr><td>SQLite Viewer<br><code>qwtel.sqlite-viewer</code></td><td><span class="no">not FOSS</span></td><td>The registry licence reads <code>LICENSE.md</code> — whose contents are an "Activate SQLite Viewer PRO" paywall notice. A license-shaped filename is not a license.</td></tr>
+            <tr><td>Redis for VS Code<br><code>Redis.redis-for-vscode</code></td><td><span class="no">not OSI</span></td><td><b>SSPL-1.0</b> upstream — source-available, not an OSI-approved licence, so it fails the FOSS gate. The registry pointer hid it; reading the upstream <code>LICENSE</code> is what found it.</td></tr>
+            <tr><td>Google Cloud Code<br><code>googlecloudtools.cloudcode</code></td><td><span class="no">proprietary</span></td><td><code>SEE LICENSE IN LICENSE</code> → the Google Cloud Code Plugin Software License Agreement. Service terms, not a grant.</td></tr>
+            <tr><td>DBCode<br><code>dbcode.dbcode</code></td><td><span class="no">no grant</span></td><td><code>SEE LICENSE IN LICENSE</code> with no SPDX licence — a database service client, not a catalog candidate.</td></tr>
+            <tr><td>Catppuccin · Tokyo Night theme packs</td><td><span class="no">not here</span></td><td>Marketplace-only (404 on Open VSX). Their upstream licences would permit an original DWCode pack <em>inspired by</em> the palette.</td></tr>
+            <tr><td>Live Preview · Mermaid Chart · Office Viewer · Posit Shiny</td><td><span class="no">proprietary</span></td><td>Registry licence is <code>NONE</code> or a service EULA.</td></tr>
+            <tr><td>Codex account switchers<br><code>woozy-masta.codex-switch</code> and friends</td><td><span class="warn">no capability</span></td><td>Licences are fine (MIT); multi-account rotation simply has no DWCode feature to attach to.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="honest"><b>// how this list is written</b> Only facts travel here: the package name, its Open VSX id, its licence status and the reason. No binaries, no icons or logos, no copied descriptions, no mirrors, no endorsement — and every judgement links back to the registry entry or upstream repository so you can re-check it. Names are used to describe DWCode's own compatibility, which is exactly what a catalogue is for; each package stays the property of its publisher under its own licence. The full research, download counts and the commands to reproduce every call are in <a href="https://github.com/cybercoretech/dwcode/blob/main/FOSS_EXTENSION_REPOSITORY.md" target="_blank" rel="noopener">FOSS_EXTENSION_REPOSITORY.md</a>.</p>
+    </section>
+
+    <!-- 05 Submit -->
+    <section class="section" id="submit" aria-labelledby="submit-h">
+      <header class="section-head">
+        <p class="kicker">// 05 · submit a pack</p>
+        <h2 id="submit-h" data-scramble>Ship data, not code.</h2>
+        <p>DWCode accepts declarative packs today: themes, icon maps, snippets, keymaps and syntax grammars. Anything with an executable entry point waits for the extension host.</p>
+      </header>
+      <ul class="reqs">
+        <li><b>Declarative only.</b> <code>manifestVersion: 1</code>, <code>kind: "declarative"</code>, no <code>main</code> or <code>browser</code>, and an empty <code>capabilities</code> array.</li>
+        <li><b>Open-source licence.</b> An SPDX licence plus a licence file in the pack; every upstream asset you adapted must permit it, with attribution recorded.</li>
+        <li><b>Paths stay inside.</b> Themes, icons and snippets are referenced relatively — <code>../</code> escapes and absolute paths are refused by the loader.</li>
+        <li><b>DWCode theme tokens.</b> Imported colours are mapped into the <code>surfaces / text / accents / syntax</code> schema; application chrome always stays DWCode's.</li>
+        <li><b>Validate before you open the PR.</b> <code>npm run validate:packs</code> runs the same schema, escape and entry-point checks CI will run.</li>
+        <li><b>Provenance.</b> Upstream repository, version, licence and sha256 in the pack record — so a licence change later is a re-review, not a silent bump.</li>
+      </ul>
+      <div class="links">
+        <a href="https://github.com/cybercoretech/dwcode/blob/main/PACK_FORMAT.md" target="_blank" rel="noopener">PACK_FORMAT.md ↗</a>
+        <a href="https://github.com/cybercoretech/dwcode/blob/main/EXTENSIONS.md" target="_blank" rel="noopener">EXTENSIONS.md (policy) ↗</a>
+        <a href="https://github.com/cybercoretech/dwcode/blob/main/EXTENSIONS_BLUEPRINT.md" target="_blank" rel="noopener">blueprint M5 ↗</a>
+        <a href="https://github.com/cybercoretech/dwcode/blob/main/FOSS_EXTENSION_REPOSITORY.md" target="_blank" rel="noopener">the shortlist ↗</a>
+        <a href="https://github.com/cybercoretech/dwcode/issues" target="_blank" rel="noopener">open an issue ↗</a>
+      </div>
+      <p class="honest"><b>// honest limits</b> The validator currently checks the bundled pack directory; the <code>[packDir]</code> argument and a <code>dwcode --check-pack</code> flag are on the roadmap, and icon themes validate but are not rendered by the Explorer yet.</p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <cybercore-contact repo="dwcode">
+      <p><a href="mailto:dev@cybercoretech.net">dev@cybercoretech.net</a> · security reports: <a href="mailto:security@cybercoretech.net">security@cybercoretech.net</a> · <a href="https://github.com/cybercoretech" target="_blank" rel="noopener">GitHub</a> · <a href="https://discord.gg/vBMcK5wAx" target="_blank" rel="noopener">Discord</a></p>
+    </cybercore-contact>
+    <p class="legal">Copyright (c) 2026 Cybercore Tech · DWCode uses <a href="https://microsoft.github.io/monaco-editor/" target="_blank" rel="noopener">Monaco</a> and <a href="https://www.qt.io/" target="_blank" rel="noopener">Qt</a>; not affiliated with Microsoft, Visual Studio Code, Open VSX or the Eclipse Foundation. Package names and marks belong to their respective publishers and are used only to describe compatibility.</p>
+  </footer>
+
+  <script type="module" src="https://cybercoretech.github.io/kit/contact.js"></script>
+  <script type="module" src="site.js"></script>
+</body>
+</html>

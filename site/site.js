@@ -21,17 +21,28 @@ const src = (path) => `${REPO}/blob/main/${path}`;
 
 // ---------------------------------------------------------------- drawer
 // Add future pages here; each group renders as a section of the menu.
+// "this page" lists the anchors of the page you are actually on, so the same
+// script can run on every page of the site.
+const onHome = !location.pathname.endsWith('/repository.html');
 const NAV = [
-  { label: 'this page', items: [
+  { label: 'this page', items: (onHome ? [
     { ico: '#', text: 'top', href: '#top' },
     { ico: '01', text: 'features', href: '#features' },
     { ico: '02', text: 'tour', href: '#tour' },
     { ico: '03', text: 'themes', href: '#themes' },
     { ico: '04', text: 'live demo', href: '#demo' },
     { ico: '05', text: 'build from source', href: '#build' },
-  ] },
+  ] : [
+    { ico: '#', text: 'top', href: '#top' },
+    { ico: '01', text: 'the question', href: '#question' },
+    { ico: '02', text: 'how it works', href: '#design' },
+    { ico: '03', text: 'license gate', href: '#gate' },
+    { ico: '04', text: 'excluded list', href: '#excluded' },
+    { ico: '05', text: 'submit a pack', href: '#submit' },
+  ]) },
   { label: 'pages', items: [
-    { ico: '~', text: 'home', href: '/', current: true },
+    { ico: '~', text: 'home', href: '/', current: onHome },
+    { ico: '~', text: 'extension repository', href: '/repository.html', current: !onHome },
   ] },
   { label: 'project', items: [
     { ico: '↗', text: 'github repository', href: REPO, ext: true, note: 'new tab' },
@@ -121,7 +132,7 @@ const FEATURES = [
   },
 ];
 const grid = $('#feature-grid');
-for (const f of FEATURES) {
+if (grid) for (const f of FEATURES) {
   grid.append(h('button', { class: 'card', type: 'button', 'aria-haspopup': 'dialog', onclick: () => openSheet(f) },
     h('div', { class: 'card-top' }, h('span', { class: 'glyph', 'aria-hidden': 'true' }, f.glyph), h('h3', {}, f.title)),
     h('p', {}, f.blurb),
@@ -146,8 +157,8 @@ function openSheet(f) {
   body.scrollTop = 0;
   if (!reduce) animate($$('.stat, .test', body), { opacity: [0, 1], translateY: [6, 0], delay: stagger(30), duration: 380, ease: 'outQuad' });
 }
-$('.sheet-close').addEventListener('click', () => sheet.close());
-sheet.addEventListener('click', (e) => { if (e.target === sheet) sheet.close(); });
+$('.sheet-close')?.addEventListener('click', () => sheet.close());
+sheet?.addEventListener('click', (e) => { if (e.target === sheet) sheet.close(); });
 
 // ---------------------------------------------------------------- tour
 const SHOTS = [
@@ -172,10 +183,12 @@ async function showShot(i) {
   tourStage.append(next);
   old.forEach((o) => { o.classList.add('leaving'); setTimeout(() => o.remove(), 320); });
 }
-SHOTS.forEach((s, i) => tourTabs.append(h('button', { role: 'tab', 'aria-selected': 'false', 'aria-controls': 'tour-panel', onclick: () => showShot(i) }, s[1])));
-showShot(0);
-// warm the rest so switching is instant
-addEventListener('load', () => SHOTS.slice(1).forEach((s) => { const i = shotImg(s); i.decode?.().catch(() => {}); }));
+if (tourTabs) {
+  SHOTS.forEach((s, i) => tourTabs.append(h('button', { role: 'tab', 'aria-selected': 'false', 'aria-controls': 'tour-panel', onclick: () => showShot(i) }, s[1])));
+  showShot(0);
+  // warm the rest so switching is instant
+  addEventListener('load', () => SHOTS.slice(1).forEach((s) => { const i = shotImg(s); i.decode?.().catch(() => {}); }));
+}
 
 // Arrow keys between tabs in any tablist
 for (const list of $$('[role="tablist"]')) list.addEventListener('keydown', (e) => {
@@ -291,9 +304,9 @@ function startDemo() {
     };
     ready();
   });
-  $('#demo-start').replaceWith(frame);
+  $('#demo-start')?.replaceWith(frame);
 }
-$('#demo-start').addEventListener('click', startDemo);
+$('#demo-start')?.addEventListener('click', startDemo);
 function applyTheme(id) {
   select.value = id;
   const w = demoWindow();
@@ -303,7 +316,7 @@ function applyTheme(id) {
   const t = themes.find((x) => x.id === id);
   if (t) stage.style.background = t.surfaces.editor;
 }
-select.addEventListener('change', () => { applyTheme(select.value); selectTheme(select.value); });
+select?.addEventListener('change', () => { applyTheme(select.value); selectTheme(select.value); });
 $$('.demo-files [role="tab"]').forEach((tab, _, all) => tab.addEventListener('click', () => {
   const w = demoWindow();
   if (!w) return;
@@ -312,7 +325,7 @@ $$('.demo-files [role="tab"]').forEach((tab, _, all) => tab.addEventListener('cl
   w.dwcodeEditor.focus();
 }));
 const modal = $('#demo-modal');
-modal.addEventListener('click', () => {
+modal?.addEventListener('click', () => {
   const w = demoWindow();
   if (!w) return;
   const on = modal.getAttribute('aria-pressed') !== 'true';
@@ -322,17 +335,18 @@ modal.addEventListener('click', () => {
   w.dwcodeEditor.focus();
 });
 
-fetch('data/themes.json').then((r) => r.json()).then((list) => {
+if (tree && select) fetch('data/themes.json').then((r) => r.json()).then((list) => {
   themes = list;
   for (const t of list) select.append(new Option(t.name, t.id));
   select.value = selectedTheme;
   buildTree();
-}).catch(() => { tree.textContent = 'Theme list unavailable right now.'; });
+}).catch(() => { if (tree) tree.textContent = 'Theme list unavailable right now.'; });
 
 // ---------------------------------------------------------------- logo
 // The Bracket mark (Monaspace Krypton, outlined): wordmark in the bar, full
 // lockup in the hero. Brackets draw in, letters type, the cursor blinks.
 function placeLogo(file, holder, before) {
+  if (!holder) return Promise.resolve();
   return fetch(`assets/${file}`).then((r) => r.ok ? r.text() : Promise.reject(r.status)).then((markup) => {
     before?.remove();
     holder.insertAdjacentHTML('afterbegin', markup);
@@ -374,7 +388,7 @@ if (!reduce) {
     if (e.target.id === 'feature-grid') animate($$('.card', e.target), { opacity: [0, 1], translateY: [14, 0], delay: stagger(70), duration: 600, ease: 'outExpo' });
   }), { threshold: .3 });
   $$('[data-scramble]').forEach((el) => seen.observe(el));
-  seen.observe(grid);
+  if (grid) seen.observe(grid);
   // Terminal lines print in sequence.
   animate($$('#term .tl'), { opacity: [0, 1], translateX: [-6, 0], delay: stagger(260, { start: 300 }), duration: 300, ease: 'outQuad' });
   // Subtle tilt on feature cards.
