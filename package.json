@@ -7,6 +7,9 @@
     "build": "vite build",
     "validate:packs": "node tools/validate-packs.mjs",
     "catalog:scan": "node tools/openvsx-scan.mjs --doc",
+    "catalog:build": "node tools/catalog.mjs build",
+    "catalog:render": "node tools/catalog.mjs render",
+    "validate:catalog": "node tools/catalog.mjs check",
     "grammar:test": "node tools/tm2monarch.mjs --self-test"
   },
   "dependencies": {

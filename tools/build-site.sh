@@ -36,6 +36,13 @@ mkdir -p site/data
 # Built-in themes plus pack contributions, so the gallery matches the app.
 node tools/theme-catalog.mjs > site/data/themes.json
 
+# Extension catalog: paint the committed catalog data into repository.html and
+# cross-check data ↔ HTML ↔ FOSS_EXTENSION_REPOSITORY.md (offline). Refreshing
+# the data itself is `npm run catalog:build` + `npm run catalog:render`, both of
+# which need the registry, so a deploy never silently re-sources the catalog.
+node tools/catalog.mjs render
+node tools/catalog.mjs check
+
 # anime.js, served locally (pinned in package.json).
 mkdir -p site/vendor
 cp node_modules/animejs/dist/bundles/anime.esm.min.js site/vendor/anime.esm.min.js

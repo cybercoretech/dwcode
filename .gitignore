@@ -10,7 +10,12 @@ Makefile
 brand/dwcode-railshift-assets.zip
 site/downloads/
 site/demo/
-site/data/
+# site/data/ is build output (themes.json) — except the extension catalog data,
+# which is the committed source the published page renders from, so CI's
+# `npm run validate:catalog` and an offline `catalog:render` work from a fresh
+# clone. Refresh it with `npm run catalog:build` (needs the registry).
+site/data/*
+!site/data/catalog.json
 site/vendor/
 dist/
 packaging/arch/pkg/

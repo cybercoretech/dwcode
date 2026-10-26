@@ -23,6 +23,8 @@ jobs:
           node-version: 22
       - name: Licence gate (catalog:scan)
         run: npm run catalog:scan
+      - name: Catalog page gate (data <-> HTML <-> repository doc)
+        run: npm run validate:catalog
 
   grammar-gate:
     # tmLanguage → Monarch converter: 16 conversion cases, each emitted
