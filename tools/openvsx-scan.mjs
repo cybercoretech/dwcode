@@ -6,6 +6,8 @@
 //   node tools/openvsx-scan.mjs --keywords python,rust    # top-N sweep per keyword
 //   node tools/openvsx-scan.mjs --doc                     # re-check every id in the shortlist
 //   node tools/openvsx-scan.mjs --doc --json              # machine-readable report
+//   node tools/openvsx-scan.mjs --doc --appendix          # markdown table of eligible rows (doc)
+//   node tools/openvsx-scan.mjs --doc --site              # HTML rows for site/repository.html
 //
 // Verdicts:
 //   accept    registry licence is a known FOSS/OSI licence          -> eligible for the catalog
@@ -82,6 +84,7 @@ async function lookup(id) {
   return {
     id,
     verdict: v,
+    name: body.displayName || body.name || '',
     license: v === 'verified' ? `${license} → ${hand.spdx} (verified ${hand.checked})` : license,
     downloads: body.downloadCount ?? 0,
     repository: (body.repository || '').replace(/^git\+/, '').replace(/\.git$/, ''),
@@ -148,7 +151,31 @@ const eligible = rows.filter((r) => OK.has(r.verdict));
 const excluded = rows.filter((r) => r.verdict === 'refuse');
 const absent = rows.filter((r) => r.verdict === 'missing');
 
-if (json) {
+// Human-facing licence for a table cell: the registry pointer is noise once it has been
+// resolved, so `SEE LICENSE IN LICENSE.md → MIT (verified 2026-10-26)` renders as `MIT`.
+function shortLicense(r) {
+  const arrow = r.license.indexOf(' → ');
+  if (r.verdict === 'verified' && arrow >= 0) return r.license.slice(arrow + 3).replace(/ \(verified .*$/, '');
+  return r.license;
+}
+const millions = (n) => (n >= 1e6 ? `${(n / 1e6).toFixed(2).replace(/\.?0+$/, '')} M` : n >= 1e3 ? `${Math.round(n / 1e3)} K` : String(n));
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const uplink = (r) => (r.repository.startsWith('http') ? `[upstream](${r.repository})` : '—');
+
+// --appendix: a markdown table of every catalog-eligible package, for the doc.
+// --site:     the same rows as HTML <tr> cells for site/repository.html.
+// Both read the same data as --json, so the published lists cannot drift from the gate.
+if (argv.includes('--appendix')) {
+  console.log('| Package | Licence | Downloads | Upstream |');
+  console.log('| --- | --- | --- | --- |');
+  for (const r of eligible) console.log(`| ${esc(r.name || r.id)} (\`${r.id}\`) | ${esc(shortLicense(r))} | ${millions(r.downloads)} | ${uplink(r)} |`);
+  console.error(`// appendix: ${eligible.length} catalog-eligible packages`);
+} else if (argv.includes('--site')) {
+  for (const r of eligible) {
+    console.log(`            <tr><td>${esc(r.name || r.id)}<br><code>${esc(r.id)}</code></td><td>${esc(shortLicense(r))}</td><td>${millions(r.downloads)}</td><td>${r.repository.startsWith('http') ? `<a href="${esc(r.repository)}" target="_blank" rel="noopener">upstream</a>` : '—'}</td></tr>`);
+  }
+  console.error(`// site table: ${eligible.length} rows`);
+} else if (json) {
   console.log(JSON.stringify({ checked: rows.length, eligible: eligible.length, pending: pending.length, excluded: excluded.length, missing: absent.length, rows }, null, 2));
 } else {
   const pad = (s, n) => String(s).padEnd(n);

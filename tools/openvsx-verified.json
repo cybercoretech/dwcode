@@ -40,5 +40,6 @@
   "Google.gemini-cli-vscode-ide-companion": { "spdx": "Apache-2.0", "checked": "2026-10-26", "source": "registry repository field points at github.com/google-gemini/gemini-cli (Apache-2.0)" },
   "jlcodes.antigravity-cockpit": { "spdx": "MIT", "checked": "2026-10-26", "source": "licence clean; excluded separately on usefulness (reads a Google IDE's quotas, which DWCode is not)" },
   "mhutchie.git-graph": { "spdx": "NONE", "checked": "2026-10-26", "source": "registry license empty and the GitHub repo returned 404 — do not adopt until status is confirmed" },
-  "dbcode.dbcode": { "spdx": "NONE", "checked": "2026-10-26", "source": "SEE LICENSE IN LICENSE with no SPDX grant — service client, refuse" }
+  "dbcode.dbcode": { "spdx": "NONE", "checked": "2026-10-26", "source": "SEE LICENSE IN LICENSE with no SPDX grant — service client, refuse" },
+  "Vue.volar": { "spdx": "MIT", "checked": "2026-10-26", "source": "registry license field empty; upstream github.com/vuejs/language-tools is MIT (GitHub license API) — the last pending row, now cleared" }
 }

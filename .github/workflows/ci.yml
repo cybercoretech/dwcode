@@ -10,6 +10,20 @@ permissions:
   contents: read
 
 jobs:
+  catalog-gate:
+    # Licence gate for the curated catalog: re-checks every extension id in
+    # FOSS_EXTENSION_REPOSITORY.md against the live Open VSX registry.
+    # Exits non-zero only while a licence is still `verify` (pending) — recorded
+    # refusals and packages that are not on Open VSX are decisions, not failures.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Licence gate (catalog:scan)
+        run: npm run catalog:scan
+
   build-and-test:
     runs-on: ubuntu-latest
     steps:
