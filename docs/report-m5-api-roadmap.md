@@ -192,6 +192,12 @@ file, (2) a tagged release, (3) CI. Today: agentforge ✓✓✓ · diagprint ✓
 - **Exit:** every install precondition that is *not* code exists. Gates: `validate:catalog`,
   `catalog:scan`, `grammar:test`, `validate:packs`.
 
+> **Finding (2026-10-25), two of those five are harder than written:** the Open VSX publish needs
+> a pack that is actually a VS Code extension — `packs/dwcode-core` is not one (DWCode's own theme,
+> snippet and icon-theme schemas). Claim the namespace now; publish only after
+> `tools/vscode-compat.mjs` can convert and *prove* consumability. And a clean tree is a hard
+> precondition for `tools/release.sh`, so the tag waits for whatever is currently in flight.
+
 ### Phase 1 — Install, read-only (M5 core)
 - [ ] `src/packloader.cpp`: `fetch(indexUrl)` with `ETag`, sha256 verify, lock record, unpack,
       re-validate with the existing pack validator. **No URL-based installs**; only index entries.
