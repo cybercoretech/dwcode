@@ -1,0 +1,10 @@
+{
+  "manifestVersion": 1,
+  "id": "unit.escape",
+  "displayName": "Escape Pack",
+  "version": "1.0.0",
+  "engines": { "dwcode": ">=0.1.0" },
+  "kind": "declarative",
+  "license": "MIT",
+  "contributes": { "themes": ["../outside.json"] }
+}

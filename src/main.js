@@ -170,7 +170,7 @@ const models = new Map(), pendingLanguage = new Map(), inFlight = new Map();
 let selectedTheme = cybercoreThemes.find(t => t.id === 'cyberpunk-chrome') || cybercoreThemes[0];
 window.dwcodeThemes = cybercoreThemes;
 window.dwcodeSetTheme = id => {
-  const t = cybercoreThemes.find(t => t.id === id);
+  const t = window.dwcodeThemes.find(t => t.id === id);
   if (!t) return;
   selectedTheme = t;
   // Monaco rejects theme names outside [a-z0-9-], e.g. the dotted DWCode ids.
@@ -189,6 +189,29 @@ window.dwcodeSetTheme = id => {
   document.body.style.background = t.surfaces.editor;
   try {localStorage.setItem('dwcode-theme', id)} catch {}
   window.dispatchEvent(new CustomEvent('dwcode-theme', {detail:t}));
+};
+// Pack snippets become real completions: declarative data only, no pack code runs.
+const snippetProviders = [];
+window.dwcodeApplySnippets = map => {
+  for (const provider of snippetProviders.splice(0)) { try { provider.dispose() } catch {} }
+  for (const [language, entries] of Object.entries(map || {})) {
+    if (!Array.isArray(entries) || !entries.length) continue;
+    snippetProviders.push(monaco.languages.registerCompletionItemProvider(language, {
+      provideCompletionItems(model, position) {
+        const word = model.getWordUntilPosition(position);
+        const range = {startLineNumber: position.lineNumber, startColumn: word.startColumn, endLineNumber: position.lineNumber, endColumn: word.endColumn};
+        return {suggestions: entries.map(snippet => ({
+          label: snippet.prefix,
+          kind: monaco.languages.CompletionItemKind.Snippet,
+          insertText: snippet.body,
+          insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+          documentation: snippet.description || snippet.name || "",
+          detail: "Pack snippet",
+          range,
+        }))};
+      },
+    }));
+  }
 };
 try {window.dwcodeSetTheme(localStorage.getItem('dwcode-theme') || selectedTheme.id)} catch {window.dwcodeSetTheme(selectedTheme.id)}
 const applyDocument = (doc, activate = true) => {
@@ -288,7 +311,10 @@ function connectNative() {
     native.workspaceChanged.connect(() => {
       if (workspaceRoot !== native.root) {workspaceRoot=native.root;editor.setModel(null);for (const m of models.values())m.dispose();models.clear()}
     });
-    native.themeChanged.connect(() => window.dwcodeSetTheme(native.theme.id));
+    // Enabling or disabling a pack can both change the catalog and select a
+    // different theme, so the theme list is re-read before each apply.
+    native.themeChanged.connect(() => { window.dwcodeThemes = native.themes; window.dwcodeSetTheme(native.theme.id); });
+    native.packsChanged.connect(() => { window.dwcodeThemes = native.themes; window.dwcodeApplySnippets(native.packSnippets); });
     native.preferencesChanged.connect(preferences => window.dwcodeApplySettings(preferences));
     native.languageReply.connect((id,result,error) => {pendingLanguage.get(id)?.(error?null:result);pendingLanguage.delete(id)});
     native.diagnosticsReceived.connect((uri,diagnostics) => {
@@ -296,6 +322,8 @@ function connectNative() {
       monaco.editor.setModelMarkers(model,'dwcode-lsp', diagnostics.map(d => ({...range(d.range),message:d.message,severity:({1:8,2:4,3:2,4:1})[d.severity]||2,source:d.source,code:d.code?.toString()})));
     });
     native.lspChanged.connect(() => {if(!native.lspReady) for(const m of models.values())monaco.editor.setModelMarkers(m,'dwcode-lsp',[])});
+    window.dwcodeThemes = native.themes;
+    window.dwcodeApplySnippets(native.packSnippets);
     window.dwcodeSetTheme(native.theme.id);
     window.dwcodeApplySettings(native.preferences);
     native.activeDocument(doc => applyDocument(doc));

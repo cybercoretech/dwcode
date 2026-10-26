@@ -3,8 +3,26 @@
     <file alias="Main.qml">qml/Main.qml</file>
     <file alias="Theme.qml">qml/Theme.qml</file>
     <file alias="SettingsDialog.qml">qml/SettingsDialog.qml</file>
+    <file alias="CommandRegistry.qml">qml/CommandRegistry.qml</file>
     <file alias="dwcode-wordmark.png">assets/dwcode-wordmark.png</file>
     <file alias="dwcode-icon.png">assets/dwcode-icon.png</file>
   </qresource>
   <qresource prefix="/data"><file alias="themes.json">data/themes.json</file></qresource>
+  <qresource prefix="/packs">
+    <file alias="dwcode-core/manifest.json">../packs/dwcode-core/manifest.json</file>
+    <file alias="dwcode-core/themes/dwcode-dark.json">../packs/dwcode-core/themes/dwcode-dark.json</file>
+    <file alias="dwcode-core/themes/dwcode-frost.json">../packs/dwcode-core/themes/dwcode-frost.json</file>
+    <file alias="dwcode-core/themes/dwcode-contrast.json">../packs/dwcode-core/themes/dwcode-contrast.json</file>
+    <file alias="dwcode-core/snippets/javascript.json">../packs/dwcode-core/snippets/javascript.json</file>
+    <file alias="dwcode-core/snippets/typescript.json">../packs/dwcode-core/snippets/typescript.json</file>
+    <file alias="dwcode-core/snippets/markdown.json">../packs/dwcode-core/snippets/markdown.json</file>
+    <file alias="dwcode-core/icons/icon-theme.json">../packs/dwcode-core/icons/icon-theme.json</file>
+    <file alias="dwcode-core/icons/assets/data.svg">../packs/dwcode-core/icons/assets/data.svg</file>
+    <file alias="dwcode-core/icons/assets/file.svg">../packs/dwcode-core/icons/assets/file.svg</file>
+    <file alias="dwcode-core/icons/assets/folder.svg">../packs/dwcode-core/icons/assets/folder.svg</file>
+    <file alias="dwcode-core/icons/assets/javascript.svg">../packs/dwcode-core/icons/assets/javascript.svg</file>
+    <file alias="dwcode-core/icons/assets/markdown.svg">../packs/dwcode-core/icons/assets/markdown.svg</file>
+    <file alias="dwcode-core/icons/assets/stylesheet.svg">../packs/dwcode-core/icons/assets/stylesheet.svg</file>
+    <file alias="dwcode-core/icons/assets/typescript.svg">../packs/dwcode-core/icons/assets/typescript.svg</file>
+  </qresource>
 </RCC>

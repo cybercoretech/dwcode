@@ -1,8 +1,10 @@
 #include "workspacebackend.h"
+#include "packloader.h"
 #include <QtTest>
 #include <QTemporaryDir>
 #include <QFile>
 #include <QFileInfo>
+#include <QDir>
 #include <QSettings>
 #include <QUrl>
 class BackendTest:public QObject{
@@ -10,6 +12,24 @@ class BackendTest:public QObject{
  QTemporaryDir settings;
  static void put(const QString &path,const QByteArray &text){QFile f(path);QVERIFY(f.open(QIODevice::WriteOnly));QCOMPARE(f.write(text),text.size());}
  static QByteArray get(const QString &path){QFile f(path);if(!f.open(QIODevice::ReadOnly))return {};return f.readAll();}
+ // Pack fixtures live as real files: JSON stays validatable by the same tools
+ // CI runs, and the test only has to drop them where DWCode looks.
+ static bool copyTree(const QString &from,const QString &to){
+  const QFileInfo source(from);
+  if(source.isFile()){
+   QDir().mkpath(QFileInfo(to).absolutePath());
+   if(QFile::exists(to))QFile::remove(to);
+   return QFile::copy(from,to);
+  }
+  QDir().mkpath(to);const QDir dir(from);
+  if(!dir.exists())return false;
+  for(const auto &entry:dir.entryList(QDir::Dirs|QDir::NoDotAndDotDot))
+   if(!copyTree(from+QLatin1Char('/')+entry,to+QLatin1Char('/')+entry))return false;
+  for(const auto &entry:dir.entryList(QDir::Files))
+   if(!copyTree(from+QLatin1Char('/')+entry,to+QLatin1Char('/')+entry))return false;
+  return true;
+ }
+ QString fixturePacks(){const QString found=QFINDTESTDATA("fixtures/packs");return found;}
 private slots:
  void initTestCase(){QCoreApplication::setOrganizationName("DWCodeTests");QCoreApplication::setApplicationName("Isolated");QSettings::setDefaultFormat(QSettings::IniFormat);QSettings::setPath(QSettings::IniFormat,QSettings::UserScope,settings.path());}
  void files(){
@@ -45,6 +65,81 @@ private slots:
   second.resetPreferences();QCOMPARE(second.preferences().value("editor/fontSize").toInt(),14);
  }
  void themes(){WorkspaceBackend b;QVERIFY(b.themes().size()>=80);b.setTheme("cyberpunk-chrome");QCOMPARE(b.theme().value("id").toString(),QString("cyberpunk-chrome"));b.setTheme("tokyo-night");WorkspaceBackend restored;QCOMPARE(restored.theme().value("id").toString(),QString("tokyo-night"));}
+ void packLoader(){
+  const QString packs=WorkspaceBackend::packDirectory();
+  const QString unit=packs+"/unit-pack";
+  const QString fixtures=fixturePacks();
+  QVERIFY2(!fixtures.isEmpty(),"tests/fixtures/packs is missing");
+  QVERIFY(copyTree(fixtures+"/unit-pack",unit));
+  {
+   WorkspaceBackend b;
+   QVariantMap pack;for(const auto &value:b.packs())if(value.toMap().value("id")=="unit.pack")pack=value.toMap();
+   QVERIFY(!pack.isEmpty());
+   QVERIFY2(pack.value("valid").toBool(),qPrintable(pack.value("errorText").toString()));
+   QVERIFY(pack.value("enabled").toBool());
+   QCOMPARE(pack.value("themes").toList().size(),1);
+   QCOMPARE(pack.value("license").toString(),QString("MIT"));
+   QVERIFY(pack.value("note").toString().contains("snippets: javascript"));
+   // The pack's data reaches both catalogs the app serves.
+   QVERIFY(b.packSnippets().contains("javascript"));
+   const int javascript=b.packSnippets().value("javascript").toList().size();
+   QCOMPARE(javascript,3); // bundled pack contributes two, unit pack one
+   bool merged=false;
+   for(const auto &value:b.themes())if(value.toMap().value("id")=="unit.test-theme")merged=true;
+   QVERIFY(merged);
+   const int before=b.themes().size();
+   QVERIFY(b.setPackEnabled("unit.pack",false));
+   QCOMPARE(b.themes().size(),before-1);
+   QCOMPARE(b.packSnippets().value("javascript").toList().size(),javascript-1);
+  }
+  { // the switch persists across instances
+   WorkspaceBackend b;
+   QVariantMap pack;for(const auto &value:b.packs())if(value.toMap().value("id")=="unit.pack")pack=value.toMap();
+   QVERIFY(!pack.value("enabled").toBool());
+   QVERIFY(pack.value("valid").toBool());
+   QVERIFY(b.setPackEnabled("unit.pack",true));
+  }
+  // Rejected manifests stay listed with a reason and contribute nothing.
+  QVERIFY(copyTree(fixtures+"/bad-pack",packs+"/bad-pack"));
+  // A resource pointing outside the pack is refused even when it exists.
+  QVERIFY(copyTree(fixtures+"/outside.json",packs+"/outside.json"));
+  QVERIFY(copyTree(fixtures+"/escape-pack",packs+"/escape-pack"));
+  {
+   WorkspaceBackend b;
+   QVariantMap found;
+   for(const auto &value:b.packs()){
+    const auto pack=value.toMap();
+    if(pack.value("id")=="unit.bad")found=pack;
+   }
+   QVERIFY(!found.isEmpty());
+   QVERIFY(!found.value("valid").toBool());
+   QVERIFY(found.value("errorText").toString().contains("manifestVersion must be 1"));
+   QVERIFY(found.value("errorText").toString().contains("executable entry points"));
+   QVERIFY(found.value("errorText").toString().contains("cannot request capabilities"));
+   QVERIFY(found.value("errorText").toString().contains("not compatible with DWCode"));
+   QVariantMap escaped;
+   for(const auto &value:b.packs()){
+    const auto pack=value.toMap();
+    if(pack.value("id")=="unit.escape")escaped=pack;
+   }
+   QVERIFY(!escaped.isEmpty());
+   QVERIFY(!escaped.value("valid").toBool());
+   QVERIFY2(escaped.value("errorText").toString().contains("escapes the pack"),qPrintable(escaped.value("errorText").toString()));
+   QVERIFY(!b.packSnippets().contains("escape"));
+  }
+  // Compatibility windows are checked per manifest, fail-closed.
+  QVERIFY(PackLoader::versionSatisfies(">=0.1.0 <1.0.0","0.1.0"));
+  QVERIFY(!PackLoader::versionSatisfies(">=0.2.0","0.1.0"));
+  QVERIFY(PackLoader::versionSatisfies(">=0.1.0","0.1.0"));
+  QVERIFY(!PackLoader::versionSatisfies(">0.1.0","0.1.0"));
+  QVERIFY(PackLoader::versionSatisfies("<=0.1.0","0.1.0"));
+  QVERIFY(!PackLoader::versionSatisfies(">=1.0.0","0.1.0"));
+  QVERIFY(!PackLoader::versionSatisfies("^0.1.0","0.9.0"));
+  QVERIFY(PackLoader::versionSatisfies("~1.2.3","1.2.9"));
+  QVERIFY(PackLoader::versionSatisfies(">=0.1.0","0.4.2"));
+  QVERIFY(!PackLoader::versionSatisfies("","0.1.0"));
+  QVERIFY(!PackLoader::versionSatisfies(">=0.1.0","nonsense"));
+ }
  void languageServer(){
   QTemporaryDir root;put(root.filePath("main.ts"),"const message: string = 123;\nmessage.toUpperCase();\n");WorkspaceBackend b;QVERIFY(b.openWorkspace(root.path()));auto doc=b.openFile("main.ts");QSignalSpy diagnostics(&b,&WorkspaceBackend::diagnosticsReceived);QSignalSpy replies(&b,&WorkspaceBackend::languageReply);
   connect(&b,&WorkspaceBackend::lspChanged,&b,[&b]{qInfo() << b.lspStatus();});b.startLanguageServer();QTRY_VERIFY_WITH_TIMEOUT(b.lspReady(),20000);QTRY_VERIFY_WITH_TIMEOUT(!b.problems().isEmpty(),20000);

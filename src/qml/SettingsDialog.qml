@@ -127,7 +127,29 @@ Dialog {
       Label { text: "Built-in commands keep their documented shortcuts. Custom keymaps will arrive with the reviewed keymap-pack system."; color: theme.mutedText; font.pixelSize: 10; wrapMode: Text.WordWrap; Layout.fillWidth: true }
      }
     }
-    Label { visible: root.query && !root.matches("appearance theme scale density sidebar status bar editor font ligatures line height wrap minimap lines rulers whitespace guides highlight scrolling editing indent tabs spaces brackets save newline endings files workspace auto delay exclude explorer restore reopen session terminal shell directory scrollback selection clear environment dangerous warning keyboard modal helix cursor"); text: "No settings match ‘"+root.query+"’."; color: theme.mutedText; Layout.margins: 24 }
+    Rectangle { visible: root.matches("extensions packs plugins add enable disable license publisher contribution themes snippets icons open vsx"); Layout.fillWidth: true; implicitHeight: extensionsColumn.implicitHeight + 28; color: theme.background
+     ColumnLayout { id: extensionsColumn; anchors.left: parent.left; anchors.right: parent.right; anchors.margins: 14; spacing: 10
+      Label { text: "EXTENSIONS"; color: theme.cyan; font.bold: true; font.pixelSize: 11; font.letterSpacing: 1 }
+      Label { text: "Declarative packs only: schema-validated data — themes and snippets — with no executable code. License and source are shown before you enable one."; color: theme.mutedText; font.pixelSize: 10; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+      Repeater { model: workspaceBackend.packs
+       delegate: ColumnLayout { required property var modelData; Layout.fillWidth: true; spacing: 3
+        RowLayout { Layout.fillWidth: true
+         ColumnLayout { Layout.fillWidth: true; spacing: 0
+          Label { text: modelData.name + (modelData.version ? "  ·  " + modelData.version : ""); color: theme.foreground; font.bold: true; font.pixelSize: 12 }
+          Label { text: [modelData.publisher, modelData.license, modelData.source].filter(function(value) { return !!value }).join("  ·  "); color: theme.mutedText; font.pixelSize: 10 }
+         }
+         Label { visible: !modelData.valid; text: "REJECTED"; color: theme.magenta; font.pixelSize: 9; font.letterSpacing: 1; Layout.rightMargin: 8 }
+         Switch { objectName: "packToggle-" + modelData.id; checked: modelData.enabled; enabled: modelData.valid
+          onToggled: workspaceBackend.setPackEnabled(modelData.id, checked) }
+        }
+        Label { visible: modelData.note.length > 0; text: modelData.note; color: theme.secondaryText; font.pixelSize: 10; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+        Label { visible: modelData.errorText.length > 0; text: modelData.errorText; color: theme.magenta; font.pixelSize: 10; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+       }
+      }
+      Label { visible: workspaceBackend.packs.length === 0; text: "No packs installed. DWCode only loads packs from its own packs folder — never straight from a URL."; color: theme.mutedText; font.pixelSize: 10; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+     }
+    }
+    Label { visible: root.query && !root.matches("appearance theme scale density sidebar status bar editor font ligatures line height wrap minimap lines rulers whitespace guides highlight scrolling editing indent tabs spaces brackets save newline endings files workspace auto delay exclude explorer restore reopen session terminal shell directory scrollback selection clear environment dangerous warning keyboard modal helix cursor extensions packs plugins add enable disable license publisher contribution themes snippets icons open vsx"); text: "No settings match ‘"+root.query+"’."; color: theme.mutedText; Layout.margins: 24 }
    }
   }
  }

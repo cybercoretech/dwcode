@@ -1,0 +1,17 @@
+{
+  "manifestVersion": 1,
+  "id": "unit.pack",
+  "displayName": "Unit Pack",
+  "description": "A well-formed declarative pack used by the backend tests.",
+  "version": "1.2.3",
+  "engines": { "dwcode": ">=0.1.0 <2.0.0" },
+  "dwcodeApi": "1.0",
+  "kind": "declarative",
+  "license": "MIT",
+  "publisher": "Unit Test",
+  "contributes": {
+    "themes": ["themes/unit-theme.json"],
+    "snippets": { "javascript": "snippets/javascript.json" }
+  },
+  "capabilities": []
+}

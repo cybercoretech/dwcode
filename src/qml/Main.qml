@@ -23,19 +23,13 @@ ApplicationWindow {
  property bool compactUi: workspaceBackend.preferences["appearance/density"] === "compact"
  property bool sidebarRight: workspaceBackend.preferences["appearance/sidebarPosition"] === "right"
  property int tabHeight: Math.round((compactUi ? 32 : 38) * uiScale)
- property var commands: [
-  { title: "Open Folder", shortcut: "Ctrl+O", action: "folder" },
-  { title: "New File", shortcut: "Ctrl+N", action: "newfile" },
-  { title: "Save File", shortcut: "Ctrl+S", action: "save" },
-  { title: "Save File As", shortcut: "Ctrl+Shift+S", action: "saveas" },
-  { title: "Toggle File Explorer", shortcut: "Ctrl+B", action: "explorer" },
-  { title: "Toggle Terminal", shortcut: "Ctrl+J", action: "terminal" },
-  { title: "Show Problems", shortcut: "Ctrl+Shift+M", action: "problems" },
-  { title: "Split Editor", shortcut: "Ctrl+\\", action: "split" },
-  { title: "Connect Language Server", shortcut: "", action: "lsp" },
-  { title: "Disconnect Language Server", shortcut: "", action: "lspstop" },
-  { title: "Toggle Helix Mode", shortcut: "Ctrl+Alt+M", action: "modal" }
- ]
+ property var commands: commandRegistry.entries
+ CommandRegistry { id: commandRegistry; dispatcher: function(action) { return win.activate(action) } }
+ // Contribution seam: later phases route extension-registered commands through
+ // these two entry points instead of growing the if/else chain in activate().
+ function registerCommand(entry) { return commandRegistry.register(entry) }
+ function unregisterCommand(id) { return commandRegistry.unregister(id) }
+ function runCommand(id) { paletteVisible = false; return commandRegistry.run(id) }
  Theme { id: theme }
  palette.window: theme.background; palette.windowText: theme.foreground; palette.base: theme.canvas
  palette.text: theme.foreground; palette.button: theme.elevated; palette.buttonText: theme.foreground
@@ -105,7 +99,24 @@ ApplicationWindow {
  onClosing:function(event){if(!closingApproved&&workspaceBackend.hasUnsaved()){event.accepted=false;pendingAction="close";unsaved.open()}}
  WebChannel {id:channel;Component.onCompleted:registerObject("native",workspaceBackend)}
  WebChannel {id:splitChannel;Component.onCompleted:registerObject("native",workspaceBackend)}
- Component.onCompleted:{modalMode=workspaceBackend.preferences["keyboard/modalDefault"];if(!workspaceBackend.restoreSession()&&workspaceBackend.files.length>0){for(let i=0;i<workspaceBackend.files.length;i++){let f=workspaceBackend.files[i];if(f.kind==="file"){workspaceBackend.openFile(f.path);break}}}}
+ Component.onCompleted:{
+  const builtins=[
+   { title: "Open Folder", shortcut: "Ctrl+O", action: "folder" },
+   { title: "New File", shortcut: "Ctrl+N", action: "newfile" },
+   { title: "Save File", shortcut: "Ctrl+S", action: "save" },
+   { title: "Save File As", shortcut: "Ctrl+Shift+S", action: "saveas" },
+   { title: "Toggle File Explorer", shortcut: "Ctrl+B", action: "explorer" },
+   { title: "Toggle Terminal", shortcut: "Ctrl+J", action: "terminal" },
+   { title: "Show Problems", shortcut: "Ctrl+Shift+M", action: "problems" },
+   { title: "Split Editor", shortcut: "Ctrl+\\", action: "split" },
+   { title: "Connect Language Server", shortcut: "", action: "lsp" },
+   { title: "Disconnect Language Server", shortcut: "", action: "lspstop" },
+   { title: "Toggle Helix Mode", shortcut: "Ctrl+Alt+M", action: "modal" }
+  ];
+  for (const command of builtins) commandRegistry.register(Object.assign({id: "dwcode." + command.action, source: "builtin"}, command));
+  modalMode=workspaceBackend.preferences["keyboard/modalDefault"];
+  if(!workspaceBackend.restoreSession()&&workspaceBackend.files.length>0){for(let i=0;i<workspaceBackend.files.length;i++){let f=workspaceBackend.files[i];if(f.kind==="file"){workspaceBackend.openFile(f.path);break}}}
+ }
  onModalModeChanged:{editor.runJavaScript("window.dwcodeSetMode && window.dwcodeSetMode("+modalMode+")");splitEditor.runJavaScript("window.dwcodeSetMode && window.dwcodeSetMode("+modalMode+")")}
  Shortcut {sequence:"Ctrl+O";onActivated:chooseFolder()}
  Shortcut {sequence:"Ctrl+N";onActivated:newFileDialog.open()}

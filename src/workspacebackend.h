@@ -23,9 +23,11 @@ class WorkspaceBackend final : public QObject {
     Q_PROPERTY(QString lspStatus READ lspStatus NOTIFY lspChanged)
     Q_PROPERTY(bool lspReady READ lspReady NOTIFY lspChanged)
     Q_PROPERTY(QVariantList problems READ problems NOTIFY problemsChanged)
-    Q_PROPERTY(QVariantList themes READ themes CONSTANT)
+    Q_PROPERTY(QVariantList themes READ themes NOTIFY themesChanged)
     Q_PROPERTY(QVariantMap theme READ theme NOTIFY themeChanged)
     Q_PROPERTY(QVariantMap preferences READ preferences NOTIFY preferencesChanged)
+    Q_PROPERTY(QVariantList packs READ packs NOTIFY packsChanged)
+    Q_PROPERTY(QVariantMap packSnippets READ packSnippets NOTIFY packsChanged)
 public:
     explicit WorkspaceBackend(QObject *parent=nullptr);
     ~WorkspaceBackend() override;
@@ -43,6 +45,9 @@ public:
     QVariantList themes() const { return m_themes; }
     QVariantMap theme() const { return m_theme; }
     QVariantMap preferences() const { return m_preferences; }
+    QVariantList packs() const { return m_packs; }
+    QVariantMap packSnippets() const { return m_packSnippets; }
+    static QString packDirectory();
     Q_INVOKABLE bool openWorkspace(const QString &path);
     Q_INVOKABLE void refreshFiles();
     Q_INVOKABLE bool createFile(const QString &path);
@@ -66,6 +71,7 @@ public:
     Q_INVOKABLE void setTheme(const QString &id);
     Q_INVOKABLE void setPreference(const QString &key,const QVariant &value);
     Q_INVOKABLE void resetPreferences();
+    Q_INVOKABLE bool setPackEnabled(const QString &id,bool enabled);
 signals:
     void workspaceChanged();
     void documentStateChanged();
@@ -77,6 +83,8 @@ signals:
     void lspChanged();
     void problemsChanged();
     void themeChanged();
+    void themesChanged();
+    void packsChanged();
     void preferencesChanged(const QVariantMap &preferences);
     void languageReply(int id,const QVariant &result,const QString &error);
     void diagnosticsReceived(const QString &uri,const QVariantList &diagnostics);
@@ -95,6 +103,8 @@ private:
     bool supports(const Document &doc) const;
     QString preparedForSave(const QString &text) const;
     void loadPreferences();
+    void loadPacks();
+    void rebuildThemes();
     void watchWorkspace();
     void checkExternalChange(const QString &path);
     void scheduleRefresh();
@@ -104,8 +114,9 @@ private:
     void scheduleSessionWrite();
     void writeSession();
     QString m_root,m_active,m_message="Open a folder to begin.",m_terminalOutput,m_lspStatus="Disconnected",m_lspFamily;
-    QVariantList m_files,m_themes,m_problems;
+    QVariantList m_files,m_themes,m_problems,m_builtinThemes,m_packs;
     QVariantMap m_theme;
+    QVariantMap m_packSnippets;
     QVariantMap m_preferences;
     QMap<QString,Document> m_documents;
     QStringList m_order;

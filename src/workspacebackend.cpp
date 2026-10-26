@@ -1,4 +1,5 @@
 #include "workspacebackend.h"
+#include "packloader.h"
 #include <QFile>
 #include <QFileInfo>
 #include <QDir>
@@ -67,7 +68,9 @@ WorkspaceBackend::WorkspaceBackend(QObject *parent):QObject(parent){
  connect(&m_lsp,&QProcess::errorOccurred,this,[this](QProcess::ProcessError){m_lspStatus=m_lsp.errorString();m_lspReady=false;emit lspChanged();});
  connect(&m_lsp,qOverload<int,QProcess::ExitStatus>(&QProcess::finished),this,[this](int code,QProcess::ExitStatus){m_lspReady=false;m_lspStatus=QString("Stopped (%1)").arg(code);for(int id:std::as_const(m_pending))emit languageReply(id,QVariant(),"Language server stopped");m_pending.clear();emit lspChanged();});
  QFile themesFile(":/data/themes.json");
- if(themesFile.open(QIODevice::ReadOnly))m_themes=QJsonDocument::fromJson(themesFile.readAll()).array().toVariantList();
+ if(themesFile.open(QIODevice::ReadOnly))m_builtinThemes=QJsonDocument::fromJson(themesFile.readAll()).array().toVariantList();
+ loadPacks();
+ rebuildThemes();
  setTheme(QSettings().value("theme","cyberpunk-chrome").toString());
  loadSession();
 }
@@ -258,6 +261,60 @@ void WorkspaceBackend::setPreference(const QString &key,const QVariant &value){
 void WorkspaceBackend::resetPreferences(){
  const auto defaults=preferenceDefaults();QSettings settings;for(auto it=defaults.cbegin();it!=defaults.cend();++it)settings.remove("settings/"+it.key());
  loadPreferences();setTheme("cyberpunk-chrome");emit preferencesChanged(m_preferences);
+}
+// Packs live beside the settings store so test isolation carries over, same as
+// the session journal.
+QString WorkspaceBackend::packDirectory(){return PackLoader::userDirectory();}
+void WorkspaceBackend::loadPacks(){
+ m_packs.clear();
+ QSettings settings;
+ for(const auto &pack:PackLoader::loadAll()){
+  auto entry=PackLoader::toVariant(pack);
+  // Packs that reached the directory are installed deliberately; enablement is
+  // a user switch, and install-time consent arrives with the catalog (M5).
+  entry.insert(QStringLiteral("enabled"),settings.value("settings/packs/"+pack.id+"/enabled",true).toBool());
+  m_packs<<entry;
+ }
+}
+void WorkspaceBackend::rebuildThemes(){
+ m_themes=m_builtinThemes;
+ m_packSnippets.clear();
+ QSet<QString> seen;
+ for(const auto &value:std::as_const(m_builtinThemes))seen.insert(value.toMap().value("id").toString());
+ for(const auto &value:std::as_const(m_packs)){
+  const auto pack=value.toMap();
+  if(!pack.value("valid").toBool()||!pack.value("enabled").toBool())continue;
+  for(const auto &themeValue:pack.value("themes").toList()){
+   const auto theme=themeValue.toMap();
+   const QString id=theme.value("id").toString();
+   if(id.isEmpty()||seen.contains(id))continue;
+   seen.insert(id);m_themes<<themeValue;
+  }
+  const auto snippets=pack.value("snippets").toMap();
+  for(auto it=snippets.cbegin();it!=snippets.cend();++it){
+   auto list=m_packSnippets.value(it.key()).toList();
+   for(const auto &snippet:it.value().toList())list<<snippet;
+   m_packSnippets.insert(it.key(),list);
+  }
+ }
+ // The active theme may have left with the pack that provided it.
+ if(!m_theme.isEmpty()&&!seen.contains(m_theme.value("id").toString()))
+  setTheme(m_builtinThemes.isEmpty()?QString():m_builtinThemes.first().toMap().value("id").toString());
+ emit themesChanged();
+}
+bool WorkspaceBackend::setPackEnabled(const QString &id,bool enabled){
+ if(id.isEmpty())return false;
+ QSettings().setValue("settings/packs/"+id+"/enabled",enabled);
+ bool found=false;
+ for(auto it=m_packs.begin();it!=m_packs.end();++it){
+  auto entry=it->toMap();
+  if(entry.value("id")!=id)continue;
+  entry.insert(QStringLiteral("enabled"),enabled);*it=entry;found=true;
+ }
+ if(!found)return false;
+ rebuildThemes();
+ emit packsChanged();
+ return true;
 }
 // The journal lives beside the QSettings file, so it follows the same
 // per-user location (and the same isolation the test suites rely on).

@@ -33,7 +33,8 @@ done
 python3 tools/make-site-background.py
 
 mkdir -p site/data
-cp src/data/themes.json site/data/themes.json
+# Built-in themes plus pack contributions, so the gallery matches the app.
+node tools/theme-catalog.mjs > site/data/themes.json
 
 # anime.js, served locally (pinned in package.json).
 mkdir -p site/vendor

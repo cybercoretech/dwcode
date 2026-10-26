@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "unit.outside",
+  "name": "Outside",
+  "appearance": "dark",
+  "surfaces": {
+    "window": "#101014",
+    "shell": "#18181e",
+    "sidebar": "#18181e",
+    "editor": "#101014",
+    "raised": "#18181e",
+    "border": "#333340"
+  },
+  "text": { "primary": "#f2f2f5", "secondary": "#b8b8c2", "muted": "#74747f" },
+  "accents": {
+    "primary": "#22eeee",
+    "secondary": "#ff2277",
+    "success": "#22ff22",
+    "warning": "#ee9922",
+    "error": "#dd1111"
+  },
+  "syntax": {
+    "comment": "#74747f",
+    "keyword": "#ff2277",
+    "string": "#22ff22",
+    "number": "#ee9922",
+    "type": "#22eeee",
+    "function": "#6622bb",
+    "variable": "#f2f2f5",
+    "constant": "#6622bb"
+  }
+}

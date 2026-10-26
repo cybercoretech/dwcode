@@ -69,6 +69,58 @@ private slots:
   QVERIFY(QMetaObject::invokeMethod(dialog,"close"));
   app.backend->resetPreferences();
  }
+ void extensionsSectionManagesPacks(){
+  // The pack list is rebuilt (and its delegates recreated) on every toggle, so
+  // the switch is looked up again after each change instead of cached.
+  auto findToggle=[&]() -> QQuickItem* {
+   for(auto *i:items())if(i->objectName()=="packToggle-cybercore.dwcode-core")return i;
+   return nullptr;
+  };
+  auto *dialog=app.window->findChild<QObject*>("settingsDialog");QVERIFY(dialog);
+  QVERIFY(QMetaObject::invokeMethod(dialog,"open"));QTRY_VERIFY(dialog->property("visible").toBool());
+  QQuickItem *search=nullptr;
+  for(auto *i:items())if(i->inherits("QQuickTextField")&&i->isVisible()&&i->property("placeholderText").toString().startsWith("Search settings"))search=i;
+  QVERIFY(search);
+  click(search);typeText("extensions");
+  // Filtering collapses the other sections; the switch is only clickable once
+  // the dialog has relaid the section into view.
+  QTRY_VERIFY(withText("EXTENSIONS"));
+  QTRY_VERIFY(!withText("APPEARANCE"));
+  auto *content=dialog->property("contentItem").value<QQuickItem*>();QVERIFY(content);
+  QQuickItem *toggle=findToggle();QVERIFY(toggle);
+  auto inView=[&](){
+   const QPointF origin=content->mapToScene(QPointF(0,0));
+   const QPointF top=toggle->mapToScene(QPointF(0,0)),bottom=toggle->mapToScene(QPointF(0,toggle->height()));
+   return top.y()>=origin.y()&&bottom.y()<=origin.y()+content->height();
+  };
+  QTRY_VERIFY2(inView(),"the extensions section never scrolled into view");
+  // The bundled pack is listed with its licence, source and contribution note.
+  bool listed=false;
+  for(auto *i:items())if(i->isVisible()&&i->property("text").toString().startsWith("DWCode Core Signal"))listed=true;
+  QVERIFY(listed);
+  QVERIFY(toggle->property("enabled").toBool());
+  QVERIFY(toggle->property("checked").toBool());
+  const int themes=app.backend->themes().size();
+  const int snippets=app.backend->packSnippets().value("javascript").toList().size();
+  QVERIFY(themes>=84); // 81 built in, three from the bundled pack
+  // Disabling the pack withdraws its three themes and its snippets everywhere.
+  click(toggle);
+  QTRY_VERIFY(findToggle()&&!findToggle()->property("checked").toBool());
+  QTRY_COMPARE(app.backend->themes().size(),themes-3);
+  QCOMPARE(app.backend->packSnippets().value("javascript").toList().size(),0); // all of them came from the pack
+  QVERIFY(waitJs(editor(),QStringLiteral("window.dwcodeThemes.length===%1").arg(app.backend->themes().size())));
+  QCOMPARE(js(editor(),"window.dwcodeThemes.some(t=>t.id==='cybercore.dwcode-frost')"),QString("false"));
+  // Turning it back on restores both catalogs.
+  toggle=findToggle();QVERIFY(toggle);click(toggle);
+  QTRY_COMPARE(app.backend->themes().size(),themes);
+  QCOMPARE(app.backend->packSnippets().value("javascript").toList().size(),snippets);
+  QTRY_VERIFY(findToggle()&&findToggle()->property("checked").toBool());
+  // Clearing the filter brings the other sections back, then close.
+  click(search);
+  search->setProperty("text","");
+  QTRY_VERIFY(withText("APPEARANCE"));
+  QVERIFY(QMetaObject::invokeMethod(dialog,"close"));
+ }
  void newFileDialogCreatesAnUnsavedDocument(){
   auto *dialog=app.window->findChild<QObject*>("newFileDialog");auto *input=qobject_cast<QQuickItem*>(app.window->findChild<QObject*>("newFilePath"));QVERIFY(dialog);QVERIFY(input);
   QVERIFY(QMetaObject::invokeMethod(dialog,"open"));QTRY_VERIFY(dialog->property("visible").toBool());click(input);typeText("scratch.ts");click(withText("Create","QQuickButton"));

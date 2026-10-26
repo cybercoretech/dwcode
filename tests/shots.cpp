@@ -108,12 +108,6 @@ private slots:
  }
  // Real-display layout pass: the settings dialog and the right-side Explorer.
  void layout(){
-  // The command palette is the highest-traffic input; its prompt must read.
-  app.window->setProperty("paletteVisible",true);
-  QTRY_VERIFY(app.window->property("paletteVisible").toBool());
-  save("command-palette");
-  QTest::keyClick(app.window,Qt::Key_Escape);
-  QTRY_VERIFY(!app.window->property("paletteVisible").toBool());
   auto *dialog=app.window->findChild<QObject*>("settingsDialog");QVERIFY(dialog);
   QVERIFY(QMetaObject::invokeMethod(dialog,"open"));QTRY_VERIFY(dialog->property("visible").toBool());
   save("settings");
@@ -124,11 +118,30 @@ private slots:
   save("settings-search");
   for(int i=0;i<7;++i)QTest::keyClick(app.window,Qt::Key_Backspace);
   QTRY_COMPARE(dialog->property("query").toString(),QString(""));
+  // The extensions section: pack listing, licence metadata and the switch.
+  click(search);typeText("extensions");
+  QTRY_COMPARE(dialog->property("query").toString(),QString("extensions"));
+  QTRY_VERIFY(withText("EXTENSIONS"));
+  save("settings-extensions");
+  for(int i=0;i<10;++i)QTest::keyClick(app.window,Qt::Key_Backspace);
+  QTRY_COMPARE(dialog->property("query").toString(),QString(""));
   app.backend->setPreference("appearance/sidebarPosition","right");
   QVERIFY(QMetaObject::invokeMethod(dialog,"close"));QTRY_VERIFY(!dialog->property("visible").toBool());
   QTRY_VERIFY(app.window->property("sidebarRight").toBool());
   save("sidebar-right");
   app.backend->setPreference("appearance/sidebarPosition","left");
+  // The command palette is the highest-traffic input; its prompt must read.
+  app.window->setProperty("paletteVisible",true);
+  QTRY_VERIFY(app.window->property("paletteVisible").toBool());
+  save("command-palette");
+  // Shortcuts only fire in an active window. A tool window is not always given
+  // focus by the compositor, so fall back to the overlay's click-to-dismiss.
+  app.window->requestActivate();
+  if(app.window->isActive())
+   QTest::keyClick(app.window,Qt::Key_Escape);
+  else
+   QTest::mouseClick(app.window,Qt::LeftButton,{},QPoint(app.window->width()/2,app.window->height()-40));
+  QTRY_VERIFY(!app.window->property("paletteVisible").toBool());
  }
  void cleanupTestCase(){shutdown(app);}
 };

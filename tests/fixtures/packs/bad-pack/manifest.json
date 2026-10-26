@@ -1,0 +1,12 @@
+{
+  "manifestVersion": 2,
+  "id": "unit.bad",
+  "displayName": "Bad Pack",
+  "version": "1.0.0",
+  "engines": { "dwcode": "*" },
+  "kind": "declarative",
+  "license": "MIT",
+  "main": "extension.js",
+  "capabilities": ["workspace.read"],
+  "contributes": {}
+}

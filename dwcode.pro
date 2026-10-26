@@ -13,9 +13,11 @@ DEFINES += DWCODE_WEB_ROOT=\\\"$$DWCODE_WEB_ROOT\\\"
 DEFINES += DWCODE_VERSION=\\\"$$VERSION\\\"
 
 SOURCES += src/main.cpp \
-           src/localwebserver.cpp
+           src/localwebserver.cpp \
+           src/packloader.cpp
 
-HEADERS += src/localwebserver.h
+HEADERS += src/localwebserver.h \
+           src/packloader.h
 
 RESOURCES += src/resources.qrc
 

@@ -1,0 +1,7 @@
+{
+  "Unit note": {
+    "prefix": "unitnote",
+    "body": ["// $0"],
+    "description": "unit snippet"
+  }
+}
