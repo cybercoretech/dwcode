@@ -85,6 +85,17 @@ section (`extensionsSectionManagesPacks`), New File, and
 - `npm ci` and `npm run build` completed successfully. (`node_modules/` is
   ignored and was installed locally only.) `npm run validate:packs` passes:
   3 themes, 7 icon assets, 3 snippet groups.
+- Two further gates run locally and in CI (`.github/workflows/ci.yml`):
+  `npm run catalog:scan` — the licence gate over every extension id in
+  `FOSS_EXTENSION_REPOSITORY.md` (currently **206 checked · 179 catalog-eligible
+  · 0 pending**, exit 0, with hand-verified upstream licences in
+  `tools/openvsx-verified.json`) — and `npm run grammar:test`, the
+  `tools/tm2monarch.mjs --self-test` suite (16 conversion cases, each definition
+  also compiled by Monaco's own `monarchCompile.js`).
+- `./tools/deploy-site.sh` publishes `site/` to dwcode.pages.dev. It drops a
+  `$CLOUDFLARE_API_TOKEN` that lacks Pages permission (wrangler prefers env
+  tokens over `wrangler login` and dies with `code: 10000`) unless `--use-token`
+  is passed, and exports `CLOUDFLARE_ACCOUNT_ID` as a fallback.
 - The full backend suite passed **10/10 checks**, including `packLoader` (pack
   fixtures from `tests/fixtures/packs/`, bad-manifest rejection, `../` escape
   rejection, semver range table) and `sessionRestore`

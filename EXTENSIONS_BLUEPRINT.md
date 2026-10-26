@@ -137,6 +137,11 @@ Bring `packs/dwcode-core` from "validates" to "loads", still data-only, still in
     `window.dwcodeApplySettings` to also accept `packs/snippets` / `packs/languages` and call
     `monaco.languages.register` / `monaco.languages.setMonarchTokensProvider` /
     `monaco.editor.registerSnippets`-equivalents in `src/main.js`.
+  - Grammars arrive as **Monarch** JSON, converted from TextMate by `tools/tm2monarch.mjs` before
+    they ever reach the pack (`npm run grammar:test` keeps the converter honest; PACK_FORMAT.md
+    documents the CLI, the dropped constructs and the licence rule — conversion changes format,
+    never licence). The loader still re-validates state names, `@pop` balance and token ids, the
+    same way it re-validates manifests.
 - Settings dialog: new **EXTENSIONS** section — list packs, publisher, version, license, source
   hash, enable/disable, reset. Enable state in `settings/packs/<id>/enabled`.
 - Generalize `tools/validate-packs.mjs` to `node tools/validate-packs.mjs [packDir]` so any
@@ -269,7 +274,7 @@ the suite with executable extensions forced on.
 | Phase | New | Modified |
 | --- | --- | --- |
 | M0 ✅ | `src/qml/CommandRegistry.qml` | `src/qml/Main.qml`, `tests/ui_test.cpp` |
-| M1 ✅ | `src/packloader.{h,cpp}`, `tests/fixtures/packs/*`, `tools/theme-catalog.mjs` | `dwcode.pro`, `src/main.js`, `src/qml/SettingsDialog.qml`, `src/resources.qrc`, `src/data/themes.json`, `tools/build-site.sh`, `tests/backend_test.cpp`, `tests/ui_test.cpp`, `tests/shots.cpp` |
+| M1 ✅ | `src/packloader.{h,cpp}`, `tests/fixtures/packs/*`, `tools/theme-catalog.mjs`, `tools/tm2monarch.mjs` ✅ | `dwcode.pro`, `src/main.js`, `src/qml/SettingsDialog.qml`, `src/resources.qrc`, `src/data/themes.json`, `tools/build-site.sh`, `tests/backend_test.cpp`, `tests/ui_test.cpp`, `tests/shots.cpp` |
 | M2 | `src/extensionbroker.{h,cpp}`, `tests/fixtures/host/*` | `src/main.cpp`, `tests/backend_test.cpp` |
 | M3 | `src/qml/ExtensionStatusDelegate.qml` (or equivalent) | `src/extensionbroker.cpp`, `src/qml/Main.qml`, `tests/{backend,ui}_test.cpp`, `tests/shots.cpp` |
 | M4 | `tests/threatmodel.md` | `src/extensionbroker.cpp`, `tests/backend_test.cpp` |

@@ -24,7 +24,7 @@ Accept reviewed, schema-validated packages that contain data only:
 - Theme and icon-theme JSON.
 - Snippets and keymaps.
 - Language identifiers, file associations, bracket pairs, and indentation rules.
-- Syntax definitions only where the package format can be consumed without executing extension code.
+- Syntax definitions only where the package format can be consumed without executing extension code. Third-party TextMate grammars are converted to Monarch by `tools/tm2monarch.mjs` (a data transformation, not code execution): unsupported constructs are reported on stderr and dropped rather than approximated silently, `npm run grammar:test` proves the converter against Monaco's own compiler, and the pack record keeps the grammar's upstream repository, version, licence and checksum — converting the format never changes the licence.
 
 Open VSX can be queried for candidate VS Code-style packages. DWCode must inspect the package manifest and license metadata, reject executable entry points (`main` or `browser`) in this stage, validate contributions against DWCode's supported schemas, and display the publisher, version, license, source, and requested data contributions before install. Install exact versions and preserve the package's origin and checksum in a local lock record.
 

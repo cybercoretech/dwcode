@@ -169,9 +169,15 @@ Swept per keyword on the registry (top results by downloads with license lookup)
   packages cover on VS Code (all 296–407 K downloads, VS Code package license). No work needed.
 - **Third-party grammars** (TextMate `.tmLanguage.json`) are the Stage 2 declarative case:
   EXTENSIONS.md allows syntax definitions only when consumed without executing code. Monaco does
-  not consume TextMate directly — DWCode needs a **tmLanguage → Monarch converter** plus the
-  validator extended to check converted grammars. That converter is the missing piece, not the
-  packages.
+  not consume TextMate directly, so DWCode needs a **tmLanguage → Monarch converter** — which now
+  exists as [`tools/tm2monarch.mjs`](tools/tm2monarch.mjs) (zero dependencies, deterministic
+  output, `--self-test` runs 16 conversion cases *and* feeds every emitted definition through
+  Monaco's own `monarchCompile.js`, so a bad grammar fails in CI rather than at load time):
+  `node tools/tm2monarch.mjs grammar.tmLanguage.json -o lang.json`. Verified end-to-end on real
+  grammars — Red Hat's YAML (40 states, 18 root rules) and VS Code's Markdown (the unsupported
+  `while` construct is reported and dropped, never silently). Still outstanding is the other half
+  of that bullet: extending `validate-packs.mjs` to check a *converted* grammar inside a pack
+  (state names resolve, `@pop` balance, token ids exist in the theme schema).
 - Grammar-adjacent linters that are FOSS: **Harper** (`elijah-potter.harper`, Apache-2.0, 110 K),
   **LTeX+** (`ltex-plus.vscode-ltex-plus`, MPL-2.0, 21 K), **LanguageTool Linter**
   (`davidlday.languagetool-linter`, Apache-2.0, 24 K) — all external-process or server-based →
@@ -326,7 +332,7 @@ Excluded here: SQLite Viewer (`qwtel.sqlite-viewer`, 1.02 M — PRO paywall), Re
 
 | Item | License | Downloads | DWCode path |
 | --- | --- | --- | --- |
-| GraphQL: Syntax Highlighting (`GraphQL.vscode-graphql-syntax`) | MIT | 1.02 M | TextMate grammar → Tier A once the tmLanguage→Monarch converter exists |
+| GraphQL: Syntax Highlighting (`GraphQL.vscode-graphql-syntax`) | MIT | 1.02 M | TextMate grammar → Tier A: the converter exists (`tools/tm2monarch.mjs`), so this is one conversion + validator pass away |
 | GraphQL: Language Feature Support (`GraphQL.vscode-graphql`) | MIT | 584 K | `graphql-language-service` on `PATH` |
 | Apollo (`apollographql.vscode-apollo`) | MIT | 40 K | schema checks as an external process |
 | Inline Operation Execution (`GraphQL.vscode-graphql-execution`) | MIT | 20 K | needs `network.connect` → Tier C |
@@ -372,7 +378,7 @@ are GPL but tied to one engine — excluded on usefulness, not licence.
 | Item | License | Downloads | DWCode path |
 | --- | --- | --- | --- |
 | Kotlin (`fwcd.kotlin`) | MIT | 734 K | `kotlin-language-server` on `PATH` (JVM — needs the M4 resource limits) |
-| Kotlin Language (`mathiasfrohlich.Kotlin`) | Apache-2.0 | 70 K | TextMate grammar → Tier A after the tmLanguage→Monarch converter |
+| Kotlin Language (`mathiasfrohlich.Kotlin`) | Apache-2.0 | 70 K | TextMate grammar → Tier A via `tools/tm2monarch.mjs` (same one-pass conversion as GraphQL) |
 | Kotlin LSP (`JetBrains.kotlin-server` → `Kotlin/kotlin-lsp`) | **Apache-2.0 verified** | 50 K | JetBrains' official server — prefer it over `fwcd` once M4 resource limits exist |
 | ktfmt (`omBratteng.ktfmt-kotlin-formatter`) | BSD-3-Clause | 4 K | external `ktfmt` on format-on-save |
 

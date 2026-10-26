@@ -24,6 +24,22 @@ jobs:
       - name: Licence gate (catalog:scan)
         run: npm run catalog:scan
 
+  grammar-gate:
+    # tmLanguage → Monarch converter: 16 conversion cases, each emitted
+    # definition also compiled by Monaco's own monarchCompile.js. Keeps the
+    # grammar rows of FOSS_EXTENSION_REPOSITORY.md convertible in CI.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install (monaco-editor needed for the compiler oracle)
+        run: npm ci
+      - name: Grammar converter self-test
+        run: npm run grammar:test
+
   build-and-test:
     runs-on: ubuntu-latest
     steps:

@@ -67,10 +67,15 @@ mkdir -p build/ui-tests && cd build/ui-tests && qmake6 ../../tests/ui.pro && mak
 
 The UI suite always runs offscreen so it never opens a window on your desktop; set `DWCODE_UI_PLATFORM` to watch it on a real display.
 
-Validate the first data-only theme/icon/snippet pack with:
+Validate the first data-only theme/icon/snippet pack, the catalog licence gate, and the grammar converter with:
 
 ```sh
-npm run validate:packs
+npm run validate:packs   # pack manifest, theme token sets, local SVG icons, snippet shapes
+npm run catalog:scan     # licence gate: every extension id in FOSS_EXTENSION_REPOSITORY.md
+                         # re-checked against the live Open VSX registry; exits 1 while a
+                         # licence is still pending (refusals/absent ids are recorded, not failures)
+npm run grammar:test     # tools/tm2monarch.mjs --self-test: 16 TextMate → Monarch conversion
+                         # cases, each emitted definition also compiled by Monaco's monarchCompile.js
 ```
 
 ## 🌐 Website

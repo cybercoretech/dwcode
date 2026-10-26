@@ -26,12 +26,50 @@ Icon packs are normalized to the DWCode icon canvas and subdued contrast. Do not
 
 These assets are custom DWCode work, not copied theme or icon files. The pack is MIT-licensed with DWCode and is not wired into a live theme picker or extension browser yet. Third-party assets remain subject to their own licenses and attribution requirements.
 
+## 🧬 Syntax grammars — TextMate → Monarch
+
+Monaco tokenises with **Monarch** definitions, not TextMate grammars, so a third-party grammar is
+converted before it can become a pack contribution. The converter is
+[`tools/tm2monarch.mjs`](tools/tm2monarch.mjs) — Node ≥ 18, zero dependencies:
+
+```sh
+node tools/tm2monarch.mjs grammar.tmLanguage.json -o lang.json   # file in, JSON out
+node tools/tm2monarch.mjs - --id my-lang < grammar.tmLanguage.json  # stdin, override the id
+node tools/tm2monarch.mjs --self-test                            # 16-case suite (CI runs this)
+```
+
+How it behaves:
+
+- **Clean separation:** the Monarch JSON goes to stdout (or `-o`); every diagnostic — unsupported
+  constructs, dropped fields, unmapped scopes — goes to stderr. Conversion is best-effort and never
+  throws: a malformed grammar reports the problem and still emits valid JSON for what converted.
+  Exit `1` means unreadable input, bad usage, or a failed `--self-test`, never a warning.
+- **Deterministic output:** fixed key order, source-order rules, stable state names — two runs on
+  the same grammar are byte-identical, so converted grammars diff cleanly in review.
+- **What it converts:** top-level `patterns` → `tokenizer.root`; `repository` entries inlined at
+  `include` sites with cycle detection; `begin`/`end` pairs → Monarch states with `@pop`;
+  `captures` → token arrays (synthesising groups where they tile, falling back to a whole-match
+  token with a warning where they cannot); Oniguruma anchors `\A`/`\z` → `^`/`$`; TextMate scopes
+  → Monarch tokens via a specific-to-general lookup table with dotted wildcards.
+- **What it refuses to fake:** `while`, `$self`/`$base`, cross-grammar includes, possessive and
+  `(?~…)` patterns are reported and dropped; unmapped scopes fall back to `source` *after* warning,
+  so grammar authors see every gap instead of getting silent black text.
+- **Trust, not hope:** `--self-test` feeds each emitted definition through Monaco's own
+  `monarchCompile.js` when `monaco-editor` is installed, so a definition the runtime would reject
+  fails in CI instead of at load time. Real-grammar checks: Red Hat's YAML converts to 40 states /
+  18 root rules, VS Code's Markdown to 4 states with its unsupported `while` reported.
+
+Licensing is unchanged by conversion: the grammar keeps its upstream licence, and the pack record
+must carry the source repository, version, licence and attribution alongside the sha256 —
+conversion is a format change, never a licence change.
+
 ## 🔍 Validation
 
 Run:
 
 ```sh
-npm run validate:packs
+npm run validate:packs   # pack manifest, theme tokens, icons, snippets
+npm run grammar:test     # tm2monarch --self-test (converter + Monaco compiler oracle)
 ```
 
 The validator checks manifest version and id, rejects executable entry points and requested capabilities, checks that theme token sets match and use valid colors, confirms icon assets are local simple SVGs, and validates snippet shapes. It is a prototype validator; before accepting external packages, add a formal JSON Schema, archive extraction limits, checksum/signature handling, package-origin records, and adversarial tests.
